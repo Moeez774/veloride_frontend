@@ -1,0 +1,99 @@
+.searchLoader {
+  border: 3px solid rgba(0, 0, 0, .3);
+  border-left-color: transparent;
+  border-radius: 50%;
+}
+
+.searchLoader {
+  border: 3px solid rgba(0, 0, 0, .3);
+  border-left-color: transparent;
+  width: 30px;
+  height: 30px;
+}
+
+.searchLoader {
+  border: 3px solid rgba(0, 0, 0, .3);
+  border-left-color: transparent;
+  width: 30px;
+  height: 30px;
+  animation: spin89345 1s linear infinite;
+}
+
+@keyframes spin89345 {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.mainMap {
+  -webkit-animation: pulsate-fwd 0.7s ease-in-out infinite both;
+  animation: pulsate-fwd 0.7s ease-in-out infinite both;
+}
+
+ @-webkit-keyframes pulsate-fwd {
+  0% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+  }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+@keyframes pulsate-fwd {
+  0% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+  }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+
+.rideCard {
+  transition: all 0.3s ease-in-out;
+}
+
+.rideCard:hover {
+  transform: scale(1.05);
+}
+
+@keyframes bellRing {
+  0%,
+  100% {
+    transform-origin: top;
+  }
+
+  15% {
+    transform: rotateZ(10deg);
+  }
+
+  30% {
+    transform: rotateZ(-10deg);
+  }
+
+  45% {
+    transform: rotateZ(5deg);
+  }
+
+  60% {
+    transform: rotateZ(-5deg);
+  }
+
+  75% {
+    transform: rotateZ(2deg);
+  }
+}
