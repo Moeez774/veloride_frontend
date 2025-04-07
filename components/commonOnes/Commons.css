@@ -78,40 +78,59 @@
 .chatLoader {
     display: flex;
     gap: 2px;
-  }
-  
-  .chatLoader .dot {
+}
+
+.chatLoader .dot {
     height: 10px;
     width: 10px;
     border-radius: 50%;
     background: #16b0c1;
     animation: jump 0.8s ease-in-out infinite alternate;
-  }
-  
-  @keyframes jump {
+}
+
+@keyframes jump {
     100% {
-      background: #00b37e;
-      transform: translateY(-2rem) scale(1.5);
+        background: #00b37e;
+        transform: translateY(-2rem) scale(1.5);
     }
-  }
-  
-  .chatLoader .dot:nth-child(1) {
+}
+
+.chatLoader .dot:nth-child(1) {
     animation-delay: 0.1s;
-  }
-  
-  .chatLoader .dot:nth-child(2) {
+}
+
+.chatLoader .dot:nth-child(2) {
     animation-delay: 0.2s;
-  }
-  
-  .chatLoader .dot:nth-child(3) {
+}
+
+.chatLoader .dot:nth-child(3) {
     animation-delay: 0.3s;
-  }
-  
-  .chatLoader .dot:nth-child(4) {
+}
+
+.chatLoader .dot:nth-child(4) {
     animation-delay: 0.4s;
-  }
-  
-  .chatLoader .dot:nth-child(5) {
+}
+
+.chatLoader .dot:nth-child(5) {
     animation-delay: 0.5s;
-  }
-  
+}
+
+@keyframes showRides {
+    0% {
+        transform: translateY(0.5rem);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0rem);
+        opacity: 1;
+    }
+}
+
+.card {
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: scale(1.02)
+}

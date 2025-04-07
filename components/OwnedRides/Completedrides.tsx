@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { FaComment, FaMoneyCheck } from 'react-icons/fa'
 import MobileCompletedRides from './MobileCompletedRides'
 interface Details {
-    user: any
+    user: any,
+    getImage: (e: string) => string | undefined
 }
 
-const Completedrides: React.FC<Details> = ({ user }) => {
+const Completedrides: React.FC<Details> = ({ user, getImage }) => {
 
     const [myRides, setMyRides] = useState<any[]>([])
     const [showPax, setShowPax] = useState(false)
@@ -42,19 +43,6 @@ const Completedrides: React.FC<Details> = ({ user }) => {
         return formattedDate
     }
 
-    //for taking image of specific ride vehicle
-    const getImage = (e: string) => {
-        switch (e) {
-            case "Standard Car":
-                return '/Images/vecteezy_car-icon-in-flat-style-simple-traffic-icon__1_-removebg-preview.png'
-            case "SUV / Van":
-                return '/Images/Screenshot_2025-03-23_090615_cleanup-removebg-preview.png'
-            case "Luxury Car":
-                return '/Images/vecteezy_luxury-car-side-view-silhouette-on-white-background_54072783_1_-removebg-preview.png'
-            case "Electric Vehicle":
-                return '/Images/Screenshot_2025-03-23_091233-removebg-preview.png'
-        }
-    }
     return (
         <>
 

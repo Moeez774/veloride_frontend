@@ -83,10 +83,10 @@ export function Component() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-        Ride hosting rate increased by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Ride hosting rate increased by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-        Ride activity trend over the past 6 months        
+          Ride activity trend over the past 6 months
         </div>
       </CardFooter>
     </Card>

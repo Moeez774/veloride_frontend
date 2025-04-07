@@ -1,15 +1,16 @@
 'use client'
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, Dispatch, SetStateAction } from "react";
 import { ReactNode } from "react";
 import { useAuth } from "./AuthProvider";
 import socket from "@/utils/socket";
 import { usePathname } from "next/navigation";
 
-const ContactsContext = createContext<{ contacts: any[], fetchContacts: () => void } | null>(null);
+const ContactsContext = createContext<{ contacts: any[], matchedRides: any, setMatchedRides: Dispatch<SetStateAction<any>>, fetchContacts: () => void } | null>(null);
 
 
 export const ContactsProvider = ({ children }: { children: ReactNode }) => {
   const [contacts, setContacts] = useState<any[]>([])
+  const [matchedRides, setMatchedRides] = useState<any>()
   const authContext = useAuth()
   const user = authContext?.user || null
   const pathname = usePathname()
@@ -54,7 +55,7 @@ export const ContactsProvider = ({ children }: { children: ReactNode }) => {
   //for adding contacts in realtime
   useEffect(() => {
     const addContact = (data: any) => {
-      if (data.receiver_id===user?._id || data.sender_id===user?._id) {
+      if (data.receiver_id === user?._id || data.sender_id === user?._id) {
         fetchContacts()
         socket.emit("joinRoom", data.chat_id)
       }
@@ -68,7 +69,7 @@ export const ContactsProvider = ({ children }: { children: ReactNode }) => {
   }, [user])
 
   return (
-    <ContactsContext.Provider value={{ contacts, fetchContacts }}>
+    <ContactsContext.Provider value={{ contacts, matchedRides, setMatchedRides, fetchContacts }}>
       {children}
     </ContactsContext.Provider>
   );

@@ -27,8 +27,8 @@ const page = () => {
     const [statusCode, setStatusCode] = useState<number>(0)
 
     // fields for Ride Details
-    const [location, setLocation] = useState<{long: number, lat: number}>({long: queries.get("long") ? parseFloat(queries.get("long")!) || 0 : 0, lat: queries.get("lat") ? parseFloat(queries.get("lat")!) || 0 : 0})
-    const [dropLocation, setDropLocation] = useState<{long: number, lat: number}>({long: queries.get("dropLong") ? parseFloat(queries.get("dropLong")!) || 0 : 0, lat: queries.get("dropLat") ? parseFloat(queries.get("dropLat")!) || 0 : 0})
+    const [location, setLocation] = useState<{ long: number, lat: number }>({ long: queries.get("long") ? parseFloat(queries.get("long")!) || 0 : 0, lat: queries.get("lat") ? parseFloat(queries.get("lat")!) || 0 : 0 })
+    const [dropLocation, setDropLocation] = useState<{ long: number, lat: number }>({ long: queries.get("dropLong") ? parseFloat(queries.get("dropLong")!) || 0 : 0, lat: queries.get("dropLat") ? parseFloat(queries.get("dropLat")!) || 0 : 0 })
 
     const [pickup, setPickup] = useState<string | null>(queries.get('from'))
     const [drop, setDrop] = useState<string | null>(queries.get('to'))
@@ -89,10 +89,10 @@ const page = () => {
     const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, seats, setseats, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, recurring, recurringVal, negotiate, setNegotiate, setRecurring, setRecurringVal, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, budget, setBudget, vehicle, setVehicle, setLocation, setDropLocation, setGenderType }
 
     // for offering a ride
-    const offer = async() => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, needs, genderType, negotiate, recurring, recurringVal, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode)
+    const offer = async () => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, needs, genderType, negotiate, recurring, recurringVal, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode)
 
     useEffect(() => {
-        if(!loader && statusCode===200) router.push('/')
+        if (!loader && statusCode === 200) router.push('/')
     }, [loader, statusCode])
 
     return (
@@ -100,7 +100,7 @@ const page = () => {
         <>
 
             <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center bg-[#2020203f]`}>
-                <Submit statusCode={statusCode} offer={offer} loader={loader} setLoader={setLoader} message={message} setShowMessage={setShowMessage} showMessage={showMessage} formData={formData} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep}  />
+                <Submit statusCode={statusCode} offer={offer} loader={loader} setLoader={setLoader} message={message} setShowMessage={setShowMessage} showMessage={showMessage} formData={formData} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
             </div>
 
             {/* // decors */}
@@ -124,10 +124,6 @@ const page = () => {
 
                     <div className='flex items-center gap-4'>
                         <img className='w-12 sm:w-14' src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" />
-                    </div>
-
-                    <div>
-                        <button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#00b37e] rounded-xl bg-[#fefefe] shadow-lg font-semibold text-sm sm:text-base sm:font-bold hover:bg-[#f8f7f7] px-6 py-3 transition-all duration-300 cursor-pointer`}>Find a ride</button>
                     </div>
                 </div>
 

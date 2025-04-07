@@ -43,7 +43,7 @@ const MobileNavigator = () => {
         }
     }
 
-    if (pathname.startsWith('/auth') || pathname.startsWith('/reset-password') || pathname.startsWith('/find-ride') || pathname.startsWith('/offer-ride') || pathname.startsWith('/ride-detail') || pathname.startsWith('/chats')) return null
+    if (pathname.startsWith('/auth') || pathname.startsWith('/reset-password') || pathname.startsWith('/find-ride') || pathname.startsWith('/offer-ride') || pathname.startsWith('/ride-detail') || pathname.startsWith('/chats') || pathname.startsWith('/matched-rides')) return null
 
     return (
         <div className='bg-white relative z-50 py-4 px-6 justify-between transition-all duration-200 h-[5rem] flex items-end shadow-lg rounded-t-lg' style={{ border: 'none', borderTop: '1px solid #a7a7a7', userSelect: 'none', borderRight: '1px solid #a7a7a7', borderLeft: '1px solid #a7a7a7' }}>

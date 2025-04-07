@@ -17,10 +17,11 @@ interface Details {
     setDrop: Dispatch<SetStateAction<string | null>>,
     pickup: string | null,
     setPickup: Dispatch<SetStateAction<string | null>>,
-    setLocation: Dispatch<SetStateAction<{long: number, lat: number}>>
+    setLocation: Dispatch<SetStateAction<{ long: number, lat: number }>>,
+    setDropLocation: Dispatch<SetStateAction<{ long: number, lat: number }>>
 }
 
-const RideDetails: React.FC<Details> = ({ passengers, setPassengers, date, setDate, time, setTime, drop, setDrop, setPickup, pickup, setLocation }) => {
+const RideDetails: React.FC<Details> = ({ passengers, setPassengers, date, setDate, time, setTime, drop, setDrop, setPickup, pickup, setLocation, setDropLocation }) => {
 
     const [showPickupTip, setShowPickupTip] = useState(false)
     const [showDropoffTip, setShowDropoffTip] = useState(false)
@@ -88,7 +89,7 @@ const RideDetails: React.FC<Details> = ({ passengers, setPassengers, date, setDa
 
                 </div>
 
-                <div className='-mt-2'>
+                <div className='-mt-2 relative'>
                     <Suggestions setLocation={setLocation} inputRef={inputRef} showSearch={showSearch1} setShowSearch={setShowSearch1} suggestions={suggestions1} loader={loader} setValue={setPickup} />
                 </div>
 
@@ -111,9 +112,9 @@ const RideDetails: React.FC<Details> = ({ passengers, setPassengers, date, setDa
                 </div>
             </div>
 
-            <div className='-mt-4'>
+            <div className='-mt-4 relative'>
                 {/* // for showing suggestions */}
-                <Suggestions setLocation={() => {}} inputRef={inputRef2} showSearch={showSearch2} setShowSearch={setShowSearch2} suggestions={suggestions2} loader={loader} setValue={setDrop} />
+                <Suggestions setLocation={setDropLocation} inputRef={inputRef2} showSearch={showSearch2} setShowSearch={setShowSearch2} suggestions={suggestions2} loader={loader} setValue={setDrop} />
             </div>
 
             {/* Time & Datepicker */}

@@ -5,20 +5,27 @@ import Preferences from '@/components/FindARide/Preferences'
 import ProgressBar from '@/components/FindARide/ProgressBar'
 import RideDetails from '@/components/FindARide/RideDetails'
 import Submit from '@/components/FindARide/Submit'
+import { getContacts } from '@/context/ContactsProvider'
+import { findRide } from '@/functions/ridesFunctions'
 import { Users } from 'lucide-react'
-import { usePathname, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import { usePathname, useSearchParams, useRouter } from 'next/navigation'
+import React, { useState } from 'react'
 
 const page = () => {
 
     const queries = useSearchParams()
     const pathname = usePathname()
+    const authContext = getContacts()
+    const setMatchedRides = authContext?.setMatchedRides
+    const router = useRouter()
 
     const [step, setStep] = useState(0)
     const [currStep, setCurrStep] = useState(1)
+    const [hideform, setHideForm] = useState(false)
 
     // fields for Ride Details
     const [location, setLocation] = useState<{ long: number, lat: number }>({ long: queries.get("long") ? parseFloat(queries.get("long")!) || 0 : 0, lat: queries.get("lat") ? parseFloat(queries.get("lat")!) || 0 : 0 })
+    const [dropLocation, setDropLocation] = useState<{ long: number, lat: number }>({ long: queries.get("dropLong") ? parseFloat(queries.get("dropLong")!) || 0 : 0, lat: queries.get("dropLat") ? parseFloat(queries.get("dropLat")!) || 0 : 0 })
 
     const [pickup, setPickup] = useState<string | null>(queries.get('from'))
     const [drop, setDrop] = useState<string | null>(queries.get('to'))
@@ -38,11 +45,7 @@ const page = () => {
 
     // fields for budget
     const [rating, setRating] = useState('')
-    const [price, setPrice] = useState('')
-    const [negotiate, setNegotiate] = useState(false)
-    const [daily, setDaily] = useState(false)
-    const [oneTime, setOneTime] = useState(false)
-    const [weekly, setWeekly] = useState(false)
+    const [price, setPrice] = useState(0)
 
     // fields for additional info
     const [photo, setPhoto] = useState('')
@@ -78,18 +81,26 @@ const page = () => {
         </>
     )
 
-    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, passengers, setPassengers, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, rating, setRating, price, setPrice, negotiate, setNegotiate, daily, setDaily, oneTime, setOneTime, setWeekly, weekly, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, vehicle, setVehicle, setLocation }
-    
+    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, passengers, setPassengers, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, rating, setRating, price, setPrice, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, vehicle, setVehicle, setLocation, location, dropLocation, setDropLocation, setGenderType, currStep }
+
+    //search for ride
+    const searchRide = async () => await findRide(pickup, drop, date, passengers, time, price, vehicle, location, dropLocation, email, number, setMatchedRides || null, setHideForm, router, luggage, petFriendly, smoking, needs, rating)
+
     return (
 
         <>
 
-            <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center bg-[#2020203f]`}>
-                <Submit formData={formData} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
-            </div>
+            {hideform && <div className='flex justify-center h-screen w-screen items-center left-0 top-0 fixed z-50'>
+                <div className='loader -translate-y-5'></div>
+                <h1 className='inter md:text-lg font-medium text-center mt-4 translate-x-2.5 translate-y-7'>Finding best rides for you...</h1>
+            </div>}
+
+            {!hideform && <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center bg-[#2020203f]`}>
+                <Submit formData={formData} searchRide={searchRide} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
+            </div>}
 
             {/* // decors */}
-            <div className='min-h-screen flex justify-between fixed w-screen top-0 left-0 z-10'>
+            {!hideform && <div className='min-h-screen flex justify-between fixed w-screen top-0 left-0 z-10'>
 
                 <div className='flex h-screen items-end'>
                     <div className='h-[150px] w-[150px] xl:w-[220px] xl:h-[220px] bg-[#00b37e]' style={{ borderTopRightRadius: '500px' }}></div>
@@ -99,25 +110,21 @@ const page = () => {
                     <div className='w-[150px] h-[150px] xl:w-[220px] xl:h-[220px] bg-[#00b37e]' style={{ borderBottomLeftRadius: '500px' }}></div>
                 </div>
 
-            </div>
+            </div >}
 
             {/* // main part */}
 
-            <div className='min-h-screen w-full items-center flex flex-col'>
+            {!hideform && <div className='min-h-screen w-full items-center flex flex-col'>
 
                 <div className='h-[4.7rem] sm:h-[5.5rem] lg:h-24 absolute z-50 w-full px-6 sm:px-10 justify-between max-w-[80rem] flex items-end'>
 
                     <div className='flex items-center gap-4'>
                         <img className='w-12 sm:w-14' src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" />
                     </div>
-
-                    <div>
-                        <button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#00b37e] rounded-xl bg-[#fefefe] shadow-lg font-semibold text-sm sm:text-base sm:font-bold hover:bg-[#f8f7f7] px-6 py-3 transition-all duration-300 cursor-pointer`}>Offer a ride</button>
-                    </div>
                 </div>
 
                 {/* // form */}
-                <div className='flex-1 px-8 lg:pl-16 xl:pl-0 gap-20 lg:gap-40 relative z-30 max-w-5xl flex-col lg:flex-row flex pb-6 lg:pb-0 pt-28 lg:pt-8 items-center justify-center lg:justify-start w-full'>
+                <div className='flex-1 lg:pl-16 xl:pl-0 gap-20 lg:gap-40 relative z-30 max-w-5xl flex-col lg:flex-row flex pb-6 lg:pb-0 pt-28 lg:pt-8 items-center justify-center lg:justify-start w-full'>
 
                     {/* // progress bar */}
                     <div className='h-[2rem] lg:h-auto'>
@@ -127,11 +134,11 @@ const page = () => {
                     {/* filling form */}
                     <div className='flex h-[30rem] lg:h-auto flex-col gap-6'>
 
-                        {currStep === 1 && <RideDetails setLocation={setLocation} drop={drop} setDrop={setDrop} pickup={pickup} setPickup={setPickup} time={time} setTime={setTime} date={date} setDate={setDate} passengers={passengers} setPassengers={setPassengers} />}
+                        {currStep === 1 && <RideDetails setLocation={setLocation} setDropLocation={setDropLocation} drop={drop} setDrop={setDrop} pickup={pickup} setPickup={setPickup} time={time} setTime={setTime} date={date} setDate={setDate} passengers={passengers} setPassengers={setPassengers} />}
 
                         {currStep === 2 && <Preferences setGenderType={setGenderType} setRide={setRide} ride={ride} gender={gender} setGender={setGender} vehicle={vehicle} setVehicle={setVehicle} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} needs={needs} setNeeds={setNeeds} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
 
-                        {currStep === 3 && <Budget setDaily={setDaily} setNegotiate={setNegotiate} setOneTime={setOneTime} setPrice={setPrice} setRating={setRating} setWeekly={setWeekly} weekly={weekly} daily={daily} oneTime={oneTime} negotiate={negotiate} price={price} rating={rating} />}
+                        {currStep === 3 && <Budget location={location} dropLocation={dropLocation} vehicle={vehicle} currStep={currStep} setPrice={setPrice} setRating={setRating} price={price} rating={rating} />}
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
@@ -143,7 +150,7 @@ const page = () => {
                                 setCurrStep(currStep - 1)
                             }} style={{ border: '2px solid #00b37e' }}>Back</button>}
 
-                            <button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
+                            <button disabled={currStep === 3 && vehicle === '' ? true : false} className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
                                 setCurrStep(currStep + 1)
                                 setStep(step + 1)
                             }}>Next</button>
@@ -155,7 +162,7 @@ const page = () => {
 
                 </div>
 
-            </div>
+            </div>}
         </>
     )
 }

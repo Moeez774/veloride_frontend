@@ -56,19 +56,19 @@ const RideDetail: React.FC<Details> = ({ ride, queries, params }) => {
   // setting image of vehicle
   useEffect(() => {
     if (!ride) return
-    
+
     switch (ride.rideDetails.vehicle) {
-      case "Standard Car":
+      case "Compact Car":
         setImage('/Images/vecteezy_car-icon-in-flat-style-simple-traffic-icon__1_-removebg-preview.png')
         break;
-      case "SUV / Van":
+      case "SUVs":
         setImage('/Images/Screenshot_2025-03-23_090615_cleanup-removebg-preview.png')
         break;
       case "Luxury Car":
         setImage('/Images/vecteezy_luxury-car-side-view-silhouette-on-white-background_54072783_1_-removebg-preview.png')
         break;
-      case "Electric Vehicle":
-        setImage('/Images/Screenshot_2025-03-23_091233-removebg-preview.png')
+      case "Sedan":
+        setImage('/Images/vecteezy_car-icon-in-flat-style-simple-traffic-icon__1_-removebg-preview.png')
         break;
     }
   }, [ride])

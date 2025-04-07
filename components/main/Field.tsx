@@ -11,7 +11,7 @@ interface Details {
     setShowSearch: Dispatch<SetStateAction<boolean>>,
     value: string | null,
     setValue: Dispatch<SetStateAction<string | null>>,
-    setLocation: Dispatch<SetStateAction<{long: number, lat: number}>>
+    setLocation: Dispatch<SetStateAction<{ long: number, lat: number }>>
 }
 
 const Field: React.FC<Details> = ({ placeholder, showSearch, setShowSearch, setValue, value, setLocation }) => {
@@ -63,7 +63,6 @@ const Field: React.FC<Details> = ({ placeholder, showSearch, setShowSearch, setV
 
                 <Suggestions setLocation={setLocation} loader={loader} suggestions={suggestions} setValue={setValue} inputRef={inputRef} showSearch={showSearch} setShowSearch={setShowSearch} />
             </div>
-
 
         </>
     )

@@ -44,3 +44,40 @@ export async function offerRide(userId: string | null | undefined, driverName: s
     }
 
 }
+
+//function for finding best ride for user
+export async function findRide(pickup: string | null, drop: string | null, date: string | undefined, passengers: number, time: string, price: number, vehicle: string, location: { long: number, lat: number }, dropLocation: { long: number, lat: number }, email: boolean, number: boolean, setMatchedRides: Dispatch<SetStateAction<any>> | null, setHideForm: Dispatch<SetStateAction<boolean>>, router: any, luggage: boolean, petFriendly: boolean, smoking: boolean, needs: boolean, rating: string) {
+
+    //complete data
+    const data = {
+        pickup: pickup, drop: drop, date: date, time: time, passengers: passengers, price: price, vehicle: vehicle, location: location, dropLocation: dropLocation, number: number, email: email, rating: rating, needs: needs, smoking: smoking, petFriendly: petFriendly, luggage: luggage
+    }
+
+    // returning error if all fields are not filled properly
+    if (data.pickup === '' || data.drop === '' || data.date === '' || data.time === '' || data.vehicle === '' || (!data.number && !data.email)) {
+        alert("Please fill out all required fields for proceeding.",)
+        return
+    }
+
+    setHideForm(true)
+
+    let a = await fetch('http://localhost:4000/rides/find-ride', {
+        method: "POST", headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ data: data })
+    })
+
+    const response = await a.json()
+    if (response.statusCode === 200 && setMatchedRides) {
+        const allRides = {
+            rides: response.rides,
+            cheapest: response.cheapest,
+            preferred: response.preferred
+        }
+
+        setMatchedRides(allRides)
+        router.push(`/matched-rides?pickupLocation=${pickup}&pickupLongs=${location.long}&pickupLats=${location.lat}&dropoffLocation=${drop}&dropoffLongs=${dropLocation.long}&dropoffLats=${dropLocation.lat}&isFound=${response.found? 'true': 'false'}`)
+    }
+    else alert(response.message)
+}

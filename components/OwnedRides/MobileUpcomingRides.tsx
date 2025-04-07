@@ -17,7 +17,7 @@ const MobileUpcomingRides: React.FC<Details> = ({ myRides, getDate, getImage, se
 
             {myRides.length != 0 && myRides.map((e, index) => {
                 return (
-                    <div key={index} className='py-6 pl-2 sm:p-6 flex flex-col gap-4'>
+                    <div key={index} className='py-6 px-1.5 sm:p-6 flex flex-col gap-4'>
 
                         {/* image and options */}
                         <div className='flex justify-between items-center w-full'>
@@ -37,7 +37,7 @@ const MobileUpcomingRides: React.FC<Details> = ({ myRides, getDate, getImage, se
                         </div>
 
                         {/* // locations */}
-                        <div className='flex gap-3 md:gap-4 text-sm md:text-base flex-col mt-4'>
+                        <div className='flex gap-3 md:gap-4 text-sm md:text-base flex-col mt-2'>
 
                             <h1 className='font-semibold flex items-start sm:items-center gap-1'><MapPinIcon className='w-6 h-6' color='#202020' />{e.rideDetails.pickupLocation.pickupName}</h1>
 

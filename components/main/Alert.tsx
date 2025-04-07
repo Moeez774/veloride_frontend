@@ -8,7 +8,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 interface Details {
@@ -27,7 +26,7 @@ const Alert: React.FC<Details> = ({ item, setter, statements, func1, func2 }) =>
                     <AlertDialogHeader>
                         <AlertDialogTitle className='exo2'>{statements[0]}</AlertDialogTitle>
                         <AlertDialogDescription className='inter'>
-                        {statements[1]}
+                            {statements[1]}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

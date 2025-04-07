@@ -7,7 +7,7 @@ import LocalMap from './Map'
 
 const RideConnect = () => {
 
-    // states of all four inputs for showing search suggestion container 
+    // states of all four inputs for showing search suggestion container
     const [takePick, setTakePick] = useState(false)
     const [takeDrop, setTakeDrop] = useState(false)
     const [offerPick, setOfferPick] = useState(false)
@@ -16,8 +16,8 @@ const RideConnect = () => {
     // finding ride sources
     const [goFrom, setGoFrom] = useState<string | null>('')
     const [dropTo, setDropTo] = useState<string | null>('')
-    const [location, setLocation] = useState<{long: number, lat: number}>({ long: 0, lat: 0 })
-    const [dropLocation, setDropLocation] = useState<{long: number, lat: number}>({ long: 0, lat: 0 })
+    const [location, setLocation] = useState<{ long: number, lat: number }>({ long: 0, lat: 0 })
+    const [dropLocation, setDropLocation] = useState<{ long: number, lat: number }>({ long: 0, lat: 0 })
 
     // offering ride source
     const [startFrom, setStartFrom] = useState<string | null>('')
@@ -27,10 +27,10 @@ const RideConnect = () => {
     const [showOfferMap, setShowOfferMap] = useState(false)
 
     // statments for showing on selected positions
-    const findRideStatements = ["How to Select Your Locations" ,"Select your Pickup Location by tapping the map once, then select your Drop-Off Location by tapping again. You'll be asked to confirm before proceeding. Click OK to continue."]
-    const offerRideStatements = ["How to Select Your Locations" ,"Tap the map to select your Starting Point, then tap again to select your Destination. You'll be asked to confirm before proceeding. Click OK to continue."]
+    const findRideStatements = ["How to Select Your Locations", "Select your Pickup Location by tapping the map once, then select your Drop-Off Location by tapping again. You'll be asked to confirm before proceeding. Click OK to continue."]
+    const offerRideStatements = ["How to Select Your Locations", "Tap the map to select your Starting Point, then tap again to select your Destination. You'll be asked to confirm before proceeding. Click OK to continue."]
 
-    //statements for showing after selecting locations 
+    //statements for showing after selecting locations
     const confirmFindRide = ["Are you sure?", "You've set your Pickup and Drop-off locations. Ready to find a ride? Click OK to proceed."]
     const confirmOfferRide = ["Are you sure?", "You've set your Starting Point and Destination. Ready to offer a ride? Click OK to proceed."]
 
@@ -63,13 +63,13 @@ const RideConnect = () => {
                                 <div className='flex flex-col items-center gap-3'>
 
                                     {/* inout fields importing from Field.tsx */}
-                                    <Field placeholder='Pickup Location' setLocation={setLocation}  value={goFrom} setValue={setGoFrom} showSearch={takePick} setShowSearch={setTakePick} />
-                                    <Field placeholder='Drop-off Location' setLocation={() => {}} value={dropTo} setValue={setDropTo} showSearch={takeDrop} setShowSearch={setTakeDrop} />
+                                    <Field placeholder='Pickup Location' setLocation={setLocation} value={goFrom} setValue={setGoFrom} showSearch={takePick} setShowSearch={setTakePick} />
+                                    <Field placeholder='Drop-off Location' setLocation={setDropLocation} value={dropTo} setValue={setDropTo} showSearch={takeDrop} setShowSearch={setTakeDrop} />
                                 </div>
 
                                 {/* CTA */}
                                 <div className='lg:w-96 mt-3 flex flex-col sm:flex-row items-center gap-2'>
-                                    <Link prefetch={false} href={`/find-ride?from=${encodeURIComponent(goFrom || '')}&long=${location.long}&lat=${location.lat}&to=${encodeURIComponent(dropTo || '')}`} ><button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] w-[80vw] sm:w-auto rounded-md bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37de1] px-8 py-3 transition-all duration-300 cursor-pointer`}>Find a ride</button></Link>
+                                    <Link prefetch={false} href={`/find-ride?from=${encodeURIComponent(goFrom || '')}&long=${location.long}&lat=${location.lat}&to=${encodeURIComponent(dropTo || '')}&dropLong=${dropLocation.long}&dropLat=${dropLocation.lat}`} ><button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] w-[80vw] sm:w-auto rounded-md bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37de1] px-8 py-3 transition-all duration-300 cursor-pointer`}>Find a ride</button></Link>
 
                                     <button className='py-3 px-4 active:translate-y-0.5 transition-all duration-200 cursor-pointer hover:bg-[#e9e8e8] text-[15px] exo2 font-semibold bg-[#fefefe] text-[#00b37e] rounded-md shadow-md flex items-center justify-center w-[80vw] sm:w-auto gap-1' onClick={() => {
                                         setShowFindMap(true)
@@ -106,12 +106,12 @@ const RideConnect = () => {
 
                                 <div className='flex flex-col items-center gap-3'>
                                     <Field placeholder='Pickup Location' setLocation={setLocation} value={startFrom} setValue={setStartFrom} showSearch={offerPick} setShowSearch={setOfferPick} />
-                                    <Field placeholder='Drop-off Location' setLocation={() => {}} showSearch={offerDrop} value={goTo} setValue={setGoTo} setShowSearch={setOfferDrop} />
+                                    <Field placeholder='Drop-off Location' setLocation={setDropLocation} showSearch={offerDrop} value={goTo} setValue={setGoTo} setShowSearch={setOfferDrop} />
                                 </div>
 
                                 {/* CTA */}
                                 <div className='lg:w-96 flex flex-col sm:flex-row items-center gap-2 mt-3'>
-                                    <Link prefetch={false} href={`/offer-ride?from=${encodeURIComponent(startFrom || '')}&long=${location.long}&lat=${location.lat}&to=${encodeURIComponent(goTo || '')}`} ><button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-md bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37de1] w-[80vw] sm:w-auto px-8 py-3 transition-all duration-300 cursor-pointer`}>Offer a ride</button></Link>
+                                    <Link prefetch={false} href={`/offer-ride?from=${encodeURIComponent(startFrom || '')}&long=${location.long}&lat=${location.lat}&to=${encodeURIComponent(goTo || '')}&dropLong=${dropLocation.long}&dropLat=${dropLocation.lat}`} ><button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-md bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37de1] w-[80vw] sm:w-auto px-8 py-3 transition-all duration-300 cursor-pointer`}>Offer a ride</button></Link>
 
                                     <button className='py-3 px-4 active:translate-y-0.5 transition-all duration-200 cursor-pointer hover:bg-[#e9e8e8] text-[15px] exo2 font-semibold bg-[#fefefe] text-[#00b37e] rounded-md shadow-md flex items-center justify-center w-[80vw] sm:w-auto gap-1' onClick={() => {
                                         setShowOfferMap(true)

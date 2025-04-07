@@ -10,12 +10,9 @@ import './Commons.css'
 import UserProfile from './UserProfile'
 import SearchInput from './SearchInput'
 import FindARide from './FindARide'
-import OfferARide from './OfferARide'
+import Link from 'next/link'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu"
-import MyRides from './MyRides'
-import EcoStats from './EcoStats'
 import MainMap from '../main/MainMap'
-import Messages from '../ridesData/Messages'
 
 const Header = () => {
 
@@ -50,13 +47,13 @@ const Header = () => {
 
     // Checking pathname in useEffect to avoid SSR mismatch
     useEffect(() => {
-        if (pathname.startsWith('/auth') || pathname.startsWith('/reset-password') || pathname === '/find-ride' || pathname === '/offer-ride' || pathname.startsWith('/chats')) {
+        if (pathname.startsWith('/auth') || pathname.startsWith('/reset-password') || pathname === '/find-ride' || pathname === '/offer-ride' || pathname.startsWith('/chats') || pathname.startsWith('/matched-rides')) {
             setShowHeader(false)
         }
         else if ((window.matchMedia("(max-width: 1023px)").matches) && (pathname.startsWith('/ride-detail'))) {
             setShowHeader(false)
-        } 
-         else {
+        }
+        else {
             setShowHeader(true)
         }
     }, [pathname])
@@ -88,7 +85,7 @@ const Header = () => {
         }
 
         window.addEventListener("scroll", handleScroll)
-        
+
         handleScroll();
 
         return () => {
@@ -115,7 +112,7 @@ const Header = () => {
                     <div className='flex items-center gap-6'>
                         {/* logo */}
                         <div className='flex items-center'>
-                            <img className={`transition-all duration-200 ${scroll ? 'w-8 md:w-10' : 'w-10 md:w-12'}`} src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" />
+                            <Link href={'/'} ><img className={`transition-all cursor-pointer duration-200 ${scroll ? 'w-8 md:w-10' : 'w-10 md:w-12'}`} src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" /></Link>
                         </div>
 
                         {/* navigators */}
@@ -131,9 +128,6 @@ const Header = () => {
                                 </NavigationMenu>
                             </div>
                             <FindARide />
-                            <OfferARide />
-                            <MyRides />
-                            <EcoStats />
                         </div>
                     </div>
 
@@ -151,9 +145,9 @@ const Header = () => {
                             <UserProfile logOut={logOut} scroll={scroll} user={user} />
 
                             <div className='mainMap translate-y-0.5'>
-                                <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`${scroll? 'w-6 h-7': 'w-7 h-8'} transition-all duration-200`} color='#202020' /></button>
+                                <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`${scroll ? 'w-6 h-7' : 'w-7 h-8'} transition-all duration-200`} color='#202020' /></button>
                             </div>
-                            { showMap && <div className='relative z-[200]'>
+                            {showMap && <div className='relative z-[200]'>
                                 <MainMap setShowMap={setShowMap} />
                             </div>}
 

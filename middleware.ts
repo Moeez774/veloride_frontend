@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
     }
 
     try {
-        const secret = new TextEncoder().encode(process.env.SECRET_KEY); // Use your secret key        
+        const secret = new TextEncoder().encode(process.env.SECRET_KEY); // Use your secret key
         await jwtVerify(token, secret);
 
         // Token is valid, redirect away from public pages to home page

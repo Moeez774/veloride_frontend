@@ -15,8 +15,8 @@ interface Details {
     saveUser: () => Promise<void>
 }
 
-const MoreInfo: React.FC<Details> = ({ tellMore, setTellMore, isAgree, setAgree, number, setNumber, city, setCity, saveUser }) => {
-    
+const MoreInfo: React.FC<Details> = ({ tellMore, isAgree, setAgree, number, setNumber, city, setCity, saveUser }) => {
+
     return (
         <div className='fixed h-screen w-full flex justify-center items-center top-0 left-0' style={{ transition: 'all 0.2s ease-in-out', opacity: tellMore ? '1' : '0', transform: tellMore ? 'scale(1)' : 'scale(0.8)', zIndex: tellMore ? '50' : '-50' }}>
 

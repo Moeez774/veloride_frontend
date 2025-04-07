@@ -116,11 +116,11 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
                 <div className='bg-[#f0f0f0] relative flex flex-col gap-5 p-6 shadow-md w-full h-[20em] rounded-xl'>
 
                     <div className='absolute px-4 right-0'>
-                        <button onClick={() => setFavourite(!isFavourite)} className='flex text-[13px] rounded-3xl font-semibold transition-all duration-200 cursor-pointer items-center active:scale-[.97] gap-1 bg-[#e0e0e0] py-2.5 px-4'><HeartIcon className='w-7 transition-all duration-200 h-7' color={ isFavourite? '#00b37e': '#fefefe'} /> Add to favourites</button>
+                        <button onClick={() => setFavourite(!isFavourite)} className='flex text-[13px] rounded-3xl font-semibold transition-all duration-200 cursor-pointer items-center active:scale-[.97] gap-1 bg-[#e0e0e0] py-2.5 px-4'><HeartIcon className='w-7 transition-all duration-200 h-7' color={isFavourite ? '#00b37e' : '#fefefe'} /> Add to favourites</button>
                     </div>
 
                     <div>
-                        <img className='w-40 rounded-full' src={ride.additionalInfo.photo===""? "/Images/user(1).png": ride.additionalInfo.photo} alt="" />
+                        <img className='w-40 rounded-full' src={ride.additionalInfo.photo === "" ? "/Images/user(1).png" : ride.additionalInfo.photo} alt="" />
                     </div>
 
                     {/* //other info */}
@@ -142,7 +142,7 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
                         {/* //instruction */}
                         <div className='flex flex-col xl:pr-4 mt-1'>
                             <h1 className='xl:text-lg font-semibold'>Instruction</h1>
-                            <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{ride.additionalInfo.note==="" ? 'No instruction specified.' : ride.additionalInfo.note}</h1>
+                            <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{ride.additionalInfo.note === "" ? 'No instruction specified.' : ride.additionalInfo.note}</h1>
                         </div>
 
                     </div>

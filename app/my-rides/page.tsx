@@ -3,6 +3,8 @@ import Completedrides from '@/components/OwnedRides/Completedrides'
 import Performance from '@/components/OwnedRides/Performance'
 import Support from '@/components/OwnedRides/Support'
 import Upcomingrides from '@/components/OwnedRides/Upcomingrides'
+import CompletedRides from '@/components/TakenRides/CompletedRides'
+import UserPerformance from '@/components/TakenRides/Performance'
 import UpcomingRides from '@/components/TakenRides/UpcomingRides'
 import { useAuth } from '@/context/AuthProvider'
 import { PlusIcon } from '@heroicons/react/16/solid'
@@ -25,10 +27,38 @@ const page = () => {
     //for disbaling buttons
     const btns = [setShowUpcomings, setShowCompleted, setShowPerformance, setShowSafety]
 
-    //for navigating from one section to other 
+    //for navigating from one section to other
     const set = (setter: Dispatch<SetStateAction<boolean>>) => {
         btns.forEach(e => e(e === setter ? true : false))
         setShowOptions(false)
+    }
+
+    //for taking driver data
+    const getDriversData = async (driverId: string) => {
+        let a = await fetch('http://localhost:4000/users/check-user', {
+            method: "POST", headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ _id: driverId })
+        })
+
+        let response = await a.json()
+        if (response.statusCode === 200) return response.user
+        else alert(response.message)
+    }
+
+    //for taking image of specific ride vehicle
+    const getImage = (e: string) => {
+        switch (e) {
+            case "Standard Car":
+                return '/Images/vecteezy_car-icon-in-flat-style-simple-traffic-icon__1_-removebg-preview.png'
+            case "SUV / Van":
+                return '/Images/Screenshot_2025-03-23_090615_cleanup-removebg-preview.png'
+            case "Luxury Car":
+                return '/Images/vecteezy_luxury-car-side-view-silhouette-on-white-background_54072783_1_-removebg-preview.png'
+            case "Electric Vehicle":
+                return '/Images/Screenshot_2025-03-23_091233-removebg-preview.png'
+        }
     }
 
     return (
@@ -36,11 +66,17 @@ const page = () => {
             <div className='min-h-screen pt-28 px-3 lg:pl-3 lg:pr-6 max-w-7xl mx-auto flex flex-col gap-10 w-full' style={{ userSelect: 'none' }}>
 
                 <div className='flex sm:flex-row flex-col exo2 text-[1.4rem] lg:text-[1.7rem] font-[600] justify-center items-start sm:items-center sm:gap-7 lg:gap-10'>
-                    <div onClick={() => setTakeRides(false)} className={`flex rounded-xl transition-all pt-3 sm:px-3 hover:bg-[#00b37d17] duration-200 flex-col cursor-pointer ${!takeRides ? 'text-[#00b37e]' : 'text-[#202020]'} gap-1 lg:gap-1.5 sm:h-14 lg:h-16`}>
+                    <div onClick={() => {
+                        setTakeRides(false)
+                        set(setShowUpcomings)
+                    }} className={`flex rounded-xl transition-all pt-3 sm:px-3 hover:bg-[#00b37d17] duration-200 flex-col cursor-pointer ${!takeRides ? 'text-[#00b37e]' : 'text-[#202020]'} gap-1 lg:gap-1.5 sm:h-14 lg:h-16`}>
                         <h1 className='flex items-center'><ChevronRight className={`sm:hidden ${takeRides ? 'opacity-0' : 'opacity-[1]'}`} size={20} color='#00b37e' /> Rides You Own</h1>
                         <div className={`bg-[#00b37e] hidden sm:block ${takeRides ? 'translate-x-[13rem] lg:translate-x-[15.8rem]' : 'translate-x-0'} transition-all duration-200 w-full h-1 lg:h-1.5`}></div>
                     </div>
-                    <div onClick={() => setTakeRides(true)} className={`sm:h-14 lg:h-16 rounded-xl sm:pt-3 sm:px-3 hover:bg-[#00b33c17] transition-all duration-200 cursor-pointer ${takeRides ? 'text-[#00b37e]' : 'text-[#202020]'}`}>
+                    <div onClick={() => {
+                        setTakeRides(true)
+                        set(setShowUpcomings)
+                    }} className={`sm:h-14 lg:h-16 rounded-xl sm:pt-3 sm:px-3 hover:bg-[#00b33c17] transition-all duration-200 cursor-pointer ${takeRides ? 'text-[#00b37e]' : 'text-[#202020]'}`}>
                         <h1 className='flex items-center'><ChevronRight size={20} className={`sm:hidden ${takeRides ? 'opacity-[1]' : 'opacity-0'}`} color='#00b37e' /> Rides You Take</h1>
                     </div>
                 </div>
@@ -61,7 +97,7 @@ const page = () => {
                         </div>
 
                         <div className='w-full flex justify-center px-4'>
-                            <button className='bg-[#00b37e] transition-all duration-200 active:bg-[#00b35f] w-full py-3 exo2 font-semibold text-[16px] shadow-md rounded-lg text-[#fefefe] cursor-pointer hover:bg-[#00b37dda]'>Offer a ride</button>
+                            <button className='bg-[#00b37e] transition-all duration-200 active:bg-[#00b35f] w-full py-3 exo2 font-semibold text-[16px] shadow-md rounded-lg text-[#fefefe] cursor-pointer hover:bg-[#00b37dda]'>{takeRides ? 'Find a ride' : 'Offer a ride'}</button>
                         </div>
 
                     </div>
@@ -73,22 +109,22 @@ const page = () => {
                         <h1 className='lg:hidden text-center text-[1rem] font-medium inter text-[#202020]'>{showUpcomings ? 'Upcoming Rides' : showCompleted ? 'Completed Rides' : showPerformance ? 'Ride Insight & Performance' : showSafety ? 'Safety & Support' : 'Upcoming Rides'}</h1>
 
                         {/* //owned rides info */}
-                        {!takeRides && showUpcomings && <Upcomingrides user={user} />}
+                        {!takeRides && showUpcomings && <Upcomingrides getImage={getImage} user={user} />}
 
-                        {!takeRides && showCompleted && <Completedrides user={user} />}
+                        {!takeRides && showCompleted && <Completedrides getImage={getImage} user={user} />}
 
                         {!takeRides && showPerformance && <Performance user={user} />}
 
-                        {!takeRides && showSafety && <Support />}
+                        {!takeRides && showSafety && <Support text='Mention any problematic passenger' />}
 
                         {/* //taken rides info */}
-                        {takeRides && showUpcomings && <UpcomingRides user={user} />}
+                        {takeRides && showUpcomings && <UpcomingRides getImage={getImage} getDriversData={getDriversData} user={user} />}
 
-                        {takeRides && showCompleted && <Completedrides user={user} />}
+                        {takeRides && showCompleted && <CompletedRides getImage={getImage} getDriversData={getDriversData} user={user} />}
 
-                        {takeRides && showPerformance && <Performance user={user} />}
+                        {takeRides && showPerformance && <UserPerformance user={user} />}
 
-                        {takeRides && showSafety && <Support />}
+                        {takeRides && showSafety && <Support text='Mention any problematic driver' />}
                     </div>
 
                 </div>

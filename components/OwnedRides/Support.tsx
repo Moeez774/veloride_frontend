@@ -2,7 +2,11 @@ import { Mail, Phone, Search, User2Icon } from 'lucide-react'
 import React from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
-const Support = () => {
+interface Details {
+    text: string
+}
+
+const Support: React.FC<Details> = ({ text }) => {
     return (
         <div className='inter flex flex-col md:flex-row gap-10 md:gap-2 px-2 mt-4 md:px-1.5 pt-1.5 pb-4 md:justify-between'>
             <div className='flex w-full flex-col gap-4'>
@@ -32,7 +36,7 @@ const Support = () => {
                                             <input type="text" placeholder='Mention passenger here' className='bg-transparent border text-[15px] outline-none focus:border-[#202020] border-[#d0d0d0] p-2.5 w-full rounded-lg' />
 
                                             <div className='p-2.5 cursor-pointer hover:bg-[#eeeeee] transition-all duration-200 bg-[#eaeaea] rounded-full shadow-md'>
-                                            <Search color='#202020' size={20} />
+                                                <Search color='#202020' size={20} />
                                             </div>
                                         </div>
                                     </div>
@@ -40,7 +44,7 @@ const Support = () => {
                             </DialogContent>
                         </Dialog>
 
-                        <h1 className='text-[13px] flex items-end gap-1'>Mention any problematic passenger <p className='text-[11px]'>(Optional)</p></h1>
+                        <h1 className='text-[13px] flex items-end gap-1'>{text} <p className='text-[11px]'>(Optional)</p></h1>
                     </div>
 
                     {/* //about issue */}
