@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react'
 import MyTimePicker from './TimePicker'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Suggestions from '../main/Suggestions'
-
 interface Details {
     passengers: number,
     setPassengers: Dispatch<SetStateAction<number>>,
@@ -27,7 +26,6 @@ const RideDetails: React.FC<Details> = ({ passengers, setPassengers, date, setDa
     const [showDropoffTip, setShowDropoffTip] = useState(false)
     const [showSearch1, setShowSearch1] = useState(false)
     const [showSearch2, setShowSearch2] = useState(false)
-
     const inputRef = useRef<any>(null)
     const inputRef2 = useRef<any>(null)
 
@@ -143,7 +141,6 @@ const RideDetails: React.FC<Details> = ({ passengers, setPassengers, date, setDa
                         </div>
 
                     </div>
-
                     <div>
                         <MyTimePicker value={time} setValue={setTime} />
                     </div>

@@ -1,7 +1,6 @@
 'use client'
 import React, { Dispatch, Ref, SetStateAction, useEffect, useRef } from 'react'
 import { ScrollArea } from "@/components/ui/scroll-area"
-
 interface Details {
     setValue: Dispatch<SetStateAction<string | null>>,
     loader: boolean,
@@ -9,7 +8,7 @@ interface Details {
     setShowSearch: Dispatch<SetStateAction<boolean>>,
     showSearch: boolean,
     inputRef: any,
-    setLocation: Dispatch<SetStateAction<{long: number, lat: number}>>
+    setLocation: Dispatch<SetStateAction<{ long: number, lat: number }>>
 }
 
 const Suggestions: React.FC<Details> = ({ loader, setValue, suggestions, showSearch, setShowSearch, inputRef, setLocation }) => {
@@ -18,7 +17,6 @@ const Suggestions: React.FC<Details> = ({ loader, setValue, suggestions, showSea
 
     // for handling outside clicks
     useEffect(() => {
-
         const handleClick = (e: MouseEvent) => {
             if ((inputRef?.current && !inputRef?.current.contains(e.target as Node)) && (searchRef.current && !searchRef.current.contains(e.target as Node))) {
                 setShowSearch(false)
@@ -48,7 +46,7 @@ const Suggestions: React.FC<Details> = ({ loader, setValue, suggestions, showSea
                         {suggestions && suggestions.map((e: any, index: number) => {
                             return (
                                 <button key={index} onClick={() => {
-                                    setLocation({long: e.geometry.coordinates[0], lat: e.geometry.coordinates[1]})
+                                    setLocation({ long: e.geometry.coordinates[0], lat: e.geometry.coordinates[1] })
                                     setValue(`${e.properties.address_line1}, ${e.properties.address_line2}`)
                                     setShowSearch(false)
                                 }} className='inter w-full text-start rounded-md cursor-pointer p-2 hover:bg-gray-100 transition-all duration-200 text-[#202020] text-sm'>

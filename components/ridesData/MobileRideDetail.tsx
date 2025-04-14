@@ -1,10 +1,10 @@
 'use client'
 import { HeartIcon, MapPinIcon, StarIcon } from '@heroicons/react/16/solid'
-import { CreditCard, Dot, Mail, Navigation, Phone, Tag, X } from 'lucide-react'
+import { CreditCard, Dot, Mail, Navigation, Phone, Tag, X, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import Overview from './Overview'
-import { FaPaypal } from 'react-icons/fa'
+import { FaPaypal, FaSpinner } from 'react-icons/fa'
 interface Details {
   ride: any,
   isBest: boolean,
@@ -13,9 +13,10 @@ interface Details {
   isFavourite: boolean,
   setFavourite: Dispatch<SetStateAction<boolean>>,
   date: string,
+  isCompleted: boolean
 }
 
-const MobileRideDetail: React.FC<Details> = ({ ride, image, setFavourite, isBest, isFavourite, date, driver }) => {
+const MobileRideDetail: React.FC<Details> = ({ ride, image, setFavourite, isBest, isFavourite, date, driver, isCompleted }) => {
 
   const router = useRouter()
 
@@ -36,7 +37,16 @@ const MobileRideDetail: React.FC<Details> = ({ ride, image, setFavourite, isBest
 
           {/* //part 1 */}
           <div className='flex flex-col gap-10'>
-            <h1 className='flex items-center text-xl md:text-2xl font-semibold gap-2.5 exo2'><div className='bg-[#202020] translate-y-0.5 w-[5px] h-[5px] rounded-full'></div>Ride Detail</h1>
+
+            <div className='flex items-center justify-between'>
+              <h1 className='flex items-center text-xl md:text-2xl font-semibold gap-2.5 exo2'><div className='bg-[#202020] translate-y-0.5 w-[5px] h-[5px] rounded-full'></div>Ride Detail</h1>
+
+              {/* //ride status */}
+              <div className='bg-[#202020] px-4 py-1.5 flex items-center gap-1 rounded-full'>
+                {!isCompleted ? <FaSpinner size={16} style={{ animation: 'rotateAnime 1s linear infinite' }} color='#00b37e' /> : <Check size={16} color='#00b37e' />}
+                <h1 className='text-[12px] font-medium text-[#fefefe]'>{isCompleted ? `Completed` : 'Ongoing'}</h1>
+              </div>
+            </div>
 
             <img className='mx-auto w-40' src={image || undefined} alt="" />
 
@@ -49,7 +59,7 @@ const MobileRideDetail: React.FC<Details> = ({ ride, image, setFavourite, isBest
 
               {/* //labels */}
               <div className='flex items-center sm:flex-col sm:items-end gap-3 sm:pr-2'>
-                <h1 className='flex items-center gap-1.5 font-semibold text-[13px] md:text-sm'><Tag style={{ strokeWidth: '2.5' }} size={17} color='#202020' />Best Deal</h1>
+                {isBest && <h1 className='flex items-center gap-1.5 font-semibold text-[13px] md:text-sm'><Tag style={{ strokeWidth: '2.5' }} size={17} color='#202020' />Best Deal</h1>}
                 <h1 className='flex items-center gap-1 font-semibold text-[13px] md:text-sm'><StarIcon color='#202020' className='w-5 h-5' />4.5</h1>
               </div>
             </div>

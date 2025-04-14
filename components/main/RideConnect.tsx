@@ -22,7 +22,6 @@ const RideConnect = () => {
     // offering ride source
     const [startFrom, setStartFrom] = useState<string | null>('')
     const [goTo, setGoTo] = useState<string | null>('')
-
     const [showFindMap, setShowFindMap] = useState(false)
     const [showOfferMap, setShowOfferMap] = useState(false)
 
@@ -53,7 +52,6 @@ const RideConnect = () => {
                     <div className='max-w-6xl w-full mx-20 md:mx-10 gap-10 flex flex-col-reverse md:flex-row items-center md:justify-between'>
 
                         <div className='flex gap-1 sm:gap-4'>
-
                             <div className='flex gap-6 flex-col items-center md:items-start'>
 
                                 <div>
@@ -119,11 +117,8 @@ const RideConnect = () => {
                                     }}>Select by Map <Map size={20} color='#00b37e' /></button>
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
 
             </div>

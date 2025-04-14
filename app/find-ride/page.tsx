@@ -5,11 +5,13 @@ import Preferences from '@/components/FindARide/Preferences'
 import ProgressBar from '@/components/FindARide/ProgressBar'
 import RideDetails from '@/components/FindARide/RideDetails'
 import Submit from '@/components/FindARide/Submit'
+import Loader from '@/components/Loader'
+import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
 import { findRide } from '@/functions/ridesFunctions'
 import { Users } from 'lucide-react'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const page = () => {
 
@@ -17,11 +19,17 @@ const page = () => {
     const pathname = usePathname()
     const authContext = getContacts()
     const setMatchedRides = authContext?.setMatchedRides
+    const userContext = useAuth()
+    const user = userContext?.user || null
     const router = useRouter()
 
     const [step, setStep] = useState(0)
     const [currStep, setCurrStep] = useState(1)
     const [hideform, setHideForm] = useState(false)
+    const [message, setMessage] = useState('')
+    const [showMessage, setShowMessage] = useState(false)
+    const [loader, setLoader] = useState(false)
+    const [seats, setSeats] = useState<boolean[]>()
 
     // fields for Ride Details
     const [location, setLocation] = useState<{ long: number, lat: number }>({ long: queries.get("long") ? parseFloat(queries.get("long")!) || 0 : 0, lat: queries.get("lat") ? parseFloat(queries.get("lat")!) || 0 : 0 })
@@ -38,7 +46,6 @@ const page = () => {
     const [luggage, setLuggage] = useState(false)
     const [petFriendly, setPetFriendly] = useState(false)
     const [smoking, setSmoking] = useState(false)
-    const [needs, setNeeds] = useState(false)
     const [showGender, setShowGender] = useState(false)
     const [vehicle, setVehicle] = useState('')
     const [genderType, setGenderType] = useState('Any')
@@ -81,10 +88,10 @@ const page = () => {
         </>
     )
 
-    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, passengers, setPassengers, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, rating, setRating, price, setPrice, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, vehicle, setVehicle, setLocation, location, dropLocation, setDropLocation, setGenderType, currStep }
+    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, passengers, setPassengers, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, showGender, setShowGender, gender, setGender, female, male, rating, setRating, price, setPrice, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, vehicle, setVehicle, setLocation, location, dropLocation, setDropLocation, setGenderType, currStep, seats, setSeats }
 
     //search for ride
-    const searchRide = async () => await findRide(pickup, drop, date, passengers, time, price, vehicle, location, dropLocation, email, number, setMatchedRides || null, setHideForm, router, luggage, petFriendly, smoking, needs, rating)
+    const searchRide = async () => await findRide(pickup, drop, date, passengers, time, price, vehicle, location, dropLocation, email, number, setMatchedRides || null, setHideForm, router, luggage, petFriendly, smoking, rating, setLoader, setShowMessage, setMessage, ride, genderType, user)
 
     return (
 
@@ -94,6 +101,8 @@ const page = () => {
                 <div className='loader -translate-y-5'></div>
                 <h1 className='inter md:text-lg font-medium text-center mt-4 translate-x-2.5 translate-y-7'>Finding best rides for you...</h1>
             </div>}
+
+            {!hideform && loader && <Loader message={message} showMessage={showMessage} setShowMessage={setShowMessage} setLoader={setLoader} />}
 
             {!hideform && <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center bg-[#2020203f]`}>
                 <Submit formData={formData} searchRide={searchRide} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
@@ -136,9 +145,9 @@ const page = () => {
 
                         {currStep === 1 && <RideDetails setLocation={setLocation} setDropLocation={setDropLocation} drop={drop} setDrop={setDrop} pickup={pickup} setPickup={setPickup} time={time} setTime={setTime} date={date} setDate={setDate} passengers={passengers} setPassengers={setPassengers} />}
 
-                        {currStep === 2 && <Preferences setGenderType={setGenderType} setRide={setRide} ride={ride} gender={gender} setGender={setGender} vehicle={vehicle} setVehicle={setVehicle} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} needs={needs} setNeeds={setNeeds} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
+                        {currStep === 2 && <Preferences setGenderType={setGenderType} setRide={setRide} ride={ride} gender={gender} setGender={setGender} vehicle={vehicle} setVehicle={setVehicle} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
 
-                        {currStep === 3 && <Budget location={location} dropLocation={dropLocation} vehicle={vehicle} currStep={currStep} setPrice={setPrice} setRating={setRating} price={price} rating={rating} />}
+                        {currStep === 3 && <Budget seats={seats} setSeats={setSeats} location={location} dropLocation={dropLocation} vehicle={vehicle} currStep={currStep} setPrice={setPrice} setRating={setRating} price={price} rating={rating} />}
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 

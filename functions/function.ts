@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction } from "react"
 
 
 // for saving user's data
-export async function saveUsersData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, isAgree: boolean, setShowMessage: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, router: any) {
+export async function saveUsersData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, isAgree: boolean, setShowMessage: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, router: any, genderType: string) {
 
     setLoader(true)
     setMessage('')
@@ -15,7 +15,7 @@ export async function saveUsersData(setLoader: Dispatch<SetStateAction<boolean>>
             "Content-Type": "application/json"
         },
         credentials: 'include',
-        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, remember: false, photo: user?.photoURL, isAgree: isAgree, isProvider: true })
+        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, remember: false, photo: user?.photoURL, isAgree: isAgree, isProvider: true, gender: genderType })
     })
 
     let response = await a.json()
@@ -38,7 +38,7 @@ function generateHSLColor() {
 }
 
 // for sign up
-export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, email: string, fullname: string, pass: string, confirmPass: string, number: string, city: string, agree: boolean, setShowMessage: Dispatch<SetStateAction<boolean>>, router: any) {
+export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, email: string, fullname: string, pass: string, confirmPass: string, number: string, city: string, agree: boolean, setShowMessage: Dispatch<SetStateAction<boolean>>, router: any, genderType: string) {
 
     //generating random color for profile backgorund
     const color = generateHSLColor()
@@ -52,7 +52,7 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, s
                 "Content-Type": "application/json"
             },
             credentials: 'include',
-            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, confirmPass: confirmPass, number: number, city: city, remeber: false, photo: color, isAgree: agree, isProvider: false })
+            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, confirmPass: confirmPass, number: number, city: city, remeber: false, photo: color, isAgree: agree, isProvider: false, gender: genderType })
         })
 
         let response = await a.json()
@@ -69,7 +69,7 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, s
     }
 }
 
-// for sending messages 
+// for sending messages
 export async function sendMessage(chat_id: string, sender_id: string, receiver_id: string, message: string, senderPhoto: string, receiverPhoto: string, senderName: string, receiverName: string, isExist: boolean, setIsExist: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>) {
 
     const _id = `${chat_id}_${new Date().getTime()}`
@@ -77,7 +77,7 @@ export async function sendMessage(chat_id: string, sender_id: string, receiver_i
     const data = {
         _id: _id, chat_id: chat_id, sender_id: sender_id, receiver_id: receiver_id, message: message, senderPhoto: senderPhoto, receiverPhoto: receiverPhoto, senderName: senderName, receiverName: receiverName, time: new Date().getTime(),
     }
-    
+
     if(message!='') {
         socket.emit("newMessage", { data: data, chat_id: chat_id, message: message, time: new Date().getTime() })
         setMessage('')

@@ -1,10 +1,9 @@
 'use client'
 import { MapPinIcon } from '@heroicons/react/16/solid'
 import { Navigation } from 'lucide-react'
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
 import './Main.css'
 import Suggestions from './Suggestions'
-
 interface Details {
     placeholder: string,
     showSearch: boolean,
@@ -17,7 +16,6 @@ interface Details {
 const Field: React.FC<Details> = ({ placeholder, showSearch, setShowSearch, setValue, value, setLocation }) => {
 
     const inputRef = useRef<any>(null)
-
     const [suggestions, setSuggestions] = useState<any[]>([])
     const [loader, setLoader] = useState(false)
 
@@ -63,7 +61,6 @@ const Field: React.FC<Details> = ({ placeholder, showSearch, setShowSearch, setV
 
                 <Suggestions setLocation={setLocation} loader={loader} suggestions={suggestions} setValue={setValue} inputRef={inputRef} showSearch={showSearch} setShowSearch={setShowSearch} />
             </div>
-
         </>
     )
 }

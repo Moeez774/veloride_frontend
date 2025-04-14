@@ -3,12 +3,7 @@ import React, { Dispatch, SetStateAction } from "react"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 interface Details {
   date: string | undefined,
   setDate: Dispatch<SetStateAction<string | undefined>>
@@ -34,8 +29,8 @@ const DatePicker: React.FC<Details> = ({ date, setDate }) => {
 
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-auto relative z-[100] p-0">
-        <Calendar className="inter"
+      <PopoverContent className="w-full relative z-[100] p-0">
+        <Calendar className="inter w-full"
           mode="single"
           selected={date ? new Date(date) : undefined}
           onSelect={(day) => setDate(day ? day.toISOString() : undefined)}

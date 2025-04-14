@@ -1,5 +1,5 @@
 'use client'
-import { ChevronLeft, ChevronRight, Tag } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -18,8 +18,7 @@ const NearRides = () => {
 
     //fetching rides near user
     useEffect(() => {
-        if(!user) return
-
+        if (!user) return
         const long = localStorage.getItem("long")
         const lat = localStorage.getItem("lat")
 
@@ -33,9 +32,7 @@ const NearRides = () => {
             })
 
             let response = await a.json()
-            if (response.statusCode === 200) {
-                setNearRides(response.data)
-            }
+            if (response.statusCode === 200) setNearRides(response.data)
             else alert(response.message)
         }
 
@@ -43,7 +40,7 @@ const NearRides = () => {
     }, [user])
 
     const increaseSlides = () => {
-        if (slideNo === nearRides.length-1) return
+        if (slideNo === nearRides.length - 1) return
         else {
             const no = slideNo + 1
             setSlideNo(no)
@@ -88,7 +85,7 @@ const NearRides = () => {
                         return (
                             <div key={index}>
                                 <SwiperSlide className='relative overflow-auto z-10' key={index} >
-                                    
+
                                     <NearRide nearRides={nearRides} ride={e} />
                                 </SwiperSlide>
                             </div>
@@ -100,8 +97,8 @@ const NearRides = () => {
                     <button className={`swiper-button-prev-shoes ${slideNo === 1 ? 'bg-gray-100 hover:bg-gray-100' : 'bg-gray-200 hover:bg-gray-300'} cursor-pointer p-2.5 mr-[3.8rem] rounded-full absolute top-0 transform -translate-y-[4rem] z-10`} onClick={decreaseSlide} style={{ transition: 'all 0.3s ease-in-out' }}>
                         <ChevronLeft color={slideNo === 1 ? 'gray' : 'black'} style={{ strokeWidth: 1 }} size={28} />
                     </button>
-                    <button className={`swiper-button-next-shoes ${slideNo === nearRides.length-1 ? 'bg-gray-100 hover:bg-gray-100' : 'bg-gray-200 hover:bg-gray-300'} transition-all cursor-pointer duration-300 p-2.5 rounded-full absolute top-0 transform -translate-y-[4rem] z-10`} onClick={increaseSlides}>
-                        <ChevronRight color={slideNo === nearRides.length-1 ? 'gray' : 'black'} style={{ strokeWidth: 1 }} size={28} />
+                    <button className={`swiper-button-next-shoes ${slideNo === nearRides.length - 1 ? 'bg-gray-100 hover:bg-gray-100' : 'bg-gray-200 hover:bg-gray-300'} transition-all cursor-pointer duration-300 p-2.5 rounded-full absolute top-0 transform -translate-y-[4rem] z-10`} onClick={increaseSlides}>
+                        <ChevronRight color={slideNo === nearRides.length - 1 ? 'gray' : 'black'} style={{ strokeWidth: 1 }} size={28} />
                     </button>
                 </div>
             </div>}

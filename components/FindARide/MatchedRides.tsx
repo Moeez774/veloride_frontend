@@ -21,12 +21,10 @@ const MatchedRides: React.FC<Details> = ({ isFound, location, drop, pickup, drop
     const [showCheapest, setCheapest] = useState(false)
     const [showPreference, setPreference] = useState(false)
     const types = [setBest, setCheapest, setPreference]
-
     const [rideTypes, setRideTypes] = useState<any[]>([])
     const router = useRouter()
     const authContext = getContacts()
     const matchedRides = authContext?.matchedRides || null
-
     const showTypes = (e: Dispatch<SetStateAction<boolean>>) => types.forEach(type => type(type == e))
 
     //for fetching distance of rides if they are near
@@ -109,9 +107,9 @@ const MatchedRides: React.FC<Details> = ({ isFound, location, drop, pickup, drop
 
                 <div className='flex w-full flex-col lg:flex-row lg:justify-between sm:text-lg gap-4 lg:gap-2 xl:text-xl px-4 lg:px-6'>
 
-                    <h1 className='font-semibold lg:w-1/2 xl:w-auto flex xl:items-center gap-1'><MapPinIcon className='w-6 -translate-y-0.5 sm:-translate-y-1 h-6 sm:w-8 sm:h-8' color='#202020' />{pickup}</h1>
+                    <h1 className='font-semibold lg:w-1/2 xl:w-auto flex gap-1'><MapPinIcon className='w-6 -translate-y-0.5 sm:-translate-y-1 h-6 sm:w-8 sm:h-8' color='#202020' />{pickup}</h1>
 
-                    <h1 className='font-semibold flex lg:w-1/2 xl:w-auto xl:items-center gap-2'><Navigation size={22} color='#202020' />{drop}</h1>
+                    <h1 className='font-semibold flex lg:w-1/2 xl:w-auto gap-2'><Navigation size={22} color='#202020' />{drop}</h1>
                 </div>
 
                 <h1 className='text-center font-semibold text-xl mt-8 mx-4 sm:text-2xl'>{isFound === "false" ? "Couldn't find a direct ride, but here are the closest matches." : 'Here are the top rides we’ve found for you.'}</h1>
@@ -132,7 +130,7 @@ const MatchedRides: React.FC<Details> = ({ isFound, location, drop, pickup, drop
                     {rideTypes && rideTypes.map((e: any, index: number) => {
                         if (e != null) {
                             return (
-                                <div key={index} onClick={() => router.push(`/ride-detail/${e._id}?from=${encodeURIComponent(e.rideDetails.pickupLocation.pickupName || '')}&long=${e.rideDetails.pickupLocation.coordinates[0]}&lat=${e.rideDetails.pickupLocation.coordinates[0]}&to=${encodeURIComponent(e.rideDetails.dropoffLocation.dropoffName || '')}&dropLong=${e.rideDetails.dropoffLocation.coordinates[0]}&dropLat=${e.rideDetails.pickupLocation.coordinates[0]}&isBest=false`)} className={`card py-4 sm:py-6 px-3 sm:p-6 w-full flex bg-white cursor-pointer justify-between gap-2 h-fit rounded-3xl lg:rounded-lg shadow-lg sm:shadow-sm`} style={{ border: '1px solid #e0e0e0', transition: 'all 0.2s ease-in-out', animation: 'showRides 0.2s ease-in-out' }}>
+                                <div key={index} onClick={() => router.push(`/ride-detail/${e._id}?from=${encodeURIComponent(e.rideDetails.pickupLocation.pickupName || '')}&long=${e.rideDetails.pickupLocation.coordinates[0]}&lat=${e.rideDetails.pickupLocation.coordinates[1]}&to=${encodeURIComponent(e.rideDetails.dropoffLocation.dropoffName || '')}&dropLong=${e.rideDetails.dropoffLocation.coordinates[0]}&dropLat=${e.rideDetails.pickupLocation.coordinates[1]}&isCheaper=false`)} className={`card py-4 sm:py-6 px-3 sm:p-6 w-full flex bg-white cursor-pointer justify-between gap-2 h-fit rounded-3xl lg:rounded-lg shadow-lg sm:shadow-sm`} style={{ border: '1px solid #e0e0e0', transition: 'all 0.2s ease-in-out', animation: 'showRides 0.2s ease-in-out' }}>
 
                                     <div className='flex items-start sm:flex-col gap-4'>
                                         <div className='p-2 w-fit rounded-xl bg-[#00b37e]'>

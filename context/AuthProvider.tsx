@@ -12,7 +12,8 @@ export interface User {
   remember: boolean;
   photo: string | null;
   isAgree: boolean;
-  contacts: any[]
+  contacts: any[],
+  gender: string | null
 }
 
 interface AuthContextType {

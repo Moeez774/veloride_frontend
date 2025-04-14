@@ -48,9 +48,7 @@ const page = () => {
 
     // fields for budget
     const [negotiate, setNegotiate] = useState(false)
-    const [recurring, setRecurring] = useState(false)
-    const [recurringVal, setRecurringVal] = useState('One time')
-    const [budget, setBudget] = useState('')
+    const [budget, setBudget] = useState(0)
 
     // fields for additional info
     const [photo, setPhoto] = useState('')
@@ -86,10 +84,10 @@ const page = () => {
         </>
     )
 
-    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, seats, setseats, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, recurring, recurringVal, negotiate, setNegotiate, setRecurring, setRecurringVal, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, budget, setBudget, vehicle, setVehicle, setLocation, setDropLocation, setGenderType }
+    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, seats, setseats, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, negotiate, setNegotiate, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, budget, setBudget, vehicle, setVehicle, setLocation, setDropLocation, setGenderType, currStep, location, dropLocation }
 
     // for offering a ride
-    const offer = async () => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, needs, genderType, negotiate, recurring, recurringVal, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode)
+    const offer = async () => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, negotiate, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode, user)
 
     useEffect(() => {
         if (!loader && statusCode === 200) router.push('/')
@@ -140,12 +138,11 @@ const page = () => {
 
                         {currStep === 1 && <RideDetails setLocation={setLocation} setDropLocation={setDropLocation} drop={drop} setDrop={setDrop} pickup={pickup} setPickup={setPickup} time={time} setTime={setTime} vehicle={vehicle} setVehicle={setVehicle} date={date} setDate={setDate} seats={seats} setseats={setseats} />}
 
-                        {currStep === 2 && <Preferences setGenderType={setGenderType} vehicle={vehicle} setVehicle={setVehicle} setRide={setRide} ride={ride} gender={gender} setGender={setGender} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} needs={needs} setNeeds={setNeeds} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
+                        {currStep === 2 && <Preferences setGenderType={setGenderType} vehicle={vehicle} setVehicle={setVehicle} setRide={setRide} ride={ride} gender={gender} setGender={setGender} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
 
-                        {currStep === 3 && <Budget budget={budget} setBudget={setBudget} recurring={recurring} recurringVal={recurringVal} setNegotiate={setNegotiate} negotiate={negotiate} setRecurring={setRecurring} setRecurringVal={setRecurringVal} />}
+                        {currStep === 3 && <Budget currStep={currStep} budget={budget} setBudget={setBudget} setNegotiate={setNegotiate} negotiate={negotiate} vehicle={vehicle} location={location} dropLocation={dropLocation} />}
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
-
 
                         {currStep != 5 && <div className={`mt-6 lg:mt-8 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
@@ -154,7 +151,7 @@ const page = () => {
                                 setCurrStep(currStep - 1)
                             }} style={{ border: '2px solid #00b37e' }}>Back</button>}
 
-                            <button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
+                            <button disabled={currStep === 3 && vehicle === '' ? true : false} className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
                                 setCurrStep(currStep + 1)
                                 setStep(step + 1)
                             }}>Next</button>

@@ -50,14 +50,14 @@ const page = () => {
     //for taking image of specific ride vehicle
     const getImage = (e: string) => {
         switch (e) {
-            case "Standard Car":
+            case "Compact Car":
                 return '/Images/vecteezy_car-icon-in-flat-style-simple-traffic-icon__1_-removebg-preview.png'
-            case "SUV / Van":
+            case "SUVs":
                 return '/Images/Screenshot_2025-03-23_090615_cleanup-removebg-preview.png'
             case "Luxury Car":
                 return '/Images/vecteezy_luxury-car-side-view-silhouette-on-white-background_54072783_1_-removebg-preview.png'
-            case "Electric Vehicle":
-                return '/Images/Screenshot_2025-03-23_091233-removebg-preview.png'
+            case "Sedan":
+                return '/Images/vecteezy_car-icon-in-flat-style-simple-traffic-icon__1_-removebg-preview.png'
         }
     }
 

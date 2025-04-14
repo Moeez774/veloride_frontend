@@ -1,11 +1,10 @@
 'use client'
 import './Main.css'
-import { FlagIcon, MapPinIcon } from '@heroicons/react/16/solid'
-import { Flag, MapPin, Navigation, Tag } from 'lucide-react'
+import { MapPinIcon } from '@heroicons/react/16/solid'
+import { Navigation, Tag } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Link from 'next/link'
-
 interface Details {
     nearRides: any[],
     ride: any
@@ -18,9 +17,9 @@ const NearRide: React.FC<Details> = ({ ride, nearRides }) => {
 
     //setting cheapest ride badge
     useEffect(() => {
-        const allPrices = nearRides.map(e => e.budget.totalBudget)
+        const allPrices = nearRides.map(e => Math.round(e.budget.totalBudget / (e.rideDetails.bookedSeats + 1.5)))
         allPrices.sort((a, b) => a - b)
-        if (ride.budget.totalBudget === allPrices[0]) setBadge(true)
+        if (Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5)) === allPrices[0]) setBadge(true)
     }, [])
 
     //formatting date
@@ -131,7 +130,7 @@ const NearRide: React.FC<Details> = ({ ride, nearRides }) => {
 
                         <div className='flex gap-1'>
                             <h1 className='font-semibold'>Fare:</h1>
-                            <h1 className='font-normal'>Rs.{ride.budget.totalBudget}</h1>
+                            <h1 className='font-normal'>Rs.{Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5))}</h1>
                         </div>
                     </div>
 
@@ -146,16 +145,14 @@ const NearRide: React.FC<Details> = ({ ride, nearRides }) => {
                             <h1 className='font-normal'>{ride.rideDetails.time}</h1>
                         </div>
                     </div>
-
                 </div>
 
                 {/* //button for ride details  */}
                 <div className='flex mt-2 items-center'>
                     <div>
-                        <Link prefetch={false} href={`/ride-detail/${ride._id}?from=${encodeURIComponent(ride.rideDetails.pickupLocation.pickupName || '')}&long=${ride.rideDetails.pickupLocation.coordinates[0]}&lat=${ride.rideDetails.pickupLocation.coordinates[0]}&to=${encodeURIComponent(ride.rideDetails.dropoffLocation.dropoffName || '')}&dropLong=${ride.rideDetails.dropoffLocation.coordinates[0]}&dropLat=${ride.rideDetails.pickupLocation.coordinates[0]}&isBest=${badge ? 'true' : 'false'}`} ><button className='text-[14px] exo2 bg-[#fefefe] px-5 py-3 rounded-3xl cursor-pointer shadow-md transition-all font-semibold duration-200 text-[#202020] active:bg-[#fff7f7] hover:bg-[#f5f4f4]'>Ride Details</button></Link>
+                        <Link prefetch={false} href={`/ride-detail/${ride._id}?from=${encodeURIComponent(ride.rideDetails.pickupLocation.pickupName || '')}&long=${ride.rideDetails.pickupLocation.coordinates[0]}&lat=${ride.rideDetails.pickupLocation.coordinates[1]}&to=${encodeURIComponent(ride.rideDetails.dropoffLocation.dropoffName || '')}&dropLong=${ride.rideDetails.dropoffLocation.coordinates[0]}&dropLat=${ride.rideDetails.pickupLocation.coordinates[1]}&isCheaper=${badge ? 'true' : 'false'}`} ><button className='text-[14px] exo2 bg-[#fefefe] px-5 py-3 rounded-3xl cursor-pointer shadow-md transition-all font-semibold duration-200 text-[#202020] active:bg-[#fff7f7] hover:bg-[#f5f4f4]'>Ride Details</button></Link>
                     </div>
                 </div>
-
             </div>
 
         </div>

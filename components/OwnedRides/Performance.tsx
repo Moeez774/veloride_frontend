@@ -2,7 +2,6 @@ import { StarIcon } from '@heroicons/react/16/solid'
 import { Car, CheckCircle, Timer } from 'lucide-react'
 import React from 'react'
 import { Component } from './Chart'
-
 interface Details {
     user: any
 }
@@ -53,14 +52,12 @@ const Performance: React.FC<Details> = ({ user }) => {
                     <div className='w-10 h-10 flex items-center justify-center rounded-full bg-[#00b37e] text-[#fefefe] font-medium'>M</div>
                     <h1 className='flex flex-col sm:flex-row sm:items-center text-sm gap-0.5 sm:gap-2 font-medium'>Marcus said <p className='font-normal'>"His ride was very smooth for traveling."</p></h1>
                 </div>
-
             </div>
 
             {/* //chart */}
             <div>
                 <Component />
             </div>
-
         </div>
     )
 }

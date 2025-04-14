@@ -1,7 +1,9 @@
 import { HeartIcon, MapPinIcon, StarIcon } from '@heroicons/react/16/solid'
-import { Accessibility, Car, Dot, Heart, Mail, MailCheck, Navigation, Phone, Sliders, Sparkles, Star, Tag } from 'lucide-react'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
-
+import { Check, Car, Dot, Mail, Navigation, Phone, Sliders, Sparkles, Tag } from 'lucide-react'
+import React, { Dispatch, SetStateAction, useEffect } from 'react'
+import { FaSpinner } from 'react-icons/fa'
+import { isToday } from 'date-fns'
+import '../commonOnes/Commons.css'
 interface Details {
     ride: any,
     isBest: boolean,
@@ -10,9 +12,22 @@ interface Details {
     isFavourite: boolean,
     setFavourite: Dispatch<SetStateAction<boolean>>,
     date: string,
+    isCompleted: boolean,
+    setIsCompleted: Dispatch<SetStateAction<boolean>>,
 }
 
-const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, setFavourite, date }) => {
+const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, setFavourite, date, isCompleted, setIsCompleted }) => {
+
+    //checking whether ride date has passed or not so mark as completed (for now)
+    useEffect(() => {
+        if (!ride) return
+        const checkRideStatus = (timestamp: string) => {
+            const date = new Date(timestamp)
+            if (!isToday(date)) setIsCompleted(true)
+        }
+
+        checkRideStatus(ride.rideDetails.date)
+    }, [ride])
 
     return (
         <div className='max-w-5xl flex flex-col gap-10 p-8 mx-auto w-full'>
@@ -35,8 +50,15 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
                     </div>
 
                     {/* //labels */}
-                    <div className='absolute right-0 flex items-center gap-8 -translate-y-12'>
-                        <h1 className='flex items-center gap-1.5 font-semibold text-sm'><Tag style={{ strokeWidth: '2.5' }} size={17} color='#202020' />Best Deal</h1>
+                    <div className='absolute right-0 flex items-center gap-6 -translate-y-12'>
+
+                        {/* //ride status */}
+                        <div className='bg-[#202020] px-4 py-1.5 flex items-center gap-1 rounded-full'>
+                            {!isCompleted ? <FaSpinner size={16} style={{ animation: 'rotateAnime 1s linear infinite' }} color='#00b37e' /> : <Check size={16} color='#00b37e' />}
+                            <h1 className='text-[13px] font-medium text-[#fefefe]'>{isCompleted ? `Completed` : 'Ongoing'}</h1>
+                        </div>
+
+                        {isBest && <h1 className='flex items-center gap-1.5 font-semibold text-sm'><Tag style={{ strokeWidth: '2.5' }} size={17} color='#202020' />Best Deal</h1>}
                         <h1 className='flex items-center gap-1 font-semibold text-sm'><StarIcon color='#202020' className='w-5 h-5' />4.5</h1>
                     </div>
                 </div>
@@ -46,7 +68,7 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
                 <div className='max-w-2xl flex flex-col gap-8 mx-auto w-full'>
 
                     <div className='flex gap-3 justify-between items-center'>
-                        <h1 className='flex items-center gap-1 text-sm'>Current Fare: <p className='font-semibold text-[16px]'>Rs.{ride.budget.totalBudget}</p></h1>
+                        <h1 className='flex items-center gap-1 text-sm'>Current Fare: <p className='font-semibold text-[16px]'>Rs.{Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5))}</p></h1>
                         <h1 className='flex items-center gap-1 text-sm'>Available seats: <p className='font-semibold text-[16px]'>{ride.rideDetails.seats}</p></h1>
                         <h1 className='flex items-center gap-1 text-sm'>Time: <p className='font-semibold text-[16px]'>{ride.rideDetails.time}</p></h1>
                     </div>
@@ -65,11 +87,11 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
 
                 {/* //Cards */}
                 <div className='flex w-full justify-center gap-12 xl:gap-20'>
-                    <div className='rounded-xl flex flex-col gap-5 p-6 shadow-md bg-[#f0f0f0] w-[20em] h-[20em]'>
+                    <div className='rounded-xl flex flex-col gap-5 p-6 shadow-md bg-[#f0f0f0] w-[20em] h-[15em]'>
 
                         <div className='flex flex-col gap-2.5'>
                             <h1 className='exo2 font-semibold flex items-center gap-1 text-lg'><Car size={22} color='#202020' />Ride type</h1>
-                            <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{ride.preferences.rideType}</h1>
+                            <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{ride.preferences.rideType === "" ? 'Normal ride' : ride.preferences.rideType}</h1>
                         </div>
 
                         <div className='flex flex-col gap-2.5'>
@@ -81,12 +103,8 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
                                 <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{ride.preferences.ridePreferences.smokingAllowed ? 'Smoking allowed' : 'Smoking not allowed'}</h1>
                             </div>
                         </div>
-                        <div className='flex flex-col gap-2.5'>
-                            <h1 className='exo2 font-semibold flex items-center gap-1 text-lg'><Accessibility size={22} color='#202020' />Accessability needs</h1>
-                            <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{ride.preferences.needs.wheelchairAccess ? 'Wheelchair available' : 'No accessability resource available'}</h1>
-                        </div>
                     </div>
-                    <div className='rounded-xl flex flex-col gap-5 p-6 shadow-md bg-[#f0f0f0] w-[20em] h-[20em]'>
+                    <div className='rounded-xl flex flex-col gap-5 p-6 shadow-md bg-[#f0f0f0] w-[20em] h-[15em]'>
                         <div className='flex flex-col gap-2.5'>
                             <h1 className='exo2 font-semibold flex items-center gap-1 text-lg'><Sparkles size={20} color='#202020' />Specialty</h1>
                             <h1 className='flex items-center text-xs'><Dot size={25} color='#202020' />{isBest ? 'Best and cheapest ride near you.' : 'No specialty'}</h1>
@@ -100,7 +118,6 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
                                 <h1 className='flex items-center font-semibold text-[13px] gap-1'>Total distance: <p className='font-medium'>{Math.round(ride.rideDetails.distance)} kilometers</p></h1>
                                 <h1 className='flex items-center font-semibold text-[13px] gap-1'>Estimated time: <p className='font-medium'>{Math.round(ride.rideDetails.duration)} minutes</p></h1>
                                 <h1 className='flex items-center font-semibold text-[13px] gap-1'>Negotiating: <p className='font-medium'>{ride.budget.negotiate ? 'Yes' : 'No'}</p></h1>
-                                <h1 className='flex items-center font-semibold text-[13px] gap-1'>Recurring Ride: <p className='font-medium'>{ride.budget.recurring ? ride.budget.recurringVal : 'No'}</p></h1>
                             </div>
                         </div>
                     </div>
@@ -128,7 +145,7 @@ const Ride: React.FC<Details> = ({ ride, isBest, driver, image, isFavourite, set
 
                         <div className='flex flex-col gap-2'>
                             <h1 className='text-xl xl:text-2xl font-semibold'>{driver.fullname}</h1>
-                            <h1 className='text-[13px] xl:text-sm'>Gender: {ride.preferences.gender === 'Gender' ? 'Not specified' : ride.preferences.gender}</h1>
+                            <h1 className='text-[13px] xl:text-sm'>Gender: {driver.gender}</h1>
                             <h1 className='text-[13px] xl:text-sm'>Age: 20</h1>
                         </div>
 

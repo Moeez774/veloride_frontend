@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Dispatch, SetStateAction } from 'react'
 import { Params } from 'next/dist/server/request/params'
 import { ReadonlyURLSearchParams } from 'next/navigation'
 import { CreditCard, Dot, HelpCircle, MessageCircle } from 'lucide-react'
@@ -14,9 +14,11 @@ interface Details {
   ride: any,
   params: Params,
   queries: ReadonlyURLSearchParams,
+  isCompleted: boolean,
+  setIsCompleted: Dispatch<SetStateAction<boolean>>,
 }
 
-const RideDetail: React.FC<Details> = ({ ride, queries, params }) => {
+const RideDetail: React.FC<Details> = ({ ride, queries, params, isCompleted, setIsCompleted }) => {
 
   const [isBest, setIsBest] = useState(false)
   const [driver, setDriver] = useState<any>()
@@ -26,7 +28,7 @@ const RideDetail: React.FC<Details> = ({ ride, queries, params }) => {
   const user = authContext?.user || null
 
   useEffect(() => {
-    if (queries.get("isBest") === "true") setIsBest(true)
+    if (queries.get("isCheaper") === "true") setIsBest(true)
     if (!ride) return
 
     const fetchDriverData = async () => {
@@ -108,26 +110,26 @@ const RideDetail: React.FC<Details> = ({ ride, queries, params }) => {
       <div className='min-h-screen inter text-[#202020] w-full flex flex-row lg:flex-row lg:pt-28 relative'>
 
         <div className='lg:hidden w-full pb-[5rem]'>
-          {ride && driver && <MobileRideDetail setFavourite={setFavourite} isBest={isBest} isFavourite={isFavourite} date={formattedDate} driver={driver} image={image} ride={ride} />}
+          {ride && driver && <MobileRideDetail isCompleted={isCompleted} setFavourite={setFavourite} isBest={isBest} isFavourite={isFavourite} date={formattedDate} driver={driver} image={image} ride={ride} />}
         </div>
 
         {/* //bottom bar */}
         <div className={`fixed bottom-0 px-4 flex items-center justify-between transition-all duration-200 z-[30] ${inView ? 'h-0 p-0' : 'h-[4.5rem] md:p-6 lg:p-8'} overflow-hidden w-full bg-[#f0f0f0]`}>
-          <div className='flex gap-3 items-center'>
+          <div className='flex gap-2 items-center'>
             <img className='w-12 sm:w-14 rounded-full' src={ride.additionalInfo.photo === "" ? "/Images/user(1).png" : ride.additionalInfo.photo} alt="" />
 
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-1.5'>
               <div onClick={() => setOpenChat(true)} className='bg-[#00b37e] cursor-pointer transition-all duration-200 active:bg-[#00b36e] hover:bg-[#00b37dc0] shadow-md p-1.5 sm:p-2 rounded-full'>
                 <MessageCircle size={27} color='#fefefe' />
               </div>
               <div>
-                <h1 className='inter text-[#202020] text-[13px] sm:text-[15px] lg:text-[16px] font-semibold'>Message Driver</h1>
+                <h1 className='inter text-[#202020] text-sm sm:text-base font-semibold'>Driver</h1>
               </div>
             </div>
 
           </div>
-          <div className='flex items-center gap-4'>
-            <div className='lg:hidden'>
+          <div className='flex items-center gap-2.5 sm:gap-4'>
+            <div className='lg:hidden translate-y-1'>
               <TooltipProvider>
                 <Tooltip open={showTip}>
                   <TooltipTrigger><HelpCircle onClick={() => setTip(!showTip)} size={20} color='#202020' /></TooltipTrigger>
@@ -137,13 +139,13 @@ const RideDetail: React.FC<Details> = ({ ride, queries, params }) => {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <button className='bg-[#00b37e] transition-all px-6 sm:px-8 md:px-10 lg:px-12 duration-200 active:bg-[#00b35f] w-full py-2.5 exo2 font-semibold text-sm sm:text-[17px] shadow-md rounded-md text-[#fefefe] cursor-pointer hover:bg-[#00b37dda]'>Join ride</button>
+            <button className='bg-[#00b37e] transition-all px-9 sm:px-12 duration-200 active:bg-[#00b35f] w-full py-2.5 exo2 font-semibold text-sm sm:text-[17px] shadow-md rounded-md text-[#fefefe] cursor-pointer hover:bg-[#00b37dda]'>Join ride</button>
           </div>
         </div>
 
         {/* //ride detail for pc screens */}
         <div className='flex-1 hidden pb-[5rem] lg:block'>
-          {ride && driver && <Ride isFavourite={isFavourite} setFavourite={setFavourite} image={image} date={formattedDate} driver={driver} isBest={isBest} ride={ride} />}
+          {ride && driver && <Ride setIsCompleted={setIsCompleted} isCompleted={isCompleted} isFavourite={isFavourite} setFavourite={setFavourite} image={image} date={formattedDate} driver={driver} isBest={isBest} ride={ride} />}
         </div>
 
         {/* //side bar fot pc screens */}

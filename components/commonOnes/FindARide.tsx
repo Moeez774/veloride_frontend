@@ -34,7 +34,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className='exo2 cursor-pointer font-medium text-[#202020]'>Find a ride</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className='inter cursor-pointer bg-transparent font-semibold text-[#00563C]'>Find a ride</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>
@@ -46,7 +46,7 @@ const FindARide = () => {
                                     {features && <div className='flex flex-col'>
                                         {features["FindARide"].map((e: any, index: number) => {
                                             return (
-                                                <NavigationMenuLink className='cursor-pointer' key={index}>
+                                                <NavigationMenuLink href={e.link} className='cursor-pointer' key={index}>
                                                     <div className='flex flex-col gap-1'>
                                                         <h1 className='exo2 font-semibold'>{e.name}</h1>
                                                         <h1 className='text-xs inter'>{e.about}</h1>
@@ -67,7 +67,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className='exo2 cursor-pointer font-medium text-[#202020]'>Offer a ride</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className='inter bg-transparent cursor-pointer font-semibold text-[#00563C]'>Offer a ride</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>
@@ -100,7 +100,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className='exo2 cursor-pointer font-medium text-[#202020]'>My rides</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className='inter bg-transparent cursor-pointer font-semibold text-[#00563C]'>My rides</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>
@@ -133,7 +133,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className='exo2 cursor-pointer font-medium text-[#202020]'>Eco stats</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className='inter bg-transparent cursor-pointer font-semibold text-[#00563C]'>Eco stats</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>

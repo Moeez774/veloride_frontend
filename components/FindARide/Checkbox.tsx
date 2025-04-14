@@ -1,5 +1,4 @@
 import React, { Dispatch, SetStateAction } from 'react'
-
 interface Details {
     item: boolean,
     setter: Dispatch<SetStateAction<boolean>>,

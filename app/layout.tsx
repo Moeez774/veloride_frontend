@@ -25,7 +25,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <ContactsProvider>
-            <div className="fixed w-full left-0 z-40 px-3 sm:px-6 md:px-10 top-0">
+            <div className="fixed w-full left-0 z-40 top-0">
               <Header />
             </div>
 
@@ -33,9 +33,9 @@ export default function RootLayout({
               {children}
             </div>
 
-            <div className="bottom-0 z-30 sticky md:hidden">
+            {/* <div className="bottom-0 z-30 sticky md:hidden">
               <MobileNavigator />
-            </div>
+            </div> */}
           </ContactsProvider>
         </AuthProvider>
       </body>

@@ -2,7 +2,6 @@ import { Camera } from 'lucide-react'
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import Checkbox from './Checkbox'
 import { usePathname } from 'next/navigation'
-
 interface Details {
     photo: string,
     setPhoto: Dispatch<SetStateAction<string>>,
@@ -17,7 +16,6 @@ interface Details {
 const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumber, setPhoto, instruct, setInstruct }) => {
 
     const pathname = usePathname()
-
     const inputRef = useRef<HTMLInputElement>(null)
     const [isUploading, setUploading] = useState(false)
 
@@ -26,11 +24,11 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
         <div className='text-[#202020] w-[80vw] sm:w-[30rem] lg:w-auto flex flex-col gap-6 inter'>
 
             <div className='flex flex-col sm:flex-row items-center gap-4'>
-               { photo==="" && <div onClick={() => inputRef.current?.click()} className='h-32 cursor-pointer w-32 flex justify-center items-center bg-[#eaeaea] rounded-full shadow-md'>
+                {photo === "" && <div onClick={() => inputRef.current?.click()} className='h-32 cursor-pointer w-32 flex justify-center items-center bg-[#eaeaea] rounded-full shadow-md'>
                     <Camera size={30} color='#202020' />
-                </div> }
+                </div>}
 
-               { photo==='' && <div className='fixed opacity-0 left-0 top-0 w-0 -z-10'>
+                {photo === '' && <div className='fixed opacity-0 left-0 top-0 w-0 -z-10'>
                     <input ref={inputRef} onChange={async (e) => {
                         const file = e.target.files?.[0] as File;
                         if (!file) return;
@@ -42,7 +40,7 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
 
                         try {
                             const uploadImg = await fetch('http://localhost:4000/files/upload', {
-                                method: "POST", 
+                                method: "POST",
                                 body: data
                             })
 
@@ -58,16 +56,14 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
 
                         setUploading(false);
                     }} type="file" />
-                </div> }
+                </div>}
 
-                { photo!="" && <div>
+                {photo != "" && <div>
                     <img className="w-32 rounded-full" src={photo} alt="" />
-                </div> }
+                </div>}
 
                 <h1 className='flex items-end gap-1'>Profile picture <p className='text-[11px]'>(Optional)</p></h1>
-            </div> 
-
-
+            </div>
 
             {/* input about special instruction */}
             <div className='flex flex-col gap-1.5'>
@@ -79,15 +75,10 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
 
                 <h1 className='text-[14px] font-medium inter'>Verify via</h1>
 
-
                 <div className='flex items-center justify-between'>
-
                     <Checkbox text='Email' item={email} setter={setEmail} />
-
                     <Checkbox text='Phone number' item={number} setter={setNumber} />
-
                 </div>
-
 
             </div>
 

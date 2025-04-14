@@ -1,7 +1,6 @@
 import { Mail, Phone, Search, User2Icon } from 'lucide-react'
 import React from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 interface Details {
     text: string
 }
@@ -16,12 +15,10 @@ const Support: React.FC<Details> = ({ text }) => {
 
                     <div className='flex flex-col gap-1.5 w-full'>
                         <label htmlFor="" className='text-[13px]'>Your name</label>
-
                         <input type="text" className='bg-[#eaeaea] text-[15px] focus:outline focus:outline-[#d0d0d0] w-full sm:w-[25em] shadow-md rounded-lg px-3 py-[0.85rem]' placeholder='Jhon Doe' />
                     </div>
 
                     <div className='flex items-center gap-2'>
-
                         <Dialog>
                             <DialogTrigger>
                                 <div className='p-3 w-fit hover:bg-[#eeeeee] transition-all duration-200 cursor-pointer rounded-full bg-[#eaeaea] shadow-md'>
@@ -63,7 +60,6 @@ const Support: React.FC<Details> = ({ text }) => {
 
             <div className='py-4 md:p-4 flex flex-col gap-4'>
                 <h1 className='font-medium'>Emergancy help</h1>
-
                 <div className='flex justify-between md:justify-start md:flex-col text-sm gap-2.5'>
                     <h1 className='flex items-center gap-1 underline'><Mail size={17} color='#202020' /> veloride@support.com</h1>
                     <h1 className='flex items-center gap-1'><Phone size={17} color='#202020' /> +923148701650</h1>

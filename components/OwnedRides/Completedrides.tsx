@@ -1,11 +1,11 @@
 'use client'
-import { ChevronDoubleUpIcon, MapPinIcon, StarIcon, UserGroupIcon } from '@heroicons/react/16/solid'
-import { MessageCircle, Navigation, Phone } from 'lucide-react'
+import { MapPinIcon, StarIcon } from '@heroicons/react/16/solid'
+import { MessageCircle, Navigation, Phone, MoreVertical } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { FaComment, FaMoneyCheck } from 'react-icons/fa'
-import MobileCompletedRides from './MobileCompletedRides'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { FaComment, FaMoneyCheck, FaSpinner } from 'react-icons/fa'
 interface Details {
     user: any,
     getImage: (e: string) => string | undefined
@@ -35,14 +35,6 @@ const Completedrides: React.FC<Details> = ({ user, getImage }) => {
         userRides()
     }, [user])
 
-    //for converting date string into valid format
-    const getDate = (e: string) => {
-        const date = new Date(e);
-        const options = { year: "numeric", month: "long", day: "numeric" } as const;
-        const formattedDate = date.toLocaleDateString('en-US', options)
-        return formattedDate
-    }
-
     return (
         <>
 
@@ -52,7 +44,47 @@ const Completedrides: React.FC<Details> = ({ user, getImage }) => {
                 </div>}
 
                 <div className='lg:hidden flex flex-col gap-6'>
-                    <MobileCompletedRides setShowPax={setShowPax} getDate={getDate} getImage={getImage} myRides={myRides} />
+                    {myRides.length != 0 && myRides.map((e, index) => {
+                        return (
+                            <div key={index} className='py-6 pl-2 sm:p-6 flex flex-col gap-4'>
+
+                                {/* image and options */}
+                                <div className='flex justify-between items-center w-full'>
+                                    <img key={index} className='w-32' src={getImage(e.rideDetails.vehicle) || undefined} alt="" />
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger className='outline-none'>
+                                            <MoreVertical size={25} className='cursor-pointer' color='#202020' />
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className='-translate-x-10 sm:-translate-x-16 w-48 font-medium p-2 inter'>
+                                            <DropdownMenuItem onClick={() => setShowPax(true)}>
+                                                <FaComment size={20} color='#757575' /> Comments & Rating</DropdownMenuItem>
+                                            <DropdownMenuItem><StarIcon className='w-6 h-6' color='#757575' /> Rate passengers</DropdownMenuItem>
+                                            <DropdownMenuItem><FaSpinner size={15} color='#757575' /> Repeat ride</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+
+                                {/* // locations */}
+                                <div className='flex gap-3 md:gap-4 text-sm md:text-base flex-col mt-4'>
+                                    <h1 className='font-semibold flex items-start sm:items-center gap-1'><MapPinIcon className='w-6 h-6' color='#202020' />{e.rideDetails.pickupLocation.pickupName}</h1>
+                                    <h1 className='font-semibold flex items-start sm:items-center gap-2'><Navigation size={20} color='#202020' />{e.rideDetails.dropoffLocation.dropoffName}</h1>
+                                </div>
+
+                                {/* time */}
+                                <div className='flex flex-col gap-2 mt-1'>
+                                    <h1 className='text-sm font-normal flex items-center gap-1'>Distance: <p className='font-medium'>{Math.round(e.rideDetails.duration)} kilometers</p></h1>
+                                    <h1 className='text-sm font-normal flex items-center gap-1'>Duration: <p className='font-medium'>{e.rideDetails.duration} mins</p></h1>
+                                </div>
+
+                                <div className='w-full flex justify-center mt-6'>
+                                    <button className='py-3 text-[#fefefe] cursor-pointer font-medium text-[14px] md:text-[15px] px-4 rounded-lg bg-[#00b37e] flex items-center gap-2'><FaMoneyCheck size={20} color='#fefefe' /> View earnings</button>
+                                </div>
+
+                                <hr className='mt-4' style={{ borderColor: '#f0f0f0' }} />
+                            </div>
+                        )
+                    })}
                 </div>
 
                 <div className='hidden lg:flex flex-col gap-4'>

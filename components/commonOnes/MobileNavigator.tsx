@@ -14,7 +14,6 @@ const MobileNavigator = () => {
     const pathname = usePathname()
     const router = useRouter()
     const [openMenu, setMenu] = useState(false)
-
     const authContext = useAuth()
     const user = authContext?.user || null
     const setUser = authContext?.setUser

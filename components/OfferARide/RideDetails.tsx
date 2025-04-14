@@ -6,7 +6,6 @@ import MyTimePicker from '../FindARide/TimePicker'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Suggestions from '../main/Suggestions'
 import Vehicle from '../FindARide/Vehicle'
-
 interface Details {
     seats: number,
     setseats: Dispatch<SetStateAction<number>>,
@@ -20,8 +19,8 @@ interface Details {
     setPickup: Dispatch<SetStateAction<string | null>>,
     vehicle: string,
     setVehicle: Dispatch<SetStateAction<string>>,
-    setLocation: Dispatch<SetStateAction<{long: number, lat: number}>>,
-    setDropLocation: Dispatch<SetStateAction<{long: number, lat: number}>>
+    setLocation: Dispatch<SetStateAction<{ long: number, lat: number }>>,
+    setDropLocation: Dispatch<SetStateAction<{ long: number, lat: number }>>
 }
 
 const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, setTime, drop, setDrop, setPickup, pickup, vehicle, setVehicle, setLocation, setDropLocation }) => {
@@ -30,7 +29,6 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
     const [showDropoffTip, setShowDropoffTip] = useState(false)
     const [showSearch1, setShowSearch1] = useState(false)
     const [showSearch2, setShowSearch2] = useState(false)
-
     const inputRef = useRef<any>(null)
     const inputRef2 = useRef<any>(null)
 
@@ -72,7 +70,7 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
             {/* inputs about location */}
             <div className='flex flex-col gap-3'>
 
-                <div className='flex flex-col gap-1.5'>
+                <div className='relative flex flex-col gap-1.5'>
                     <label htmlFor="" className='inter font-medium text-[12px]'>Pickup Location</label>
 
                     <div className='flex items-center bg-[#EAEAEA] justify-between w-[80vw] sm:w-[30rem] lg:w-[22rem] rounded-md border-solid px-3 gap-1 shadow-md'>
@@ -89,10 +87,9 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
                             </TooltipProvider>
                         </div>
                     </div>
-
                 </div>
 
-                <div className='-mt-2'>
+                <div className='relative -mt-2'>
                     <Suggestions setLocation={setLocation} inputRef={inputRef} showSearch={showSearch1} setShowSearch={setShowSearch1} suggestions={suggestions1} loader={loader} setValue={setPickup} />
                 </div>
 
@@ -115,7 +112,7 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
                 </div>
             </div>
 
-            <div className='-mt-4'>
+            <div className='relative -mt-4'>
                 {/* // for showing suggestions */}
                 <Suggestions setLocation={setDropLocation} inputRef={inputRef2} showSearch={showSearch2} setShowSearch={setShowSearch2} suggestions={suggestions2} loader={loader} setValue={setDrop} />
             </div>
@@ -126,36 +123,30 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
                 <DatePicker date={date} setDate={setDate} />
 
                 <div className='w-full flex items-center justify-between'>
-
                     <Vehicle vehicle={vehicle} setVehicle={setVehicle} />
-
-
                     <div>
                         <MyTimePicker value={time} setValue={setTime} />
                     </div>
-
                 </div>
 
                 <div className='w-[6.5rem] flex items-center gap-2 sm:gap-4 justify-between'>
-                        <h1 className='text-[14px] sm:text-sm font-normal' style={{ userSelect: 'none' }}>Seats</h1>
+                    <h1 className='text-[14px] sm:text-sm font-normal' style={{ userSelect: 'none' }}>Seats</h1>
 
-                        <div className='flex gap-2 items-center'>
-                            <h1 className='text-[14px] sm:text-sm w-4'>{seats < 10 ? `0${seats}` : seats}</h1>
+                    <div className='flex gap-2 items-center'>
+                        <h1 className='text-[14px] sm:text-sm w-4'>{seats < 10 ? `0${seats}` : seats}</h1>
 
-                            <div className='flex flex-col gap-1'>
+                        <div className='flex flex-col gap-1'>
 
-                                <div onClick={() => {
-                                    setseats(seats + 1)
-                                }} className='p-1 cursor-pointer bg-[#eaeaea] rounded-full shadow-md'><ChevronUp size={15} strokeWidth={3} /></div>
+                            <div onClick={() => {
+                                setseats(seats + 1)
+                            }} className='p-1 cursor-pointer bg-[#eaeaea] rounded-full shadow-md'><ChevronUp size={15} strokeWidth={3} /></div>
 
-                                <div onClick={() => {
-                                    if (seats > 1) setseats(seats - 1)
-                                }} className='p-1 cursor-pointer bg-[#eaeaea] rounded-full shadow-md'><ChevronDown size={15} strokeWidth={3} /></div>
-                            </div>
+                            <div onClick={() => {
+                                if (seats > 1) setseats(seats - 1)
+                            }} className='p-1 cursor-pointer bg-[#eaeaea] rounded-full shadow-md'><ChevronDown size={15} strokeWidth={3} /></div>
                         </div>
-
                     </div>
-
+                </div>
             </div>
 
         </div>

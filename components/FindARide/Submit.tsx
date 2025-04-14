@@ -16,7 +16,7 @@ interface Details {
 const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, step, searchRide }) => {
     return (
         <div className='w-full flex justify-center sm:px-10 items-center'>
-            <ScrollArea style={{ opacity: currStep === 5 ? '1' : '0', transform: currStep === 5 ? 'scale(1)' : 'scale(0.5)', transition: 'all 0.2s ease-in-out' }} className="h-[95vh] py-10 bg-[#fefefe] flex flex-col gap-6 w-[95vw] sm:w-full sm:max-w-xl lg:max-w-5xl rounded-md border">
+            <ScrollArea style={{ opacity: currStep === 5 ? '1' : '0', transform: currStep === 5 ? 'scale(1)' : 'scale(0.5)', transition: 'all 0.2s ease-in-out' }} className="h-[100vh] sm:h-[95vh] py-10 bg-[#fefefe] flex flex-col gap-6 w-full sm:max-w-xl lg:max-w-5xl sm:rounded-md border">
 
                 <div className='top-0 z-[100] sticky bg-white pb-4'>
                     <h1 className='text-3xl font-semibold text-[#202020] text-center mx-6 exo2'>Review & Find</h1>
@@ -36,10 +36,9 @@ const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, s
                         <div>
                             <h1 className='exo2 font-semibold'>Personal Preferences</h1>
                         </div>
-                        <Preferences setGenderType={formData.setGenderType} setRide={formData.setRide} ride={formData.ride} gender={formData.gender} vehicle={formData.vehicle} setVehicle={formData.setVehicle} setGender={formData.setGender} male={formData.male} female={formData.female} showGender={formData.showGender} setLuggage={formData.setLuggage} luggage={formData.luggage} setShowGender={formData.setShowGender} needs={formData.needs} setNeeds={formData.setNeeds} petFriendly={formData.petFriendly} setPetFriendly={formData.setPetFriendly} setSmoking={formData.setSmoking} smoking={formData.smoking} />
+                        <Preferences setGenderType={formData.setGenderType} setRide={formData.setRide} ride={formData.ride} gender={formData.gender} vehicle={formData.vehicle} setVehicle={formData.setVehicle} setGender={formData.setGender} male={formData.male} female={formData.female} showGender={formData.showGender} setLuggage={formData.setLuggage} luggage={formData.luggage} setShowGender={formData.setShowGender} petFriendly={formData.petFriendly} setPetFriendly={formData.setPetFriendly} setSmoking={formData.setSmoking} smoking={formData.smoking} />
                     </div>
                 </div>
-
 
                 {/* // other two steps */}
                 <div className='flex w-full gap-6 flex-col items-center lg:items-start lg:flex-row justify-around pb-10'>
@@ -48,7 +47,7 @@ const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, s
                         <div>
                             <h1 className='exo2 font-semibold'>Budget & Frequency</h1>
                         </div>
-                        <Budget currStep={formData.currStep} setPrice={formData.setPrice} setRating={formData.setRating} dropLocation={formData.dropLocation} vehicle={formData.vehicle} location={formData.location} price={formData.price} rating={formData.rating} />
+                        <Budget seats={formData.seats} setSeats={formData.setSeats} currStep={formData.currStep} setPrice={formData.setPrice} setRating={formData.setRating} dropLocation={formData.dropLocation} vehicle={formData.vehicle} location={formData.location} price={formData.price} rating={formData.rating} />
                     </div>
 
                     <div className='flex pt-8 lg:pt-0 flex-col gap-5'>
@@ -69,7 +68,6 @@ const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, s
                     <button className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={async () => await searchRide()} >Find</button>
 
                 </div>
-
             </ScrollArea>
         </div>
     )

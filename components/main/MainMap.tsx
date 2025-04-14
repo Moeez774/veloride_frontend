@@ -5,11 +5,9 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useAuth } from '@/context/AuthProvider'
 import socket from '@/utils/socket'
 import { X } from 'lucide-react'
-
 interface Details {
     setShowMap: Dispatch<SetStateAction<boolean>>
 }
-
 mapboxgl.accessToken = 'pk.eyJ1IjoibW9lZXoxMjMiLCJhIjoiY204Z3p3cHNrMDUxbjJrcjhvbGYxanU2MyJ9.ErFjedlF8xF7QZQmyTnIiw'
 
 const MainMap: React.FC<Details> = ({ setShowMap }) => {
@@ -28,7 +26,7 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
             style: 'mapbox://styles/mapbox/streets-v12',
             center: userLocation,
             zoom: 14
-        });
+        })
 
         mapInstance.addControl(new mapboxgl.NavigationControl());
 
@@ -82,7 +80,7 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
         })
     }, [drivers, map])
 
-    // for checking socket is connected or not becuase without it , it will run too early and will not execute 
+    // for checking socket is connected or not becuase without it , it will run too early and will not execute
     useEffect(() => {
         if (socket.connected) {
             socket.emit('request', "User wants drivers location.")
@@ -92,7 +90,6 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
             })
         }
     }, [])
-
 
     return (
         <>

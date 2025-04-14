@@ -1,116 +1,64 @@
 'use client'
-import { Car, Earth, Users } from 'lucide-react'
+import { Car, Navigation, ArrowUp } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Radios from '../Radios'
+import { MapPinIcon } from '@heroicons/react/16/solid'
+import { useInView } from 'react-intersection-observer';
 
 const LiveTracker = () => {
 
-    const [isStart, setStart] = useState(false)
-    const [showButton, setShowButton] = useState(false)
-
-    useEffect(() => {
-        setTimeout(() => {
-            setStart(true)
-
-            setTimeout(() => setShowButton(true), 300)
-        }, 800)
-    }, [])
+    const [isDriver, setDriver] = useState(false)
+    const [isRider, setRider] = useState(false)
+    const [isType, setType] = useState('')
+    const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+    const types = [setDriver, setRider]
 
     return (
 
         <>
 
-            <div className='w-full flex flex-col gap-28 min-h-screen' style={{ userSelect: 'none' }}>
+            <div className='w-full flex flex-col gap-28 max-w-7xl mx-auto' style={{ userSelect: 'none' }}>
 
                 {/* hero sec */}
-                <div className='hopIn bg-[#00B37E] px-8 sm:px-14 md:px-20 w-full justify-between h-[95vh] flex pt-36 items-center'>
+                <div ref={ref} className='px-8 sm:px-14 md:pl-10 xl:pl-20 w-full gap-20 lg:gap-0 justify-between flex-col-reverse lg:flex-row pt-40 lg:pt-36 pb-28 flex items-center'>
 
                     {/* // content */}
-                    <div className={`content flex flex-col transition-all duration-300 gap-6 sm:gap-8`}>
+                    <div className={`max-w-xl px-2 w-full lg:w-auto flex flex-col transition-all duration-300 gap-6 sm:gap-8`}>
 
-                        <div className='hopText flex flex-col gap-2.5'>
-                            <h1 className={`exo2 firstHead text-4xl sm:text-5xl sm:w-96 ${isStart ? 'translate-y-0 opacity-[1]' : 'opacity-0 translate-y-5'} transition-all duration-300 leading-[45px] sm:leading-[57px] text-white font-bold`} style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.5)' }}>Hop In, Save Big, Go Green!</h1>
+                        <div className='w-full lg:w-auto flex flex-col gap-6'>
+                            <h1 className={`inter ${inView? 'translate-y-0 opacity-[1]': 'translate-y-12 opacity-0'} text-[50px] md:text-[60px] lg:text-[56px] xl:text-[58px] delay-600 sm:delay-1400 lg:delay-0 w-full flex flex-row flex-wrap lg:flex-col gap-3 transition-all duration-1000 ease-out leading-[45px] md:leading-[57px] text-[#00563c] font-medium`}>Hop In, <p className='font-semibold'>Save Big,</p> Go Green!</h1>
 
-                            <h1 className={`poppins secondHead text-base sm:text-lg sm:w-96 leading-[25px] font-normal text-white ${isStart ? 'translate-y-0 opacity-[1]' : 'opacity-0 translate-y-5'} transition-all delay-150 duration-300`} style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.5)' }}>Revolutionizing Carpooling with AI-Powered Convenience.</h1>
+                            <h1 className={`inter ${inView? 'translate-y-0 opacity-[1]': 'translate-y-12 opacity-0'} text-base sm:text-lg w-full lg:w-96 leading-[25px] font-normal text-[#00563c] transition-all ease-out delay-900 sm:delay-1700 lg:delay-300 duration-1000`}>Revolutionizing Carpooling with AI-Powered Convenience.</h1>
                         </div>
 
                         {/* CTA */}
-                        <div className='btn sm:w-96'>
-                            <Link prefetch={true} href='/auth/sign-in'><button className={`exo2 transition-all active:translate-y-0.5 active:duration-200 text-[#00B37E] text-lg rounded-md bg-white shadow-lg font-bold hover:bg-[#f3f0f0] px-10 py-3 ${showButton ? 'translate-y-0 opacity-[1] cursor-pointer' : 'opacity-0 translate-y-5 cursor-default'} transition-all duration-300`} >Hop in</button></Link>
+                        <div className={`w-full lg:w-auto ${inView? 'translate-y-0 opacity-[1]': 'translate-y-12 opacity-0'} flex transition-all sm:flex-row flex-col ease-out duration-1000 delay-1200 sm:delay-2000 lg:delay-600 items-center gap-6 sm:gap-3 px-3 py-4 sm:p-1 rounded-xl border border-[#b1b1b1]`}>
+                            <div className='flex-1 flex items-center gap-6 w-full px-2'>
+
+                                <div className='flex items-center gap-2.5'>
+                                    <Radios item={isRider} setter={setRider} text="I'm a rider" arr={types} setItemName={setType} />
+                                    <Radios item={isDriver} setter={setDriver} text="I'm a driver" arr={types} setItemName={setType} />
+                                </div>
+                            </div>
+                            <Link prefetch={true} className='w-full sm:w-auto' href='/auth/sign-up'><button className={`inter flex w-full items-center gap-1.5 active:duration-200 justify-center cursor-pointer text-[#fefefe] rounded-xl bg-[#00563c] font-medium hover:bg-[#00563ccc] text-sm px-5 py-[0.90rem] transition-all ease-out`} >Get Started <ArrowUp className='rotate-45' size={20} color='#fefefe' /> </button></Link>
                         </div>
 
                     </div>
 
                     {/* //car */}
-                    <div>
-                        <img className='w-96 -rotate-y-180' style={{ transform: 'rotateY(-180deg)', animation: 'car 1.5s ease-in-out' }} src="/Images/Untitled-design-unscreen.gif" alt="" />
-                    </div>
-
-                </div>
-
-                <div className='flex flex-col gap-3 mx-6 mb-24 text-[#00b37e]'>
-
-                    <h1 className='exo2 text-center text-3xl sm:text-4xl md:text-5xl font-bold'>Welcome to VeloRide!</h1>
-
-                    <h1 className='poppins text-center text-lg font-normal'>Smarter Carpooling for Easy & Affordable Rides</h1>
-
-                </div>
-
-            </div>
-
-            <div className='grid max-w-md sm:max-w-5xl gap-6 mx-auto grid-cols-1 px-6 sm:px-10 lg:grid-cols-3' style={{ userSelect: 'none' }}>
-
-
-                <div className='h-48 sm:h-40 lg:h-60 flex flex-col justify-center sm:flex-row lg:flex-col sm:justify-between lg:justify-normal gap-4 sm:gap-6 items-center px-10 lg:p-6 rounded-2xl shadow-lg w-full bg-[#fefefe]'>
-
-                    <div className='flex flex-col gap-2 sm:gap-3 items-center sm:items-start lg:items-center'>
-                        <div>
-                            <Earth color='#00b37e' size={50} />
+                    <div className='lg:translate-x-6'>
+                        <div className='flex'>
+                            <div className='flex items-center'>
+                                <div className={`h-14 w-14 hidden mr-2 sm:flex items-center justify-center bg-[#00563c] rounded-full ${inView? 'translate-y-0 opacity-[1]': 'translate-y-8 opacity-0'} transition-all ease-out duration-800 delay-500 lg:delay-1600`}><Car size={35} className='-rotate-30' style={{ strokeWidth: '1.5' }} color='#fefefe' /></div>
+                                <img className={`w-[400px] md:w-[500px] transition-all ease-out duration-1000 delay-0 lg:delay-1100 lg:w-[400px] xl:w-[450px] ${inView? 'translate-y-0 opacity-[1]': 'translate-y-12 opacity-0'}`} src='/Images/Order-ride-bro.svg' />
+                            </div>
+                            <div className={`h-14 ${inView? 'translate-y-12 opacity-[1]': 'translate-y-20 opacity-0'} transition-all ease-out duration-800 delay-700 lg:delay-1800 -translate-x-7 w-14 hidden sm:flex items-center justify-center bg-transparent border border-[#b1b1b1] rounded-full`}><MapPinIcon className='w-8 h-8 sm:w-9 sm:h-9 -rotate-30' color='#00563c' /> </div>
                         </div>
 
-                        <div>
-                            <h1 className='exo2 font-semibold sm:text-lg text-[#00b37e]'>Carbon Emissions Reduced</h1>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h1 className='inter font-bold text-4xl md:text-5xl text-[#00b37e]'>15,325KG</h1>
-                    </div>
-
-                </div>
-
-                <div className='h-48 sm:h-40 lg:h-60 flex flex-col justify-center sm:flex-row lg:flex-col sm:justify-between lg:justify-normal gap-4 sm:gap-6 items-center px-10 lg:p-6 rounded-2xl w-full shadow-lg bg-[#fefefe]'>
-                    <div className='flex flex-col gap-2 sm:gap-3 items-center sm:items-start lg:items-center'>
-                        <div>
-                            <Car color='#00b37e' size={50} />
-                        </div>
-
-                        <div>
-                            <h1 className='exo2 font-semibold sm:text-lg text-[#00b37e]'>Successfull Rides</h1>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h1 className='inter font-bold text-4xl md:text-5xl text-[#00b37e]'>7,450</h1>
+                        <div className={`h-14 ml-auto mr-20 pt-1 w-14 hidden sm:flex items-center justify-center bg-[#00563c] rounded-full ${inView? 'translate-y-0 opacity-[1]': 'translate-y-8 opacity-0'} transition-all ease-out duration-800 delay-900 lg:delay-2000`}><Navigation size={27} color='#fefefe' /></div>
                     </div>
                 </div>
-
-                <div className='h-48 sm:h-40 lg:h-60 flex flex-col justify-center sm:flex-row shadow-lg lg:flex-col sm:justify-between lg:justify-normal gap-4 sm:gap-6 items-center px-10 lg:p-6 rounded-2xl w-full bg-[#fefefe]'>
-                    <div className='flex flex-col gap-2 sm:gap-3 items-center sm:items-start lg:items-center'>
-                        <div>
-                            <Users color='#00b37e' size={50} />
-                        </div>
-
-                        <div>
-                            <h1 className='exo2 font-semibold sm:text-lg text-[#00b37e]'>Happy Riders Connected</h1>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h1 className='inter font-bold text-4xl md:text-5xl text-[#00b37e]'>5,200</h1>
-                    </div>
-                </div>
-
 
             </div>
         </>

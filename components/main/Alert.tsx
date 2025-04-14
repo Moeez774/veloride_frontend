@@ -1,15 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 interface Details {
     item: boolean,
     setter: Dispatch<SetStateAction<boolean>>,
@@ -38,7 +28,6 @@ const Alert: React.FC<Details> = ({ item, setter, statements, func1, func2 }) =>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-
         </div>
     )
 }

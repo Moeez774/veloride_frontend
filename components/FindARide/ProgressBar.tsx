@@ -1,6 +1,5 @@
 import { Check, ClipboardCheck, DollarSign, MapPin, Pencil, Sliders } from 'lucide-react'
 import React from 'react'
-
 interface Details {
     step: number,
     currStep: number,
@@ -8,7 +7,6 @@ interface Details {
 }
 
 const ProgressBar: React.FC<Details> = ({ step, currStep, pathname }) => {
-
 
     const boxes = [
         { n: 1, icon: <MapPin className={`${currStep >= 1 ? 'text-[#00b37e]' : 'text-[#b7b7b7]/70'} transition-all duration-200 delay-200`} fill={currStep >= 1 ? '#00b37e' : 'transparent'} size={25} />, name: "Ride Details" },
@@ -19,7 +17,7 @@ const ProgressBar: React.FC<Details> = ({ step, currStep, pathname }) => {
 
         { n: 4, icon: <Pencil className={`${currStep >= 4 ? 'text-[#00b37e]' : 'text-[#b7b7b7]/70'} transition-all duration-200 delay-200`} size={25} />, name: "Additional Information" },
 
-        { n: 5, icon: <ClipboardCheck className={`${currStep >= 5 ? 'text-[#00b37e]' : 'text-[#b7b7b7]/70'} transition-all duration-200 delay-200`} size={25} />, name: pathname.startsWith('/find-ride')? 'Review & Find': 'Review & Offer' }
+        { n: 5, icon: <ClipboardCheck className={`${currStep >= 5 ? 'text-[#00b37e]' : 'text-[#b7b7b7]/70'} transition-all duration-200 delay-200`} size={25} />, name: pathname.startsWith('/find-ride') ? 'Review & Find' : 'Review & Offer' }
     ]
 
     return (
@@ -88,10 +86,8 @@ const ProgressBar: React.FC<Details> = ({ step, currStep, pathname }) => {
 
                     <div className='flex flex-col'>
                         <h1 className='text-xs inter text-[#b7b7b7]/70'>Step 5</h1>
-                        <h1 className={`transition-all delay-200 duration-200 exo2 font-semibold text-lg ${currStep >= 5 ? 'text-[#202020]' : 'text-[#b7b7b7]/70'}`}>{pathname.startsWith("/find-ride")? 'Review & Find': 'Review & Offer'}</h1>
+                        <h1 className={`transition-all delay-200 duration-200 exo2 font-semibold text-lg ${currStep >= 5 ? 'text-[#202020]' : 'text-[#b7b7b7]/70'}`}>{pathname.startsWith("/find-ride") ? 'Review & Find' : 'Review & Offer'}</h1>
                     </div>
-
-
                 </div>
 
             </div>
@@ -124,7 +120,6 @@ const ProgressBar: React.FC<Details> = ({ step, currStep, pathname }) => {
 
                 {/* // progress indicator */}
                 <div className={`${currStep === 1 ? 'w-[8vw] sm:w-[4rem] lg:h-[3rem]' : currStep === 2 ? 'w-[26vw] sm:w-[10rem] md:w-[12rem] lg:h-[8rem]' : currStep === 3 ? 'w-[44vw] sm:w-[18rem] md:w-[20rem] lg:h-[13rem]' : currStep === 4 ? 'w-[63vw] sm:w-[24rem] md:w-[28rem] lg:h-[18rem]' : currStep === 5 ? 'w-[82vw] sm:w-[32rem] md:w-[36rem] lg:h-[23rem]' : currStep === 6 ? 'w-[91vw] sm:w-[35rem] md:w-[40rem] lg:h-[25rem]' : 'w-0 lg:h-0'} h-1 lg:w-1 transition-all duration-300 bg-[#00b37e]`}></div>
-
             </div>
 
         </div>

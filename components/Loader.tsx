@@ -10,7 +10,7 @@ interface Details {
 
 const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMessage }) => {
     return (
-        <div className='fixed left-0 flex justify-center items-center top-0 z-[100] bg-[#0000001e] w-screen h-screen'>
+        <div className='fixed left-0 flex justify-center items-center top-0 z-[500] bg-[#0000001e] w-screen h-screen'>
             {message === '' && <div className="loader"></div>}
             <div className="flex flex-col gap-2 w-80 sm:w-96 relative text-[10px] sm:text-xs z-[100]">
                 <div style={{ zIndex: showMessage ? '50' : '-50', transition: 'all 0.2s ease-in-out', transform: showMessage ? 'scale(1)' : 'scale(0.9)', opacity: showMessage ? '1' : '0' }}

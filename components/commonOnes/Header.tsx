@@ -1,5 +1,5 @@
 'use client'
-import { ArrowLeft, Search, WindIcon, X } from 'lucide-react'
+import { ArrowLeft, Search, X } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import SideBar from './SideBar'
@@ -8,11 +8,11 @@ import { Bars3BottomLeftIcon, MapPinIcon } from '@heroicons/react/16/solid'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import './Commons.css'
 import UserProfile from './UserProfile'
-import SearchInput from './SearchInput'
 import FindARide from './FindARide'
 import Link from 'next/link'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu"
 import MainMap from '../main/MainMap'
+import { useInView } from 'react-intersection-observer';
 
 const Header = () => {
 
@@ -23,10 +23,10 @@ const Header = () => {
     const setUser = authContext?.setUser || undefined
 
     const [scroll, setScroll] = useState(false)
+    const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
     const [showHeader, setShowHeader] = useState(true)
     const [showSearchBar, setShowSearchBar] = useState(false)
     const [mobileSearchBar, setMobileSearchBar] = useState(false)
-
     const [val, setVal] = useState('')
     const [navigators, setNavigators] = useState<any[]>([])
     const [showMap, setShowMap] = useState(false)
@@ -47,16 +47,23 @@ const Header = () => {
 
     // Checking pathname in useEffect to avoid SSR mismatch
     useEffect(() => {
-        if (pathname.startsWith('/auth') || pathname.startsWith('/reset-password') || pathname === '/find-ride' || pathname === '/offer-ride' || pathname.startsWith('/chats') || pathname.startsWith('/matched-rides')) {
+        const hideHeaderPaths = [
+            '/auth/sign-in', '/auth/sign-up', '/reset-password', '/find-ride', '/offer-ride', '/chats', '/matched-rides']
+
+        const isSmallScreen = window.matchMedia("(max-width: 1023px)").matches;
+        const isMobileScreen = window.matchMedia("(max-width: 767px)").matches;
+
+        if (
+            hideHeaderPaths.some(path => pathname === path) ||
+            (isSmallScreen && pathname.startsWith('/ride-detail')) ||
+            (isMobileScreen && pathname.startsWith('/find-ride/saved-routes'))
+        ) {
             setShowHeader(false)
-        }
-        else if ((window.matchMedia("(max-width: 1023px)").matches) && (pathname.startsWith('/ride-detail'))) {
-            setShowHeader(false)
-        }
-        else {
+        } else {
             setShowHeader(true)
         }
     }, [pathname])
+
 
     // for logging out user
     const logOut = async () => {
@@ -83,10 +90,8 @@ const Header = () => {
         const handleScroll = () => {
             setScroll(window.scrollY > 0);
         }
-
         window.addEventListener("scroll", handleScroll)
-
-        handleScroll();
+        handleScroll()
 
         return () => {
             window.removeEventListener("scroll", handleScroll)
@@ -95,7 +100,7 @@ const Header = () => {
 
     useEffect(() => {
         setScroll(window.scrollY > 0);
-    }, [pathname]);
+    }, [pathname])
 
     if (!showHeader) return null
 
@@ -103,26 +108,52 @@ const Header = () => {
 
         <>
 
-            <div className={`bg-white transition-all duration-200 ${scroll ? 'h-[3rem] md:h-[3.5rem] mt-0' : 'h-[4.5rem] md:h-[5rem] lg:h-[5.5rem] mt-2'} flex max-w-7xl mx-auto items-center px-8 sm:px-10 md:px-12 ${pathname === '/hop-in' ? 'shadow-md' : 'shadow-none'} py-3 rounded-md`}>
+        <div className={`absolute bg-[#fefefe] w-full z-10 ${scroll? 'h-[6.5rem] lg:h-[6rem]': 'h-0'} transition-all duration-400`}></div>
 
-                <SearchInput setMobileSearchBar={setMobileSearchBar} mobileSearchBar={mobileSearchBar} val={val} setVal={setVal} setShowSearchBar={setShowSearchBar} showSearchBar={showSearchBar} scroll={scroll} />
+            <div ref={ref} className={`transition-all relative z-20 ${inView? 'translate-y-0 opacity-[1]': 'opacity-0 translate-y-3'} duration-800 rounded-b-xl h-[6.5rem] md:h-[6.5rem] lg:h-[6rem] flex max-w-7xl mx-auto items-center px-8 sm:px-10 md:px-12 py-5`}>
 
-                <div className='flex justify-between w-full items-center'>
+                {/* // searchbar for screens below 950px */}
+                <div>
+                    <Sheet open={mobileSearchBar} onOpenChange={() => {
+                        setMobileSearchBar(false)
+                    }}>
+                        <SheetTrigger className='flex cursor-pointer items-center'></SheetTrigger>
+                        <SheetContent side='top' className='w-full py-10 h-screen'>
+                            <SheetHeader>
+                                <SheetTitle></SheetTitle>
+                                <div className='flex bg-[#f0f0f0] rounded-full pl-3 justify-between items-center'>
+                                    <div className='flex items-center w-full'>
 
-                    <div className='flex items-center gap-6'>
+                                        <ArrowLeft size={20} onClick={() => setVal('')} color={val.length > 0 ? '#202020' : 'gray'} className='cursor-pointer transition-all duration-200' />
+
+                                        <input value={val} onChange={(e) => setVal(e.target.value)} type="text" className={`inter text-[#202020] bg-transparent text-sm sm:text-base w-full outline-none py-2 px-2 transition-all duration-200`} placeholder='Best rides for Lahore...' />
+                                    </div>
+
+                                    <div className={` ${'p-3'} cursor-pointer rounded-full transition-all duration-200 hover:bg-[#d6d6d6]`}>
+                                        <Search size={18} color='#202020' />
+                                    </div>
+                                </div>
+                            </SheetHeader>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+
+                <div className='relative z-20 flex justify-between w-full items-center'>
+
+                    <div className='flex items-center gap-10'>
                         {/* logo */}
                         <div className='flex items-center'>
-                            <Link href={'/'} ><img className={`transition-all cursor-pointer duration-200 ${scroll ? 'w-8 md:w-10' : 'w-10 md:w-12'}`} src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" /></Link>
+                            <Link href={'/'} ><img className={`transition-all cursor-pointer duration-200 w-10 md:w-12`} src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" /></Link>
                         </div>
 
                         {/* navigators */}
 
-                        <div className={`searchBar transition-all flex duration-200 items-center gap-1 ${showSearchBar ? 'opacity-0 z-0' : 'opacity-[1] z-20'}`}>
+                        <div className={`hidden transition-all lg:flex duration-200 items-center gap-1 ${showSearchBar ? 'opacity-0 z-0' : 'opacity-[1] z-20'}`}>
                             <div className='px-6 py-[7px] rounded-md hover:bg-[#eeeeee] cursor-pointer'>
                                 <NavigationMenu>
                                     <NavigationMenuList>
                                         <NavigationMenuItem>
-                                            <h1 className='exo2 text-sm'>Home</h1>
+                                            <h1 className='inter text-[#00563C] font-semibold text-sm'>Home</h1>
                                         </NavigationMenuItem>
                                     </NavigationMenuList>
                                 </NavigationMenu>
@@ -131,7 +162,12 @@ const Header = () => {
                         </div>
                     </div>
 
-                    <div className='flex items-center gap-4'>
+                   { !user && <div className='inter flex items-center gap-3'>
+                        <Link prefetch={true} href={'/auth/sign-in'}><button className='py-2.5 font-semibold rounded-xl cursor-pointer hover:bg-[#f0f0f0] transition-all duration-200 text-[#00563c] px-6 sm:px-8 text-[14px] bg-transparent border border-[#b1b1b1]'>Login</button></Link>
+                        <Link href={'/auth/sign-up'}><button className='py-2.5 font-medium hover:bg-[#00563ccc] transition-all duration-200 rounded-xl cursor-pointer text-[#fefefe] px-6 sm:px-8 text-[14px] bg-[#00563c]'>Signup</button></Link>
+                    </div> }
+
+                  { user &&  <div className='flex items-center gap-4'>
                         <div className='flex items-center relative z-30 gap-6'>
                             <Search size={scroll ? 20 : 23} onClick={() => {
 
@@ -142,9 +178,9 @@ const Header = () => {
                             <X size={scroll ? 20 : 23} onClick={() => setShowSearchBar(false)} className='transition-all duration-200 cursor-pointer' style={{ display: showSearchBar ? 'block' : 'none' }} color='#202020' />
 
                             {/* // user's profile and logout access */}
-                            <UserProfile logOut={logOut} scroll={scroll} user={user} />
+                           <UserProfile logOut={logOut} scroll={scroll} user={user} />
 
-                            <div className='mainMap translate-y-0.5'>
+                           <div className='mainMap translate-y-0.5'>
                                 <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`${scroll ? 'w-6 h-7' : 'w-7 h-8'} transition-all duration-200`} color='#202020' /></button>
                             </div>
                             {showMap && <div className='relative z-[200]'>
@@ -171,7 +207,7 @@ const Header = () => {
                                 </Sheet>
                             </div>
                         </div>
-                    </div>
+                    </div> }
                 </div>
             </div>
         </>
