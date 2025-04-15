@@ -38,21 +38,19 @@ function generateHSLColor() {
 }
 
 // for sign up
-export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, email: string, fullname: string, pass: string, confirmPass: string, number: string, city: string, agree: boolean, setShowMessage: Dispatch<SetStateAction<boolean>>, router: any, genderType: string) {
+export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, router: any) {
 
     //generating random color for profile backgorund
     const color = generateHSLColor()
-    setLoader(true)
-    setMessage('')
     const userId = `${email}_${new Date().getTime()}`
-
+    setLoader(true)
     try {
         let a = await fetch('http://localhost:4000/users/sign-up', {
             method: "POST", headers: {
                 "Content-Type": "application/json"
             },
             credentials: 'include',
-            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, confirmPass: confirmPass, number: number, city: city, remeber: false, photo: color, isAgree: agree, isProvider: false, gender: genderType })
+            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: number, city: city, remeber: false, photo: color, isProvider: false })
         })
 
         let response = await a.json()
@@ -60,8 +58,8 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, s
             router.push('/authorization')
         }
         else {
-            setShowMessage(true)
-            setMessage(response.message)
+            alert(response.message)
+            setLoader(false)
         }
 
     } catch (err) {

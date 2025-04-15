@@ -5,12 +5,13 @@ import { useAuth } from "./AuthProvider";
 import socket from "@/utils/socket";
 import { usePathname } from "next/navigation";
 
-const ContactsContext = createContext<{ contacts: any[], matchedRides: any, setMatchedRides: Dispatch<SetStateAction<any>>, fetchContacts: () => void } | null>(null);
+const ContactsContext = createContext<{ contacts: any[], matchedRides: any, setMatchedRides: Dispatch<SetStateAction<any>>, fetchContacts: () => void, toggleTheme: boolean, setToggleTheme: Dispatch<SetStateAction<boolean>> } | null>(null);
 
 
 export const ContactsProvider = ({ children }: { children: ReactNode }) => {
   const [contacts, setContacts] = useState<any[]>([])
   const [matchedRides, setMatchedRides] = useState<any>()
+  const [toggleTheme, setToggleTheme] = useState(false)
   const authContext = useAuth()
   const user = authContext?.user || null
   const pathname = usePathname()
@@ -68,8 +69,25 @@ export const ContactsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user])
 
+  useEffect(() => {
+    const themeOn = localStorage.getItem("theme")
+    setToggleTheme(themeOn && themeOn==='true'? true: false)
+  }, [])
+
+  useEffect(() => {
+    if(toggleTheme) {
+      localStorage.setItem("theme", 'true')
+      document.body.style.backgroundColor = 'black'
+    }
+    else if(!toggleTheme) {
+      localStorage.setItem("theme", 'false')
+      document.body.style.backgroundColor = 'white'
+    }
+
+  }, [toggleTheme])
+
   return (
-    <ContactsContext.Provider value={{ contacts, matchedRides, setMatchedRides, fetchContacts }}>
+    <ContactsContext.Provider value={{ contacts, matchedRides, setMatchedRides, fetchContacts, toggleTheme, setToggleTheme }}>
       {children}
     </ContactsContext.Provider>
   );

@@ -10,6 +10,7 @@ import './Commons.css'
 import UserProfile from './UserProfile'
 import FindARide from './FindARide'
 import Link from 'next/link'
+import { getContacts } from '@/context/ContactsProvider'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu"
 import MainMap from '../main/MainMap'
 import { useInView } from 'react-intersection-observer';
@@ -21,6 +22,8 @@ const Header = () => {
     const authContext = useAuth()
     const user = authContext?.user || null
     const setUser = authContext?.setUser || undefined
+    const context = getContacts()
+    const toggleTheme = context?.toggleTheme
 
     const [scroll, setScroll] = useState(false)
     const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -108,9 +111,9 @@ const Header = () => {
 
         <>
 
-        <div className={`absolute bg-[#fefefe] w-full z-10 ${scroll? 'h-[6.5rem] lg:h-[6rem]': 'h-0'} transition-all duration-400`}></div>
+            <div className={`absolute ${toggleTheme? 'bg-[#000000]': 'bg-[#fefefe]'} w-full z-10 ${scroll ? 'h-[6.5rem] lg:h-[6rem]' : 'h-0'} transition-all duration-400`}></div>
 
-            <div ref={ref} className={`transition-all relative z-20 ${inView? 'translate-y-0 opacity-[1]': 'opacity-0 translate-y-3'} duration-800 rounded-b-xl h-[6.5rem] md:h-[6.5rem] lg:h-[6rem] flex max-w-7xl mx-auto items-center px-8 sm:px-10 md:px-12 py-5`}>
+            <div ref={ref} className={`transition-all relative z-20 ${inView ? 'translate-y-0 opacity-[1]' : 'opacity-0 translate-y-3'} duration-800 rounded-b-xl h-[6.5rem] md:h-[6.5rem] lg:h-[6rem] flex max-w-7xl mx-auto items-center px-8 sm:px-10 md:px-12 py-5`}>
 
                 {/* // searchbar for screens below 950px */}
                 <div>
@@ -153,7 +156,7 @@ const Header = () => {
                                 <NavigationMenu>
                                     <NavigationMenuList>
                                         <NavigationMenuItem>
-                                            <h1 className='inter text-[#00563C] font-semibold text-sm'>Home</h1>
+                                            <h1 className={`inter ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'} font-semibold text-sm`}>Home</h1>
                                         </NavigationMenuItem>
                                     </NavigationMenuList>
                                 </NavigationMenu>
@@ -162,12 +165,12 @@ const Header = () => {
                         </div>
                     </div>
 
-                   { !user && <div className='inter flex items-center gap-3'>
-                        <Link prefetch={true} href={'/auth/sign-in'}><button className='py-2.5 font-semibold rounded-xl cursor-pointer hover:bg-[#f0f0f0] transition-all duration-200 text-[#00563c] px-6 sm:px-8 text-[14px] bg-transparent border border-[#b1b1b1]'>Login</button></Link>
+                    {!user && <div className='inter flex items-center gap-3'>
+                        <Link prefetch={true} href={'/auth/sign-in'}><button className={`py-2.5 font-semibold rounded-xl cursor-pointer hover:bg-[#f0f0f0] transition-all ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'}  duration-200 px-6 sm:px-8 text-[14px] bg-transparent border border-[#b1b1b1]`}>Login</button></Link>
                         <Link href={'/auth/sign-up'}><button className='py-2.5 font-medium hover:bg-[#00563ccc] transition-all duration-200 rounded-xl cursor-pointer text-[#fefefe] px-6 sm:px-8 text-[14px] bg-[#00563c]'>Signup</button></Link>
-                    </div> }
+                    </div>}
 
-                  { user &&  <div className='flex items-center gap-4'>
+                    {user && <div className='flex items-center gap-4'>
                         <div className='flex items-center relative z-30 gap-6'>
                             <Search size={scroll ? 20 : 23} onClick={() => {
 
@@ -178,9 +181,9 @@ const Header = () => {
                             <X size={scroll ? 20 : 23} onClick={() => setShowSearchBar(false)} className='transition-all duration-200 cursor-pointer' style={{ display: showSearchBar ? 'block' : 'none' }} color='#202020' />
 
                             {/* // user's profile and logout access */}
-                           <UserProfile logOut={logOut} scroll={scroll} user={user} />
+                            <UserProfile logOut={logOut} scroll={scroll} user={user} />
 
-                           <div className='mainMap translate-y-0.5'>
+                            <div className='mainMap translate-y-0.5'>
                                 <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`${scroll ? 'w-6 h-7' : 'w-7 h-8'} transition-all duration-200`} color='#202020' /></button>
                             </div>
                             {showMap && <div className='relative z-[200]'>
@@ -207,7 +210,7 @@ const Header = () => {
                                 </Sheet>
                             </div>
                         </div>
-                    </div> }
+                    </div>}
                 </div>
             </div>
         </>

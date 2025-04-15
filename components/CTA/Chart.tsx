@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
-
+import { getContacts } from '@/context/ContactsProvider'
 import {
   Card,
   CardContent,
@@ -34,14 +34,17 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function Component() {
+
+  const context = getContacts()
+  const toggleTheme = context?.toggleTheme
   return (
-    <Card className='inter' style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px' }}>
+    <Card className={`inter ${toggleTheme? 'bg-[#0d0d0d]': 'bg-[#fefefe]'} border-none`} style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px' }}>
       <CardHeader>
         <CardTitle className='text-xs font-medium flex w-full justify-between items-center gap-2 text-[#5b5b5b]'>
-            <h1>Completed rides</h1>
-            <h1 className='text-[#00563c] flex items-center'>6 months <ChevronDown size={17} color='#00563c' /> </h1>
+            <h1 className={`${toggleTheme? 'text-[#b1b1b1]': 'text-[#5b5b5b]'}`}>Completed rides</h1>
+            <h1 className={`${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'} flex items-center`}>6 months <ChevronDown size={17} color={toggleTheme? '#048C64': '#00563c'} /> </h1>
             </CardTitle>
-        <CardDescription className='text-[#202020] text-2xl font-semibold'>6,400+</CardDescription>
+        <CardDescription className={`${toggleTheme? 'text-[#fefefe]': 'text-[#202020]'} text-2xl font-semibold`}>6,400+</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className='h-[20em] md:h-[10em] w-full' config={chartConfig}>
@@ -68,7 +71,7 @@ export function Component() {
             <Line
               dataKey="desktop"
               type="natural"
-              stroke="#00563c"
+              stroke={toggleTheme? '#048C64': '#00563c'}
               strokeWidth={2}
               dot={false}
             />

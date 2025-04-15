@@ -10,8 +10,7 @@ interface Details {
 
 const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMessage }) => {
     return (
-        <div className='fixed left-0 flex justify-center items-center top-0 z-[500] bg-[#0000001e] w-screen h-screen'>
-            {message === '' && <div className="loader"></div>}
+        <div className={`fixed left-0 flex justify-center items-center top-0 z-[500] ${showMessage? 'bg-[#0000001e]': 'bg-transparent'} w-screen h-screen`}>
             <div className="flex flex-col gap-2 w-80 sm:w-96 relative text-[10px] sm:text-xs z-[100]">
                 <div style={{ zIndex: showMessage ? '50' : '-50', transition: 'all 0.2s ease-in-out', transform: showMessage ? 'scale(1)' : 'scale(0.9)', opacity: showMessage ? '1' : '0' }}
                     className="succsess-alert inter cursor-default flex items-center justify-between w-full py-3 rounded-lg bg-red-500 px-[10px]"
@@ -29,7 +28,7 @@ const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMes
                         setShowMessage(false)
                         setTimeout(() => setLoader(false), 200)
                     }}
-                        className="text-gray-600 cursor-pointer text-gray-600 hover:bg-white/5 p-1 rounded-md transition-colors ease-linear"
+                        className="text-gray-600 cursor-pointer hover:bg-white/5 p-1 rounded-md transition-colors ease-linear"
                     >
                         <X size={20} color='#fefefe' />
                     </button>

@@ -33,9 +33,9 @@ export default function RootLayout({
               {children}
             </div>
 
-            {/* <div className="bottom-0 z-30 sticky md:hidden">
+            <div className="bottom-0 z-30 fixed right-0 h-fit w-fit ml-auto">
               <MobileNavigator />
-            </div> */}
+            </div>
           </ContactsProvider>
         </AuthProvider>
       </body>
