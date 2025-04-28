@@ -15,16 +15,23 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
     const [markers, setMarkers] = useState<Record<string, mapboxgl.Marker>>({})
     const [userMarker, setUserMarker] = useState<mapboxgl.Marker | null>(null)
     const authContext = useAuth()
+    const user = authContext?.user || null
     const userLocation = authContext?.userLocation || null || undefined
     const drivers = authContext?.drivers || null
 
     useEffect(() => {
-        if (!userLocation) return;
+        const long = localStorage.getItem("long")
+        const lat = localStorage.getItem("lat")
+        const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
+
+        const location: [number, number] = userLocation && userLocation.length === 2
+            ? [userLocation[0], userLocation[1]]
+            : [currLocation[0], currLocation[1]]
 
         const mapInstance = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v12',
-            center: userLocation,
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: location,
             zoom: 14
         })
 
@@ -32,7 +39,7 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
 
         // Add a red marker for user's location
         const userMarker = new mapboxgl.Marker({ color: "red" })
-            .setLngLat(userLocation)
+            .setLngLat(location)
             .setPopup(new mapboxgl.Popup().setHTML("<h3>You are here!</h3>"))
             .addTo(mapInstance);
 
@@ -44,6 +51,8 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
             const { longitude, latitude } = position.coords
 
             userMarker.setLngLat([longitude, latitude])
+            localStorage.setItem('long', longitude.toString())
+            localStorage.setItem('lat', latitude.toString())
         }, err => console.log(err),
             {
                 enableHighAccuracy: true,
@@ -60,25 +69,28 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
 
     // showing drivers location on map
     useEffect(() => {
-        if (!map || drivers?.length === 0) return
+        if (!map || drivers?.length === 0 || !user) return
 
         drivers?.forEach(driver => {
             const { userId, location } = driver
-            // Add a greeb marker for driver's location
-            if (markers[userId]) {
-                const driver = markers[userId]
-                const updated = driver.setLngLat(location)
-                setMarkers(prev => ({ ...prev, [userId]: updated }))
-            }
-            else {
-                const driverMarker = new mapboxgl.Marker({ color: "green" })
-                    .setLngLat(location)
-                    .setPopup(new mapboxgl.Popup().setHTML(`<h3>Driver: ${userId}</h3>`))
-                    .addTo(map);
-                setMarkers(prev => ({ ...prev, [userId]: driverMarker }))
+
+            if (userId != user?._id) {
+                // Add a green marker for driver's location
+                if (markers[userId]) {
+                    const driver = markers[userId]
+                    const updated = driver.setLngLat(location)
+                    setMarkers(prev => ({ ...prev, [userId]: updated }))
+                }
+                else {
+                    const driverMarker = new mapboxgl.Marker({ color: "green" })
+                        .setLngLat(location)
+                        .setPopup(new mapboxgl.Popup().setHTML(`<h3>Driver: ${userId}</h3>`))
+                        .addTo(map);
+                    setMarkers(prev => ({ ...prev, [userId]: driverMarker }))
+                }
             }
         })
-    }, [drivers, map])
+    }, [drivers, map, user])
 
     // for checking socket is connected or not becuase without it , it will run too early and will not execute
     useEffect(() => {
@@ -100,8 +112,6 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
                     </div>
                 </div>
                 <div id="map" className={`w-full h-full z-[50]`} />
-
-                {!userLocation && <p className='loader'></p>}
             </div>
         </>
     )

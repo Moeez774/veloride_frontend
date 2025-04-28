@@ -9,11 +9,11 @@ export interface User {
   pass: string | null;
   number: string | null;
   city: string | null;
-  remember: boolean;
   photo: string | null;
-  isAgree: boolean;
-  contacts: any[],
-  gender: string | null
+  role: string | null;
+  isProvider: boolean;
+  contacts: any[];
+  rating: number;
 }
 
 interface AuthContextType {
@@ -31,7 +31,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [check, setCheck] = useState(false)
 
   //collecting all riders
   const [drivers, setDrivers] = useState<any[]>([])
@@ -133,7 +132,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (setDrivers) {
         setDrivers((prev) => {
           const exists = prev.some(driver => driver.userId === data.userId);
-          if (!exists) return [...prev, data]; // Prevent duplicate drivers
+          if (!exists) return [...prev, data]
           return prev;
         })
       }

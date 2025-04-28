@@ -2,20 +2,20 @@ import { auth } from "@/firebase"
 import socket from "@/utils/socket"
 import { User } from "firebase/auth"
 import { Dispatch, SetStateAction } from "react"
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth'
 
+const google = new GoogleAuthProvider()
 
 // for saving user's data
-export async function saveUsersData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, isAgree: boolean, setShowMessage: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, router: any, genderType: string) {
+export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any) {
 
-    setLoader(true)
-    setMessage('')
     // calling server for saving user's data if not saved already
     let a = await fetch('http://localhost:4000/users/providers-sign-in', {
         method: "POST", headers: {
             "Content-Type": "application/json"
         },
         credentials: 'include',
-        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, remember: false, photo: user?.photoURL, isAgree: isAgree, isProvider: true, gender: genderType })
+        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, photo: user?.photoURL, role: role, isProvider: true, rating: 0 })
     })
 
     let response = await a.json()
@@ -23,8 +23,8 @@ export async function saveUsersData(setLoader: Dispatch<SetStateAction<boolean>>
         router.push('/authorization')
     }
     else {
-        setShowMessage(true)
-        setMessage(response.message)
+        alert(response.message)
+        setLoader(false)
     }
 }
 
@@ -38,7 +38,7 @@ function generateHSLColor() {
 }
 
 // for sign up
-export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, router: any) {
+export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, role: string | null, router: any) {
 
     //generating random color for profile backgorund
     const color = generateHSLColor()
@@ -50,7 +50,7 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, e
                 "Content-Type": "application/json"
             },
             credentials: 'include',
-            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: number, city: city, remeber: false, photo: color, isProvider: false })
+            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: number, city: city, remeber: false, photo: color, role: role, isProvider: false, rating: 0 })
         })
 
         let response = await a.json()
@@ -76,7 +76,7 @@ export async function sendMessage(chat_id: string, sender_id: string, receiver_i
         _id: _id, chat_id: chat_id, sender_id: sender_id, receiver_id: receiver_id, message: message, senderPhoto: senderPhoto, receiverPhoto: receiverPhoto, senderName: senderName, receiverName: receiverName, time: new Date().getTime(),
     }
 
-    if(message!='') {
+    if (message != '') {
         socket.emit("newMessage", { data: data, chat_id: chat_id, message: message, time: new Date().getTime() })
         setMessage('')
     }
@@ -90,9 +90,84 @@ export async function sendMessage(chat_id: string, sender_id: string, receiver_i
 
     let response = await a.json()
     if (response.statusCode === 200) {
-        if(!isExist) {
+        if (!isExist) {
             socket.emit("add-contact", { receiver_id: receiver_id, chat_id: chat_id, sender_id: sender_id })
         }
         setIsExist(true)
+    }
+}
+
+//handling signup steps
+export async function handlingProceeding(setShowSteps: Dispatch<SetStateAction<boolean>>, toggleForm: boolean, signIn: () => Promise<void>, email: string, value: string, setStep: Dispatch<SetStateAction<number>>, delay: (number: number) => Promise<void>, setMessage: Dispatch<SetStateAction<string>>, setShowMessage: Dispatch<SetStateAction<boolean>>) {
+    setShowSteps(true)
+    if (!toggleForm) signIn()
+    else if (email != '' && value != '') {
+        setStep(prev => prev + 1)
+
+        setTimeout(async () => {
+            let a = await fetch('http://localhost:4000/users/user-existance', {
+                method: "POST", headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: email })
+            })
+
+            let response = await a.json()
+            if (response.statusCode === 200) {
+                setStep(prev => prev + 1)
+                setShowSteps(false)
+
+                await delay(400)
+                setStep(prev => prev + 1)
+                await delay(50)
+                setStep(prev => prev + 1)
+            }
+            else {
+                setStep(0)
+                setMessage(response.message)
+                setShowMessage(true)
+            }
+        }, 800)
+    }
+    else {
+        setShowMessage(true)
+        setMessage("Please fill in all the requied fields.")
+    }
+}
+
+export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolean>>, router: any, setStep: Dispatch<SetStateAction<number>>, delay: (number: number) => Promise<void>, setShowSteps: Dispatch<SetStateAction<boolean>>, saveUser: (setLoader: Dispatch<SetStateAction<boolean>>) => Promise<void>) {
+    setLoader(true)
+    try {
+
+        await signInWithPopup(auth, google)
+
+        // for chekcing whther user's data already availabale in database or not so we can ask for more info
+        let a = await fetch('http://localhost:4000/users/check-user', {
+            method: "POST", headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ _id: auth.currentUser?.uid })
+        })
+
+        let response = await a.json()
+
+        if (response.user === null) {
+            setStep(prev => prev + 1)
+            await delay(1000)
+            setStep(prev => prev + 1)
+            setShowSteps(false)
+            await delay(400)
+            setStep(prev => prev + 1)
+            await delay(50)
+            setStep(prev => prev + 1)
+        }
+        else {
+            await saveUser(setLoader)
+            router.push('/authorization')
+        }
+
+    } catch (err) {
+        alert("Error signing in with Google." + err)
+        setLoader(false)
     }
 }

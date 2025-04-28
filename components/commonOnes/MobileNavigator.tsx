@@ -2,13 +2,9 @@
 import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
 import { HomeIcon } from '@heroicons/react/16/solid'
-import { Car, DoorOpen, Gift, Leaf, LifeBuoy, MessageCircle, Moon, ShieldCheck, Sun, User2, Wallet } from 'lucide-react'
-import Link from 'next/link'
+import { Moon, Sun } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import React, { useState } from 'react'
-import { signOut } from 'firebase/auth'
-import { auth } from '@/firebase'
 
 const MobileNavigator = () => {
 

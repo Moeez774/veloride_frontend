@@ -8,22 +8,31 @@ interface Details {
     setStep: Dispatch<SetStateAction<number>>,
     toggleTheme: boolean | undefined,
     fullname: string,
-    email: string
+    email: string,
+    user: any,
+    role: string | null,
+    setRole: Dispatch<SetStateAction<string | null>>,
+    city: string,
+    number: string,
+    setCity: Dispatch<SetStateAction<string>>,
+    setNumber: Dispatch<SetStateAction<string>>,
+    saveUser: (setLoader: Dispatch<SetStateAction<boolean>>) => Promise<void>,
+    setShowMessage: Dispatch<SetStateAction<boolean>>,
+    setMessage: Dispatch<SetStateAction<string>>,
+    setShowSteps: Dispatch<SetStateAction<boolean>>,
 }
 
-const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname }) => {
+const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname, user, role, setRole, number, city, setCity, setNumber, saveUser, setShowMessage, setMessage, setShowSteps }) => {
 
     const router = useRouter()
     const [pass, setPass] = useState('')
-    const [number, setNumber] = useState('')
-    const [city, setCity] = useState('')
-    const [rider, setRider] = useState(false)
-    const [driver, setDriver] = useState(false)
+    const [rider, setRider] = useState(role==='rider'? true: false)
+    const [driver, setDriver] = useState(role==='driver'? true: false)
     const [showPass, setShowPass] = useState(false)
     const [loader, setLoader] = useState(false)
 
     // sending signup request to backend
-    const signUp = async () => await signUserUp(setLoader, email, fullname, pass, number, city, router)
+    const signUp = async () => await signUserUp(setLoader, email, fullname, pass, number, city, role, router)
 
     const delay = async (ms: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms))
 
@@ -72,6 +81,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                         <button onClick={() => {
                             setRider(true)
                             setDriver(false)
+                            setRole('rider')
                         }} className={`${rider ? 'border border-[#00563c]' : 'border border-[#c7c7c7]'} cursor-pointer flex gap-3 items-center transition-all duration-300 rounded-md shadow-sm py-8 px-9 w-full`}>
                             <div className='flex items-center gap-5'>
                                 <div className={`p-[4px] border transition-all duration-200 rounded-full ${rider ? 'bg-[#00563c] border-transparent' : 'border-[#b5b5b5] bg-transparent'}`}><Check className={`${rider ? 'opacity-[1]' : 'opacity-0'}`} size={14} color='#fefefe' /> </div>
@@ -82,6 +92,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                         <button onClick={() => {
                             setDriver(true)
                             setRider(false)
+                            setRole('driver')
                         }} className={`${driver ? 'border border-[#00563c]' : 'border border-[#c7c7c7]'} cursor-pointer flex gap-3 items-center rounded-md transition-all duration-300 shadow-sm py-8 px-9 w-full`}>
                             <div className='flex items-center gap-5'>
                                 <div className={`p-[4px] border transition-all duration-200 rounded-full ${driver ? 'bg-[#00563c] border-transparent' : 'border-[#b5b5b5] bg-transparent'}`}><Check className={`${driver ? 'opacity-[1]' : 'opacity-0'}`} size={14} color='#fefefe' /> </div>
@@ -91,8 +102,18 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                     </div>
 
                     <div className='flex items-center justify-end gap-10 mt-4'>
-                        <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => proceed()}>Skip</button>
-                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => proceed()}>Continue</button>
+                        <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => {
+                            setRole('Any')
+                            proceed()
+                        }}>Skip</button>
+                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
+                            if (role === 'Any') {
+                                setShowSteps(true)
+                                setMessage("Please select at least one option.")
+                                setTimeout(() => setShowMessage(true), 100)
+                            }
+                            else proceed()
+                        }}>Continue</button>
                     </div>
                 </div>}
 
@@ -112,18 +133,36 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                         <input value={number} onChange={(e) => setNumber(e.target.value)} className='border outline-none font-normal focus:shadow-lg transition-all duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm p-[0.90rem] w-full' />
                     </div>
 
-                    <div className='flex flex-col mt-4 gap-1.5'>
+                    {!user && <div className='flex flex-col mt-4 gap-1.5'>
                         <label className='text-[13px]'>Password</label>
                         <div className='w-full flex items-center gap-2'>
                             <input value={pass} type={showPass ? 'text' : 'password'} onChange={(e) => setPass(e.target.value)} className={`border outline-none font-normal focus:shadow-lg transition-all w-full duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm pl-[0.90rem] pr-12 py-[0.90rem] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} />
                             {!showPass && <Eye onClick={() => setShowPass(true)} size={20} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
                             {showPass && <EyeOff size={20} onClick={() => setShowPass(false)} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
                         </div>
-                    </div>
+                    </div>}
 
                     <div className='flex items-center justify-end gap-10 mt-10'>
                         <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => back()}>Back</button>
-                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => proceed()}>Continue</button>
+                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
+                            if ((!user && (pass === '' || number === '' || city === '')) || (user && (number === '' || city === ''))) {
+                                setShowSteps(true)
+                                setMessage("Please fill in all the required fields.")
+                                setTimeout(() => setShowMessage(true), 100)
+                            }
+                            else {
+                                for (let i = 0; i < number.length; i++) {
+                                    const n = parseInt(number.charAt(i))
+                                    if (Number.isNaN(n)) {
+                                        setShowSteps(true)
+                                        setMessage("Invalid phone number.")
+                                        setTimeout(() => setShowMessage(true), 100)
+                                        return
+                                    }
+                                }
+                                proceed()
+                            }
+                        }}>Continue</button>
                     </div>
 
                 </div>}
@@ -140,9 +179,13 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
 
                     <div className='flex items-center justify-end mt-4 gap-10'>
                         <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => back()}>Back</button>
-                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => signUp()}>{!loader ? 'Hop in' :
-                            <svg className='authLoader' viewBox="25 25 50 50">
-                                <circle className='authCircle' r="20" cy="50" cx="50"></circle>
+                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
+                            setLoader(true)
+                            if (!user) signUp()
+                            else saveUser(setLoader)
+                        }}>{!loader ? 'Hop in' :
+                            <svg className='authLoader w-[1.42em]' viewBox="25 25 50 50">
+                                <circle stroke='#fefefe' className='authCircle' r="20" cy="50" cx="50"></circle>
                             </svg>}</button>
                     </div>
 

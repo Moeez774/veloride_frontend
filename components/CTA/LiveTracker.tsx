@@ -44,7 +44,7 @@ const LiveTracker = () => {
                                     <Radios item={isDriver} setter={setDriver} text="I'm a driver" arr={types} setItemName={setType} />
                                 </div>
                             </div>
-                            <Link prefetch={true} className='w-full sm:w-auto' href='/auth/sign-up'><button className={`inter flex w-full items-center gap-1.5 active:duration-200 justify-center cursor-pointer text-[#fefefe] rounded-xl bg-[#00563c] font-medium hover:bg-[#00563ccc] text-sm px-5 py-[0.90rem] transition-all ease-out`} >Get Started <ArrowUp className='rotate-45' size={20} color='#fefefe' /> </button></Link>
+                            <Link prefetch={true} className='w-full sm:w-auto' href={`/auth/sign-in?role=${isRider? 'rider': isDriver? 'driver': 'Any'}`}><button className={`inter flex w-full items-center gap-1.5 active:duration-200 justify-center cursor-pointer text-[#fefefe] rounded-xl bg-[#00563c] font-medium hover:bg-[#00563ccc] text-sm px-5 py-[0.90rem] transition-all ease-out`} >Get Started <ArrowUp className='rotate-45' size={20} color='#fefefe' /> </button></Link>
                         </div>
 
                     </div>

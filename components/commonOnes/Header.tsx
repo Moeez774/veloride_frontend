@@ -1,13 +1,22 @@
 'use client'
-import { ArrowLeft, Search, X } from 'lucide-react'
+import { Car, DoorOpen, Gift, Leaf, LifeBuoy, LogOut, MessageCircle, ShieldCheck, Sliders, User, User2, Wallet, ArrowLeft, Search, X } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import SideBar from './SideBar'
+import { auth } from '@/firebase'
+import { signOut } from 'firebase/auth'
 import { useAuth } from '@/context/AuthProvider'
 import { Bars3BottomLeftIcon, MapPinIcon } from '@heroicons/react/16/solid'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import './Commons.css'
-import UserProfile from './UserProfile'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import FindARide from './FindARide'
 import Link from 'next/link'
 import { getContacts } from '@/context/ContactsProvider'
@@ -111,7 +120,7 @@ const Header = () => {
 
         <>
 
-            <div className={`absolute ${toggleTheme? 'bg-[#000000]': 'bg-[#fefefe]'} w-full z-10 ${scroll ? 'h-[6.5rem] lg:h-[6rem]' : 'h-0'} transition-all duration-400`}></div>
+            <div className={`absolute ${toggleTheme ? 'bg-[#000000]' : 'bg-[#fefefe]'} w-full z-10 ${scroll ? 'h-[6.5rem] lg:h-[6rem]' : 'h-0'} transition-all duration-400`}></div>
 
             <div ref={ref} className={`transition-all relative z-20 ${inView ? 'translate-y-0 opacity-[1]' : 'opacity-0 translate-y-3'} duration-800 rounded-b-xl h-[6.5rem] md:h-[6.5rem] lg:h-[6rem] flex max-w-7xl mx-auto items-center px-8 sm:px-10 md:px-12 py-5`}>
 
@@ -156,7 +165,7 @@ const Header = () => {
                                 <NavigationMenu>
                                     <NavigationMenuList>
                                         <NavigationMenuItem>
-                                            <h1 className={`inter ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'} font-semibold text-sm`}>Home</h1>
+                                            <h1 className={`inter ${toggleTheme ? 'text-[#048C64]' : 'text-[#00563c]'} font-semibold text-sm`}>Home</h1>
                                         </NavigationMenuItem>
                                     </NavigationMenuList>
                                 </NavigationMenu>
@@ -166,8 +175,8 @@ const Header = () => {
                     </div>
 
                     {!user && <div className='inter flex items-center gap-3'>
-                        <Link prefetch={true} href={'/auth/sign-in'}><button className={`py-2.5 font-semibold rounded-xl cursor-pointer hover:bg-[#f0f0f0] transition-all ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'}  duration-200 px-6 sm:px-8 text-[14px] bg-transparent border border-[#b1b1b1]`}>Login</button></Link>
-                        <Link href={'/auth/sign-up'}><button className='py-2.5 font-medium hover:bg-[#00563ccc] transition-all duration-200 rounded-xl cursor-pointer text-[#fefefe] px-6 sm:px-8 text-[14px] bg-[#00563c]'>Signup</button></Link>
+                        <Link prefetch={true} href={'/auth/sign-in'}><button className={`py-2.5 font-semibold rounded-xl cursor-pointer transition-all ${toggleTheme ? 'text-[#048C64] active:bg-[#0d0d0d] hover:bg-[#202020]' : 'text-[#00563c] active:bg-[#fefefe] hover:bg-[#f0f0f0]'}  duration-200 px-6 sm:px-8 text-[14px] bg-transparent border border-[#b1b1b1]`}>Login</button></Link>
+                        <Link href={'/auth/sign-in'}><button className='py-2.5 font-medium hover:bg-[#00563ccc] transition-all duration-200 rounded-xl cursor-pointer active:bg-[#00563c] text-[#fefefe] px-6 sm:px-8 text-[14px] bg-[#00563c]'>Signup</button></Link>
                     </div>}
 
                     {user && <div className='flex items-center gap-4'>
@@ -181,7 +190,54 @@ const Header = () => {
                             <X size={scroll ? 20 : 23} onClick={() => setShowSearchBar(false)} className='transition-all duration-200 cursor-pointer' style={{ display: showSearchBar ? 'block' : 'none' }} color='#202020' />
 
                             {/* // user's profile and logout access */}
-                            <UserProfile logOut={logOut} scroll={scroll} user={user} />
+                            <div className='hidden md:flex items-center'>
+
+                                {user && <DropdownMenu>
+                                    <DropdownMenuTrigger className='outline-none'>
+                                        <div className='cursor-pointer flex items-center'>
+                                            {/* if user hasn't any photo */}
+                                            {user.photo?.startsWith("hsl") && (
+                                                <div className={`rounded-full flex justify-center items-center text-white ${scroll ? 'h-7 w-7 md:w-9 md:h-9' : 'h-8 w-8 md:w-10 md:h-10'}`} style={{ background: user.photo }}>
+                                                    <h1 className='inter md:text-lg'>{user.fullname?.charAt(0).toUpperCase()}</h1>
+                                                </div>
+                                            )}
+
+                                            {/* user with profile */}
+                                            {!user.photo?.startsWith("hsl") && (
+                                                <div>
+                                                    <img className={`${scroll ? 'w-7 md:w-9' : 'w-8 md:w-10'} transition-all duration-200 rounded-full`} src={user.photo || undefined} alt="" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className='inter hidden lg:block w-56 text-[#202020] p-2 -translate-x-20'>
+                                        <DropdownMenuLabel className='inter'>My Account</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+
+                                        <DropdownMenuItem className='cursor-pointer'><User2 size={15} color='#202020' /> Profile & Settings</DropdownMenuItem>
+                                        <Link href={'/chats'} ><DropdownMenuItem className='cursor-pointer'><MessageCircle size={15} color='#202020' /> Messages </DropdownMenuItem></Link>
+                                        <Link href={'/my-rides'} ><DropdownMenuItem className='cursor-pointer'><Car size={15} color='#202020' /> Your Rides</DropdownMenuItem></Link>
+                                        <DropdownMenuItem className='cursor-pointer'><Wallet size={15} color='#202020' /> Payments & Wallet</DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+
+                                        <DropdownMenuItem className='cursor-pointer'><Leaf size={15} color='#202020' /> Eco Rewards & Badges</DropdownMenuItem>
+                                        <DropdownMenuItem className='cursor-pointer'><LifeBuoy size={15} color='#202020' /> Support & Help</DropdownMenuItem>
+                                        <DropdownMenuItem className='cursor-pointer'><Gift size={15} color='#202020' /> Refer & Earn</DropdownMenuItem>
+                                        <DropdownMenuItem className='cursor-pointer'><ShieldCheck size={15} color='#202020' /> Privacy & Security</DropdownMenuItem>
+
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className='cursor-pointer' onClick={async () => {
+                                            await logOut()
+                                            await signOut(auth)
+                                            router.push('/hop-in')
+                                        }}><DoorOpen size={15} color='#202020' /> Log out</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>}
+
+                                {!user && <Link href='/auth/sign-in' ><User size={scroll ? 22 : 25} className='transition-all duration-200 cursor-pointer' color='#202020' /></Link>}
+
+
+                            </div>
 
                             <div className='mainMap translate-y-0.5'>
                                 <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`${scroll ? 'w-6 h-7' : 'w-7 h-8'} transition-all duration-200`} color='#202020' /></button>

@@ -24,7 +24,7 @@ export async function offerRide(userId: string | null | undefined, driverName: s
 
         // complete data
         const data = {
-            _id: rideId, driverName: driverName, userId: userId, pickupName: pickup, coordinates: [location.long, location.lat], dropLocationCoordinates: [dropLocation.long, dropLocation.lat], dropoffLocation: drop, date: date, seats: seats, time: time, vehicle: vehicle, rideType: ride, luggageAllowed: luggage, petAllowed: petFriendly, smokingAllowed: smoking, gender: user?.gender, totalBudget: budget, negotiate: negotiate, photo: photo, note: note, number: number, email: email, distance: distance, duration: duration
+            _id: rideId, driver_rating: user?.rating, driverName: driverName, userId: userId, pickupName: pickup, coordinates: [location.long, location.lat], dropLocationCoordinates: [dropLocation.long, dropLocation.lat], dropoffLocation: drop, date: date, seats: seats, time: time, vehicle: vehicle, rideType: ride, luggageAllowed: luggage, petAllowed: petFriendly, smokingAllowed: smoking, gender: user?.gender, totalBudget: budget, negotiate: negotiate, photo: photo, note: note, number: number, email: email, distance: distance, duration: duration
         }
 
         let a = await fetch('http://localhost:4000/rides/offer-ride', {
