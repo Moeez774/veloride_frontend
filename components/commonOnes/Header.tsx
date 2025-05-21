@@ -21,7 +21,7 @@ import FindARide from './FindARide'
 import Link from 'next/link'
 import { getContacts } from '@/context/ContactsProvider'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu"
-import MainMap from '../main/MainMap'
+import MainMap from '../../app/(HomePage)/MainMap'
 import { useInView } from 'react-intersection-observer';
 
 const Header = () => {
@@ -44,6 +44,15 @@ const Header = () => {
     const [showMap, setShowMap] = useState(false)
 
     useEffect(() => {
+        if (showMap) {
+            document.body.style.overflowY = 'hidden'
+        }
+        else if (!showMap) {
+            document.body.style.overflowY = 'auto'
+        }
+    }, [showMap])
+
+    useEffect(() => {
 
         const fetchFeatures = async () => {
             let a = await fetch('http://localhost:4000/data/sub-features', {
@@ -60,14 +69,14 @@ const Header = () => {
     // Checking pathname in useEffect to avoid SSR mismatch
     useEffect(() => {
         const hideHeaderPaths = [
-            '/auth/sign-in', '/auth/sign-up', '/reset-password', '/find-ride', '/offer-ride', '/chats', '/matched-rides']
+            '/auth', '/auth', '/dashboard', '/reset-password', '/find-ride', '/offer-ride', '/chats', '/matched-rides', '/dashboard/manage-rides']
 
         const isSmallScreen = window.matchMedia("(max-width: 1023px)").matches;
         const isMobileScreen = window.matchMedia("(max-width: 767px)").matches;
 
         if (
             hideHeaderPaths.some(path => pathname === path) ||
-            (isSmallScreen && pathname.startsWith('/ride-detail')) ||
+            pathname.startsWith('/ride-detail') ||
             (isMobileScreen && pathname.startsWith('/find-ride/saved-routes'))
         ) {
             setShowHeader(false)
@@ -157,37 +166,32 @@ const Header = () => {
                         <div className='flex items-center'>
                             <Link href={'/'} ><img className={`transition-all cursor-pointer duration-200 w-10 md:w-12`} src="/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png" alt="" /></Link>
                         </div>
+                    </div>
 
-                        {/* navigators */}
+                    {/* navigators */}
 
-                        <div className={`hidden transition-all lg:flex duration-200 items-center gap-1 ${showSearchBar ? 'opacity-0 z-0' : 'opacity-[1] z-20'}`}>
-                            <div className='px-6 py-[7px] rounded-md hover:bg-[#eeeeee] cursor-pointer'>
-                                <NavigationMenu>
-                                    <NavigationMenuList>
-                                        <NavigationMenuItem>
-                                            <h1 className={`inter ${toggleTheme ? 'text-[#048C64]' : 'text-[#00563c]'} font-semibold text-sm`}>Home</h1>
-                                        </NavigationMenuItem>
-                                    </NavigationMenuList>
-                                </NavigationMenu>
-                            </div>
-                            <FindARide />
+                    <div className={`hidden transition-all lg:flex duration-200 items-center gap-1 ${showSearchBar ? 'opacity-0 z-0' : 'opacity-[1] z-20'}`}>
+                        <div className='px-6 py-[7px] rounded-md hover:bg-[#eeeeee] cursor-pointer'>
+                            <NavigationMenu>
+                                <NavigationMenuList>
+                                    <NavigationMenuItem>
+                                        <h1 className={`inter ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} font-medium text-sm`}>Home</h1>
+                                    </NavigationMenuItem>
+                                </NavigationMenuList>
+                            </NavigationMenu>
                         </div>
+                        <FindARide />
                     </div>
 
                     {!user && <div className='inter flex items-center gap-3'>
-                        <Link prefetch={true} href={'/auth/sign-in'}><button className={`py-2.5 font-semibold rounded-xl cursor-pointer transition-all ${toggleTheme ? 'text-[#048C64] active:bg-[#0d0d0d] hover:bg-[#202020]' : 'text-[#00563c] active:bg-[#fefefe] hover:bg-[#f0f0f0]'}  duration-200 px-6 sm:px-8 text-[14px] bg-transparent border border-[#b1b1b1]`}>Login</button></Link>
-                        <Link href={'/auth/sign-in'}><button className='py-2.5 font-medium hover:bg-[#00563ccc] transition-all duration-200 rounded-xl cursor-pointer active:bg-[#00563c] text-[#fefefe] px-6 sm:px-8 text-[14px] bg-[#00563c]'>Signup</button></Link>
+                        <Link href={'/auth'}><button className='py-2.5 font-medium hover:bg-[#00563ccc] transition-all duration-200 rounded-xl cursor-pointer active:bg-[#00563c] text-[#fefefe] px-6 sm:px-8 text-[14px] bg-[#00563c]'>Join us</button></Link>
                     </div>}
 
                     {user && <div className='flex items-center gap-4'>
                         <div className='flex items-center relative z-30 gap-6'>
-                            <Search size={scroll ? 20 : 23} onClick={() => {
-
+                            <Search size={23} onClick={() => {
                                 setMobileSearchBar(true)
-
-                            }} className='transition-all duration-200 cursor-pointer' style={{ display: !showSearchBar ? 'block' : 'none' }} color='#202020' />
-
-                            <X size={scroll ? 20 : 23} onClick={() => setShowSearchBar(false)} className='transition-all duration-200 cursor-pointer' style={{ display: showSearchBar ? 'block' : 'none' }} color='#202020' />
+                            }} className='transition-all duration-200 cursor-pointer' style={{ display: !showSearchBar ? 'block' : 'none' }} color={toggleTheme ? '#fefefe' : '#202020'} />
 
                             {/* // user's profile and logout access */}
                             <div className='hidden md:flex items-center'>
@@ -197,7 +201,7 @@ const Header = () => {
                                         <div className='cursor-pointer flex items-center'>
                                             {/* if user hasn't any photo */}
                                             {user.photo?.startsWith("hsl") && (
-                                                <div className={`rounded-full flex justify-center items-center text-white ${scroll ? 'h-7 w-7 md:w-9 md:h-9' : 'h-8 w-8 md:w-10 md:h-10'}`} style={{ background: user.photo }}>
+                                                <div className={`rounded-full flex justify-center items-center text-white h-8 w-8 md:w-10 md:h-10`} style={{ background: user.photo }}>
                                                     <h1 className='inter md:text-lg'>{user.fullname?.charAt(0).toUpperCase()}</h1>
                                                 </div>
                                             )}
@@ -205,42 +209,30 @@ const Header = () => {
                                             {/* user with profile */}
                                             {!user.photo?.startsWith("hsl") && (
                                                 <div>
-                                                    <img className={`${scroll ? 'w-7 md:w-9' : 'w-8 md:w-10'} transition-all duration-200 rounded-full`} src={user.photo || undefined} alt="" />
+                                                    <img className={`w-8 md:w-10 transition-all duration-200 rounded-full`} src={user.photo || undefined} alt="" />
                                                 </div>
                                             )}
                                         </div>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className='inter hidden lg:block w-56 text-[#202020] p-2 -translate-x-20'>
-                                        <DropdownMenuLabel className='inter'>My Account</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
+                                    <DropdownMenuContent className='inter hidden h-28 lg:flex flex-col justify-center w-60 text-[#202020] p-2 -translate-x-32'>
 
-                                        <DropdownMenuItem className='cursor-pointer'><User2 size={15} color='#202020' /> Profile & Settings</DropdownMenuItem>
-                                        <Link href={'/chats'} ><DropdownMenuItem className='cursor-pointer'><MessageCircle size={15} color='#202020' /> Messages </DropdownMenuItem></Link>
-                                        <Link href={'/my-rides'} ><DropdownMenuItem className='cursor-pointer'><Car size={15} color='#202020' /> Your Rides</DropdownMenuItem></Link>
-                                        <DropdownMenuItem className='cursor-pointer'><Wallet size={15} color='#202020' /> Payments & Wallet</DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-
-                                        <DropdownMenuItem className='cursor-pointer'><Leaf size={15} color='#202020' /> Eco Rewards & Badges</DropdownMenuItem>
-                                        <DropdownMenuItem className='cursor-pointer'><LifeBuoy size={15} color='#202020' /> Support & Help</DropdownMenuItem>
-                                        <DropdownMenuItem className='cursor-pointer'><Gift size={15} color='#202020' /> Refer & Earn</DropdownMenuItem>
-                                        <DropdownMenuItem className='cursor-pointer'><ShieldCheck size={15} color='#202020' /> Privacy & Security</DropdownMenuItem>
+                                        <Link href='/dashboard'><DropdownMenuItem className='cursor-pointer text-lg'>Dashboard</DropdownMenuItem></Link>
 
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem className='cursor-pointer' onClick={async () => {
                                             await logOut()
                                             await signOut(auth)
                                             router.push('/hop-in')
-                                        }}><DoorOpen size={15} color='#202020' /> Log out</DropdownMenuItem>
+                                        }}>Log out</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>}
 
-                                {!user && <Link href='/auth/sign-in' ><User size={scroll ? 22 : 25} className='transition-all duration-200 cursor-pointer' color='#202020' /></Link>}
-
+                                {!user && <Link href='/auth' ><User size={scroll ? 22 : 25} className='transition-all duration-200 cursor-pointer' color='#202020' /></Link>}
 
                             </div>
 
                             <div className='mainMap translate-y-0.5'>
-                                <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`${scroll ? 'w-6 h-7' : 'w-7 h-8'} transition-all duration-200`} color='#202020' /></button>
+                                <button className='cursor-pointer' onClick={() => setShowMap(true)}><MapPinIcon className={`w-7 h-8 transition-all duration-200`} color={toggleTheme ? '#fefefe' : '#202020'} /></button>
                             </div>
                             {showMap && <div className='relative z-[200]'>
                                 <MainMap setShowMap={setShowMap} />

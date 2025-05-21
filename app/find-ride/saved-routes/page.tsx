@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react'
 import { Heart, History, Sparkles, TrendingUp, MapPin, SlidersHorizontal, Eraser, ChevronLeft, MoreVertical } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Recents from '@/components/savedRoutes/Recents'
-import Nearby from '@/components/savedRoutes/Nearby'
+import Recents from '@/app/find-ride/saved-routes/(Saved_Routes)/Recents'
+import Nearby from '@/app/find-ride/saved-routes/(Saved_Routes)/Nearby'
 import { useAuth } from '@/context/AuthProvider'
 import { useRouter } from 'next/navigation'
 const page = () => {

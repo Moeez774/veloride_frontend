@@ -2,9 +2,10 @@
 import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
 import { HomeIcon } from '@heroicons/react/16/solid'
-import { Moon, Sun } from 'lucide-react'
+import { Bell, Moon, SlidersHorizontal, Sun } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import Notifications from './Notifications'
 
 const MobileNavigator = () => {
 
@@ -12,38 +13,45 @@ const MobileNavigator = () => {
     const router = useRouter()
     const authContext = useAuth()
     const user = authContext?.user || null
+    const [openNotifications, setOpenNotifications] = useState(false)
     const setUser = authContext?.setUser
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
     const setToggleTheme = context?.setToggleTheme
+    const [isOpen, setIsOpen] = useState(false)
+    const optionsRef = useRef<HTMLDivElement>(null)
 
-    // for logging out user
-    const logOut = async () => {
-        try {
-            let a = await fetch('http://localhost:4000/users/log-out', {
-                method: "GET",
-                credentials: 'include'
-            })
-
-            let response = await a.json()
-            if (response.statusCode === 200) {
-                setUser && setUser(null)
-                alert(response.message)
-                router.refresh()
-            } else {
-                alert(response.message)
+    useEffect(() => {
+        const handleOutsideClicks = (e: MouseEvent) => {
+            if (optionsRef.current && !optionsRef.current?.contains(e.target as Node)) {
+                setIsOpen(false)
             }
-        } catch (error) {
-            console.error("Logout Error:", error)
         }
-    }
+
+        window.addEventListener('mousedown', handleOutsideClicks)
+
+        return () => {
+            window.removeEventListener('mousedown', handleOutsideClicks)
+        }
+    }, [])
 
     return (
-        <div onClick={() => {
-            if(setToggleTheme) setToggleTheme(!toggleTheme)
-        }} className={`p-4 w-fit h-fit cursor-pointer transition-all duration-200 rounded-full ${toggleTheme? 'bg-[#fefefe]': 'bg-[#202020]'} m-8`}>
-           { !toggleTheme? <Moon size={25} color='#fefefe' /> : <Sun size={25} color='#202020' /> }
-        </div>
+        <>
+
+            <Notifications toggleTheme={toggleTheme} user={user} openNotifications={openNotifications} setOpenNotifications={setOpenNotifications} />
+
+            <div ref={optionsRef} className={`w-fit ${isOpen ? 'h-[10.7rem]' : 'h-14'} flex flex-col overflow-hidden transition-all duration-200 rounded-full ${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} mb-8 mr-8`}>
+                <button className={`cursor-pointer rounded-full p-4 ${toggleTheme ? 'hover:bg-[#f0f0f0]' : 'hover:bg-[#353535]'}`} onClick={() => setIsOpen(!isOpen)}><SlidersHorizontal size={25} color={toggleTheme ? '#202020' : '#fefefe'} /></button>
+                <button className={`cursor-pointer rounded-full p-4 ${toggleTheme ? 'hover:bg-[#f0f0f0]' : 'hover:bg-[#353535]'}`} onClick={() => {
+                    if (setToggleTheme) setToggleTheme(!toggleTheme)
+                }}>{!toggleTheme ? <Moon size={25} color='#fefefe' /> : <Sun size={25} color='#202020' />}</button>
+
+                <button onClick={() => {
+                    setOpenNotifications(true)
+                    setIsOpen(false)
+                }} className={`cursor-pointer rounded-full p-4 ${toggleTheme ? 'hover:bg-[#f0f0f0]' : 'hover:bg-[#353535]'}`}><Bell size={25} color={toggleTheme ? '#202020' : '#fefefe'} /></button>
+            </div>
+        </>
     )
 }
 

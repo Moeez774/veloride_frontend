@@ -1,0 +1,208 @@
+[
+    {
+        "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/idUO-qYYT-_1746163116223.svg",
+        "name": "HBL (Habib Bank Limited)",
+        "type": "bank",
+        "requirements": [
+            {
+                "label": "Account Holder's Name",
+                "type": "string",
+                "optional": false
+            },
+            {
+                "label": "Account Number",
+                "type": "string",
+                "optional": false
+            },
+            {
+                "label": "Branch Code",
+                "type": "string",
+                "optional": true
+            },
+            {
+                "label": "CNIC",
+                "type": "string",
+                "optional": true
+            }
+        ],
+        "usage": {
+            "For Payments": false,
+            "For Payouts": false,
+            "Use for both": true
+        }
+    },
+    {
+        "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/idPncNv7mC_1746162971646.png",
+        "name": "EasyPaisa",
+        "type": "mobile",
+        "requirements": [
+            {
+                "label": "Account Holder's Name",
+                "type": "string",
+                "optional": false
+            },
+            {
+                "label": "Easypaisa Mobile Number",
+                "type": "string",
+                "optional": false
+            },
+            {
+                "label": "CNIC",
+                "type": "string",
+                "optional": true
+            }
+        ],
+        "usage": [
+            {
+                "label": "For Payments",
+                "value": false
+            },
+            {
+                "label": "For Payouts",
+                "value": false
+            },
+            {
+                "label": "Use for both",
+                "value": true
+            }
+        ]
+    },
+    {
+        "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/idvp4xtAGa_logos.png",
+        "name": "JazzCash",
+        "type": "mobile",
+        "requirements": [
+            {
+                "label": "Account Holder's Name",
+                "type": "string",
+                "optional": false
+            },
+            {
+                "label": "Jazzcash Mobile Number",
+                "type": "string",
+                "optional": false
+            },
+            {
+                "label": "CNIC",
+                "type": "string",
+                "optional": true
+            }
+        ],
+        "usage": [
+            {
+                "label": "For Payments",
+                "value": false
+            },
+            {
+                "label": "For Payouts",
+                "value": false
+            },
+            {
+                "label": "Use for both",
+                "value": true
+            }
+        ]
+    },
+    {
+        "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/idRRAw_KPy_logos.png",
+        "name": "Payooner",
+        "type": "mobile",
+        "requirements": [
+                {
+                    "label": "Account Holder's Name",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "Payoneer Email Address",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "Country",
+                    "type": "string",
+                    "optional": true
+                }
+            ],
+            "usage": [
+                {
+                    "label": "For Payments",
+                    "value": false
+                },
+                {
+                    "label": "For Payouts",
+                    "value": false
+                },
+                {
+                    "label": "Use for both",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/Symbol.svg",
+            "name": "Mastercard",
+            "type": "card",
+            "requirements": [
+                {
+                    "label": "Card Holder's Name",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "Card Number",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "Expiry Date",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "CVV",
+                    "type": "string",
+                    "optional": false
+                }
+            ],
+            "usage": [
+                {
+                    "label": "For Payments",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/idDUM8TcN7_1746163043859.svg",
+            "name": "Visa",
+            "type": "card",
+            "requirements": [
+                {
+                    "label": "Card Holder's Name",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "Card Number",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "Expiry Date",
+                    "type": "string",
+                    "optional": false
+                },
+                {
+                    "label": "CVV",
+                    "type": "string",
+                    "optional": false
+                }
+            ],
+            "usage": [
+                {
+                    "label": "For Payments",
+                    "value": true
+                }
+            ]
+        }
+    ]

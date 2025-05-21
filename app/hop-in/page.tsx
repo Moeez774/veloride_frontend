@@ -1,8 +1,8 @@
 'use client'
-import LiveTracker from '@/components/CTA/LiveTracker'
+import LiveTracker from '@/app/hop-in/(Hop-In)/LiveTracker'
 import React from 'react'
 import { Bot, Mic, Bus, Leaf, ChevronRight, ArrowUp, Trophy } from 'lucide-react'
-import { Component } from '@/components/CTA/Chart'
+import { Component } from '@/app/hop-in/(Hop-In)/Chart'
 import { useInView } from 'react-intersection-observer';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";

@@ -1,5 +1,5 @@
 'use client'
-import RideDetail from '@/components/ridesData/RideDetail'
+import RideDetail from '@/app/ride-detail/(Ride_Details)/RideDetail'
 import { useParams, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -17,11 +17,10 @@ const page = () => {
     if (!rideId) return
 
     const fetchRide = async () => {
-      let a = await fetch('http://localhost:4000/rides/fetchRide', {
-        method: "POST", headers: {
+      let a = await fetch(`http://localhost:4000/rides/fetchRide?rideId=${rideId}`, {
+        method: "GET", headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ rideId: rideId })
       })
 
       let response = await a.json()
@@ -35,9 +34,10 @@ const page = () => {
     fetchRide()
 
   }, [rideId])
+
   return (
     <div>
-      {ride && <RideDetail setIsCompleted={setIsCompleted} isCompleted={isCompleted} queries={searchParams} ride={ride} params={params} />}
+      {ride && <RideDetail setRide={setRide} setIsCompleted={setIsCompleted} isCompleted={isCompleted} queries={searchParams} ride={ride} params={params} />}
     </div>
   )
 }

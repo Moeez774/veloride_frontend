@@ -3,9 +3,8 @@ import "./globals.css";
 import Header from "@/components/commonOnes/Header";
 import { AuthProvider } from "@/context/AuthProvider";
 import MobileNavigator from "@/components/commonOnes/MobileNavigator";
-import MainMap from "@/components/main/MainMap";
 import { ContactsProvider } from "@/context/ContactsProvider";
-
+import { RideProvider } from "@/context/states";
 export const metadata: Metadata = {
   title: "VeloRide | Smarter Carpooling for Easy & Affordable Rides",
   description: "VeloRide makes carpooling effortless! Connect with trusted drivers and passengers, save money, reduce traffic, and travel smarter. Join now and ride the future!",
@@ -21,11 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex relative flex-col min-h-screen"
+      <body className="inter flex relative flex-col min-h-screen"
       >
-        <AuthProvider>
-          <ContactsProvider>
-            <div className="fixed w-full left-0 z-40 top-0">
+        <RideProvider>
+          <AuthProvider>
+            <ContactsProvider>
+              <div className="fixed w-full left-0 z-40 top-0">
               <Header />
             </div>
 
@@ -36,8 +36,9 @@ export default function RootLayout({
             <div className="bottom-0 z-30 fixed right-0 h-fit w-fit ml-auto">
               <MobileNavigator />
             </div>
-          </ContactsProvider>
-        </AuthProvider>
+            </ContactsProvider>
+          </AuthProvider>
+        </RideProvider>
       </body>
     </html>
   );

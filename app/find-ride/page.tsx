@@ -1,10 +1,10 @@
 'use client'
-import Additional from '@/components/FindARide/Additional'
-import Budget from '@/components/FindARide/Budget'
-import Preferences from '@/components/FindARide/Preferences'
-import ProgressBar from '@/components/FindARide/ProgressBar'
-import RideDetails from '@/components/FindARide/RideDetails'
-import Submit from '@/components/FindARide/Submit'
+import Additional from './(Find-Ride)/Steps/Additional'
+import Budget from './(Find-Ride)/Steps/Budget'
+import Preferences from './(Find-Ride)/Steps/Preferences'
+import ProgressBar from '@/app/find-ride/(Find-Ride)/ProgressBar'
+import RideDetails from './(Find-Ride)/Steps/RideDetails'
+import Submit from './(Find-Ride)/Steps/Submit'
 import Loader from '@/components/Loader'
 import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
@@ -12,6 +12,7 @@ import { findRide } from '@/functions/ridesFunctions'
 import { Users } from 'lucide-react'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+import { useRide } from '@/context/states'
 
 const page = () => {
 
@@ -19,6 +20,7 @@ const page = () => {
     const pathname = usePathname()
     const authContext = getContacts()
     const setMatchedRides = authContext?.setMatchedRides
+    const toggleTheme = authContext?.toggleTheme
     const userContext = useAuth()
     const user = userContext?.user || null
     const router = useRouter()
@@ -48,7 +50,7 @@ const page = () => {
     const [smoking, setSmoking] = useState(false)
     const [showGender, setShowGender] = useState(false)
     const [vehicle, setVehicle] = useState('')
-    const [genderType, setGenderType] = useState('Any')
+    const [gender, setGender] = useState('')
 
     // fields for budget
     const [rating, setRating] = useState('')
@@ -60,38 +62,23 @@ const page = () => {
     const [number, setNumber] = useState(false)
     const [email, setEmail] = useState(false)
 
-    // for storing initial state of gender element so it can be change after selection
-    const [gender, setGender] = useState(<>
-        <Users size={20} color='#202020' />
-        <h1 className='text-[13px] inter font-normal'>Driver</h1>
-    </>)
+    const { rideState, setRideState } = useRide()
 
-    // stroing male and female code so it can be use in page and also for setting gender
-
-    const [male, setMale] = useState(
-        <>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 2H22M22 2V10M22 2L13 11" stroke="#202020" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="10" cy="14" r="6" stroke="#202020" strokeWidth="2" />
-            </svg>
-            <h1 className='font-normal text-[13px]'>Male</h1>
-        </>
-    )
-
-    const [female, setFemale] = useState(
-        <>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="8" r="6" stroke="#202020" strokeWidth="2" />
-                <path d="M12 14V22M9 19H15" stroke="#202020" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            <h1 className='font-normal text-[13px]'>Female</h1>
-        </>
-    )
-
-    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, passengers, setPassengers, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, showGender, setShowGender, gender, setGender, female, male, rating, setRating, price, setPrice, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, vehicle, setVehicle, setLocation, location, dropLocation, setDropLocation, setGenderType, currStep, seats, setSeats }
+    const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, passengers, setPassengers, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, showGender, setShowGender, gender, setGender, rating, setRating, price, setPrice, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, vehicle, setVehicle, setLocation, location, dropLocation, setDropLocation, currStep, seats, setSeats }
 
     //search for ride
-    const searchRide = async () => await findRide(pickup, drop, date, passengers, time, price, vehicle, location, dropLocation, email, number, setMatchedRides || null, setHideForm, router, luggage, petFriendly, smoking, rating, setLoader, setShowMessage, setMessage, ride, genderType, user)
+    const searchRide = async () => {
+        await findRide(pickup, drop, date, passengers, time, price, vehicle, location, dropLocation, email, number, setMatchedRides || null, setHideForm, router, luggage, petFriendly, smoking, rating, setLoader, setShowMessage, setMessage, ride, gender, user)
+        setRideState({
+            userId: user?._id || '',
+            photo: photo,
+            bookedSeats: passengers,
+            paying: price,
+            luggage: luggage,
+            pet: petFriendly,
+            smoking: smoking
+        })
+    }
 
     return (
 
@@ -99,7 +86,7 @@ const page = () => {
 
             {hideform && <div className='flex justify-center h-screen w-screen items-center left-0 top-0 fixed z-50'>
                 <div className='loader -translate-y-5'></div>
-                <h1 className='inter md:text-lg font-medium text-center mt-4 translate-x-2.5 translate-y-7'>Finding best rides for you...</h1>
+                <h1 className={`${toggleTheme? 'text-[#fefefe]': 'text-[#202020]'} inter md:text-lg font-medium text-center mt-4 translate-x-2.5 translate-y-7`}>Finding best rides for you...</h1>
             </div>}
 
             {!hideform && loader && <Loader message={message} showMessage={showMessage} setShowMessage={setShowMessage} setLoader={setLoader} />}
@@ -112,11 +99,11 @@ const page = () => {
             {!hideform && <div className='min-h-screen flex justify-between fixed w-screen top-0 left-0 z-10'>
 
                 <div className='flex h-screen items-end'>
-                    <div className='h-[150px] w-[150px] xl:w-[220px] xl:h-[220px] bg-[#00b37e]' style={{ borderTopRightRadius: '500px' }}></div>
+                    <div className='h-[150px] w-[150px] xl:w-[220px] xl:h-[220px] bg-[#00563c]' style={{ borderTopRightRadius: '500px' }}></div>
                 </div>
 
                 <div className='flex'>
-                    <div className='w-[150px] h-[150px] xl:w-[220px] xl:h-[220px] bg-[#00b37e]' style={{ borderBottomLeftRadius: '500px' }}></div>
+                    <div className='w-[150px] h-[150px] xl:w-[220px] xl:h-[220px] bg-[#00563c]' style={{ borderBottomLeftRadius: '500px' }}></div>
                 </div>
 
             </div >}
@@ -145,21 +132,21 @@ const page = () => {
 
                         {currStep === 1 && <RideDetails setLocation={setLocation} setDropLocation={setDropLocation} drop={drop} setDrop={setDrop} pickup={pickup} setPickup={setPickup} time={time} setTime={setTime} date={date} setDate={setDate} passengers={passengers} setPassengers={setPassengers} />}
 
-                        {currStep === 2 && <Preferences setGenderType={setGenderType} setRide={setRide} ride={ride} gender={gender} setGender={setGender} vehicle={vehicle} setVehicle={setVehicle} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
+                        {currStep === 2 && <Preferences gender={gender} setGender={setGender} setRide={setRide} ride={ride} vehicle={vehicle} setVehicle={setVehicle} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
 
                         {currStep === 3 && <Budget seats={seats} setSeats={setSeats} location={location} dropLocation={dropLocation} vehicle={vehicle} currStep={currStep} setPrice={setPrice} setRating={setRating} price={price} rating={rating} />}
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
 
-                        {currStep != 5 && <div className={`mt-6 lg:mt-10 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
+                        {currStep != 5 && <div className={`inter mt-6 lg:mt-10 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
-                            {currStep != 1 && <button className={`exo2 active:translate-y-0.5 active:duration-200 shadow-lg font-bold text-[#00b37e] rounded-xl bg-[#fefefe] hover:bg-[#f8f7f7] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
+                            {currStep != 1 && <button className={`shadow-md font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`} onClick={() => {
                                 setStep(step - 1)
                                 setCurrStep(currStep - 1)
-                            }} style={{ border: '2px solid #00b37e' }}>Back</button>}
+                            }}>Back</button>}
 
-                            <button disabled={currStep === 3 && vehicle === '' ? true : false} className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
+                            <button disabled={currStep === 3 && vehicle === '' ? true : false} className={`active:bg-[#00563c] text-[#fefefe] rounded-md bg-[#00563c] shadow-md font-medium hover:bg-[#00563ccc] px-8 py-2.5 cursor-pointer`} onClick={() => {
                                 setCurrStep(currStep + 1)
                                 setStep(step + 1)
                             }}>Next</button>

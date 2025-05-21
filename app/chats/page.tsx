@@ -1,6 +1,6 @@
 'use client'
-import Chat from '@/components/Chat/Chat'
-import Contacts from '@/components/Chat/Contacts'
+import Chat from '@/app/chats/(Chats)/Chat'
+import Contacts from '@/app/chats/(Chats)/Contacts'
 import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
 import { StarIcon } from '@heroicons/react/16/solid'
@@ -24,7 +24,7 @@ const page = () => {
   const [chat, setChat] = useState<any>()
   const [openChat, setOpenChat] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  
+
   useEffect(() => {
     if (!contacts) return
     setChat(contacts[0])

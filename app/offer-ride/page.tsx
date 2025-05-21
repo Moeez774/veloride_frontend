@@ -1,21 +1,25 @@
 'use client'
-import Additional from '@/components/FindARide/Additional'
-import Preferences from '@/components/FindARide/Preferences'
-import ProgressBar from '@/components/FindARide/ProgressBar'
-import Budget from '@/components/OfferARide/Budget'
-import RideDetails from '@/components/OfferARide/RideDetails'
-import Submit from '@/components/OfferARide/Submit'
+import Additional from '@/app/find-ride/(Find-Ride)/Steps/Additional'
+import Preferences from '@/app/find-ride/(Find-Ride)/Steps/Preferences'
+import ProgressBar from '@/app/find-ride/(Find-Ride)/ProgressBar'
+import Budget from '@/app/offer-ride/(Offer-Ride)/Budget'
+import RideDetails from '@/app/offer-ride/(Offer-Ride)/RideDetails'
+import Submit from '@/app/offer-ride/(Offer-Ride)/Submit'
 import { useAuth } from '@/context/AuthProvider'
+import { getContacts } from '@/context/ContactsProvider'
 import { offerRide } from '@/functions/ridesFunctions'
 import { Users } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { useRide } from '@/context/states'
 
 const page = () => {
-
+    const context = getContacts()
+    const toggleTheme = context?.toggleTheme
     const queries = useSearchParams()
     const pathname = usePathname()
     const router = useRouter()
+    const { setNotifications } = useRide()
     const authContext = useAuth()
     const user = authContext?.user || null
 
@@ -58,8 +62,8 @@ const page = () => {
 
     // for storing initial state of gender element so it can be change after selection
     const [gender, setGender] = useState(<>
-        <Users size={20} color='#202020' />
-        <h1 className='text-[13px] inter font-normal'>Driver</h1>
+        <Users size={20} color={toggleTheme ? '#fefefe' : '#202020'} />
+        <h1 className={`text-[13px] inter font-normal ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Driver</h1>
     </>)
 
     // stroing male and female code so it can be use in page and also for setting gender
@@ -67,37 +71,65 @@ const page = () => {
     const [male, setMale] = useState(
         <>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 2H22M22 2V10M22 2L13 11" stroke="#202020" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="10" cy="14" r="6" stroke="#202020" strokeWidth="2" />
+                <path d="M14 2H22M22 2V10M22 2L13 11" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="10" cy="14" r="6" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" />
             </svg>
-            <h1 className='font-normal text-[13px]'>Male</h1>
+            <h1 className={`font-normal text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Male</h1>
         </>
     )
 
     const [female, setFemale] = useState(
         <>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="8" r="6" stroke="#202020" strokeWidth="2" />
-                <path d="M12 14V22M9 19H15" stroke="#202020" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="8" r="6" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" />
+                <path d="M12 14V22M9 19H15" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" strokeLinecap="round" />
             </svg>
-            <h1 className='font-normal text-[13px]'>Female</h1>
+            <h1 className={`font-normal text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Female</h1>
         </>
     )
 
     const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, seats, setseats, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, negotiate, setNegotiate, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, budget, setBudget, vehicle, setVehicle, setLocation, setDropLocation, setGenderType, currStep, location, dropLocation }
 
     // for offering a ride
-    const offer = async () => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, negotiate, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode, user)
+    const offer = async () => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, negotiate, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode, user, setNotifications)
 
     useEffect(() => {
         if (!loader && statusCode === 200) router.push('/')
     }, [loader, statusCode])
 
+    // Update SVG colors when theme changes
+    useEffect(() => {
+        setGender(<>
+            <Users size={20} color={toggleTheme ? '#fefefe' : '#202020'} />
+            <h1 className={`text-[13px] inter font-normal ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Driver</h1>
+        </>)
+
+        setMale(
+            <>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H22M22 2V10M22 2L13 11" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="10" cy="14" r="6" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" />
+                </svg>
+                <h1 className={`font-normal text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Male</h1>
+            </>
+        )
+
+        setFemale(
+            <>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="6" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" />
+                    <path d="M12 14V22M9 19H15" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <h1 className={`font-normal text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Female</h1>
+            </>
+        )
+    }, [toggleTheme])
+
     return (
 
         <>
 
-            <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center bg-[#2020203f]`}>
+            <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center ${toggleTheme ? 'bg-[#0d0d0d3f]' : 'bg-[#2020203f]'}`}>
                 <Submit statusCode={statusCode} offer={offer} loader={loader} setLoader={setLoader} message={message} setShowMessage={setShowMessage} showMessage={showMessage} formData={formData} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
             </div>
 
@@ -105,18 +137,18 @@ const page = () => {
             <div className='min-h-screen flex justify-between fixed w-screen top-0 left-0 z-10'>
 
                 <div className='flex h-screen items-end'>
-                    <div className='h-[150px] w-[150px] xl:w-[220px] xl:h-[220px] bg-[#00b37e]' style={{ borderTopRightRadius: '500px' }}></div>
+                    <div className={`h-[150px] w-[150px] xl:w-[220px] xl:h-[220px] ${toggleTheme ? 'bg-[#048C64]' : 'bg-[#00b37e]'}`} style={{ borderTopRightRadius: '500px' }}></div>
                 </div>
 
                 <div className='flex'>
-                    <div className='w-[150px] h-[150px] xl:w-[220px] xl:h-[220px] bg-[#00b37e]' style={{ borderBottomLeftRadius: '500px' }}></div>
+                    <div className={`w-[150px] h-[150px] xl:w-[220px] xl:h-[220px] ${toggleTheme ? 'bg-[#048C64]' : 'bg-[#00b37e]'}`} style={{ borderBottomLeftRadius: '500px' }}></div>
                 </div>
 
             </div>
 
             {/* // main part */}
 
-            <div className='min-h-screen w-full items-center flex flex-col'>
+            <div className={`min-h-screen w-full items-center flex flex-col ${toggleTheme ? 'bg-[#0d0d0d]' : 'bg-white'}`}>
 
                 <div className='h-[4.7rem] sm:h-[5.5rem] lg:h-24 absolute z-50 w-full px-6 sm:px-10 justify-between max-w-[80rem] flex items-end'>
 
@@ -138,20 +170,20 @@ const page = () => {
 
                         {currStep === 1 && <RideDetails setLocation={setLocation} setDropLocation={setDropLocation} drop={drop} setDrop={setDrop} pickup={pickup} setPickup={setPickup} time={time} setTime={setTime} vehicle={vehicle} setVehicle={setVehicle} date={date} setDate={setDate} seats={seats} setseats={setseats} />}
 
-                        {currStep === 2 && <Preferences setGenderType={setGenderType} vehicle={vehicle} setVehicle={setVehicle} setRide={setRide} ride={ride} gender={gender} setGender={setGender} male={male} female={female} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
+                        {currStep === 2 && <Preferences setGender={setGenderType} vehicle={vehicle} setVehicle={setVehicle} setRide={setRide} ride={ride} gender={gender} showGender={showGender} setLuggage={setLuggage} luggage={luggage} setShowGender={setShowGender} petFriendly={petFriendly} setPetFriendly={setPetFriendly} setSmoking={setSmoking} smoking={smoking} />}
 
                         {currStep === 3 && <Budget currStep={currStep} budget={budget} setBudget={setBudget} setNegotiate={setNegotiate} negotiate={negotiate} vehicle={vehicle} location={location} dropLocation={dropLocation} />}
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
-                        {currStep != 5 && <div className={`mt-6 lg:mt-8 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
+                        {currStep != 5 && <div className={`inter mt-6 lg:mt-10 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
-                            {currStep != 1 && <button className={`exo2 active:translate-y-0.5 active:duration-200 shadow-lg font-bold text-[#00b37e] rounded-xl bg-[#fefefe] hover:bg-[#f8f7f7] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
+                            {currStep != 1 && <button className={`shadow-lg font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`} onClick={() => {
                                 setStep(step - 1)
                                 setCurrStep(currStep - 1)
-                            }} style={{ border: '2px solid #00b37e' }}>Back</button>}
+                            }}>Back</button>}
 
-                            <button disabled={currStep === 3 && vehicle === '' ? true : false} className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl bg-[#00b37e] shadow-lg font-bold hover:bg-[#00b37dd3] px-8 py-2.5 transition-all duration-300 cursor-pointer`} onClick={() => {
+                            <button disabled={currStep === 3 && vehicle === '' ? true : false} className={`active:bg-[#00563c] text-[#fefefe] rounded-md bg-[#00563c] shadow-lg font-medium hover:bg-[#00563ccc] px-8 py-2.5 cursor-pointer`} onClick={() => {
                                 setCurrStep(currStep + 1)
                                 setStep(step + 1)
                             }}>Next</button>

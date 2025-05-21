@@ -9,6 +9,7 @@ interface Details {
 }
 
 const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMessage }) => {
+
     return (
         <div className={`fixed left-0 flex justify-center items-center top-0 z-[500] ${showMessage? 'bg-[#0000001e]': 'bg-transparent'} w-screen h-screen`}>
             <div className="flex flex-col gap-2 w-80 sm:w-96 relative text-[10px] sm:text-xs z-[100]">
@@ -32,6 +33,8 @@ const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMes
                     >
                         <X size={20} color='#fefefe' />
                     </button>
+
+
                 </div>
             </div>
 

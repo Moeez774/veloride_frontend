@@ -1,0 +1,21 @@
+{
+  "files.watcherExclude": {
+    "**/node_modules/*": true,
+    "**/dist/*": true,
+    "**/build/*": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "files.associations": {
+    "*.js": "javascriptreact",
+    "*.jsx": "javascriptreact"
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "javascriptreact": "html"
+  }
+}

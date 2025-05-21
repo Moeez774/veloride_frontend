@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
 
     if (!token) {
         // No token, allow requests to these paths
-        if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth/') || pathname.startsWith('/reset-password')) {
+        if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
             return NextResponse.next();
         }
         // Redirect if trying to access protected pages without a token
@@ -25,7 +25,7 @@ export async function middleware(req: NextRequest) {
         await jwtVerify(token, secret);
 
         // Token is valid, redirect away from public pages to home page
-        if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth/') || pathname.startsWith('/reset-password')) {
+        if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
             url.pathname = '/';
             return NextResponse.redirect(url);
         }
@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
         console.error('JWT Verification Error:', error);
 
         // Invalid token, redirect to /hop-in
-        if (!(pathname.startsWith('/hop-in') || pathname.startsWith('/auth/') || pathname.startsWith('/reset-password'))) {
+        if (!(pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password'))) {
             url.pathname = '/hop-in';
             return NextResponse.redirect(url);
         }

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useSearchParams } from 'next/navigation'
-import MatchedRides from '@/components/FindARide/MatchedRides'
+import MatchedRides from '@/app/find-ride/(Find-Ride)/MatchedRides'
 
 const page = () => {
 

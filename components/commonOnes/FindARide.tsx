@@ -30,7 +30,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className={`inter cursor-pointer bg-transparent font-semibold ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'}`}>Find a ride</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className={`inter cursor-pointer bg-transparent font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Find a ride</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>
@@ -63,7 +63,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className={`inter bg-transparent cursor-pointer font-semibold ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'} `}>Offer a ride</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className={`inter bg-transparent cursor-pointer font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Offer a ride</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>
@@ -96,7 +96,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className={`inter bg-transparent cursor-pointer font-semibold ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'} `}>My rides</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className={`inter bg-transparent cursor-pointer font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} `}>My rides</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>
@@ -129,7 +129,7 @@ const FindARide = () => {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <NavigationMenuTrigger className={`inter bg-transparent cursor-pointer font-semibold ${toggleTheme? 'text-[#048C64]': 'text-[#00563c]'} `}>Eco stats</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className={`inter bg-transparent cursor-pointer font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} `}>Eco stats</NavigationMenuTrigger>
                             <NavigationMenuContent className='w-60'>
 
                                 <div className='flex w-96 gap-3'>

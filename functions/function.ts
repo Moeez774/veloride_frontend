@@ -1,3 +1,4 @@
+import { toggleTheme } from './../app/page';
 import { auth } from "@/firebase"
 import socket from "@/utils/socket"
 import { User } from "firebase/auth"
@@ -5,9 +6,10 @@ import { Dispatch, SetStateAction } from "react"
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth'
 
 const google = new GoogleAuthProvider()
+const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
 // for saving user's data
-export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any) {
+export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any, gender: string) {
 
     // calling server for saving user's data if not saved already
     let a = await fetch('http://localhost:4000/users/providers-sign-in', {
@@ -15,12 +17,12 @@ export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>,
             "Content-Type": "application/json"
         },
         credentials: 'include',
-        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, photo: user?.photoURL, role: role, isProvider: true, rating: 0 })
+        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, photo: user?.photoURL, role: role, isProvider: true, rating: 0, gender: gender })
     })
 
     let response = await a.json()
     if (response.statusCode === 200) {
-        router.push('/authorization')
+        router.push('/validation')
     }
     else {
         alert(response.message)
@@ -38,7 +40,7 @@ function generateHSLColor() {
 }
 
 // for sign up
-export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, role: string | null, router: any) {
+export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, role: string | null, router: any, gender: string) {
 
     //generating random color for profile backgorund
     const color = generateHSLColor()
@@ -50,12 +52,12 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, e
                 "Content-Type": "application/json"
             },
             credentials: 'include',
-            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: number, city: city, remeber: false, photo: color, role: role, isProvider: false, rating: 0 })
+            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: number, city: city, remeber: false, photo: color, role: role, isProvider: false, rating: 0, gender: gender })
         })
 
         let response = await a.json()
         if (response.statusCode === 200) {
-            router.push('/authorization')
+            router.push('/validation')
         }
         else {
             alert(response.message)
@@ -142,11 +144,8 @@ export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolea
         await signInWithPopup(auth, google)
 
         // for chekcing whther user's data already availabale in database or not so we can ask for more info
-        let a = await fetch('http://localhost:4000/users/check-user', {
-            method: "POST", headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ _id: auth.currentUser?.uid })
+        let a = await fetch(`http://localhost:4000/users/check-user?id=${auth.currentUser?.uid}`, {
+            method: "GET"
         })
 
         let response = await a.json()
@@ -163,7 +162,7 @@ export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolea
         }
         else {
             await saveUser(setLoader)
-            router.push('/authorization')
+            router.push('/validation')
         }
 
     } catch (err) {
@@ -171,3 +170,113 @@ export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolea
         setLoader(false)
     }
 }
+
+//for fetching eta of drivers
+export async function fetchEta({ sources, targets, setAvgTime, setDriversTime, drivers }: { sources: any[], targets: any[], setAvgTime: Dispatch<SetStateAction<number>>, setDriversTime: Dispatch<SetStateAction<Record<string, string>>>, drivers: any[] }) {
+    const body = {
+        mode: 'drive',
+        sources: sources,
+        targets: targets
+    }
+
+    let a = await fetch(`https://api.geoapify.com/v1/routematrix?apiKey=7c961581499544e085f28a826bf9ebeb`, {
+        method: "POST", headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    })
+
+    let data = await a.json()
+    const times = data.sources_to_targets.map((item: any) => item[0].time)
+    const avgTime = Math.round(
+        times.reduce((a: number, b: number) => a + b, 0) / times.length / 60
+    )
+    setAvgTime(avgTime)
+
+    // for getting ETA of drivers separately
+    times.forEach((t: any, i: any) => {
+        const time = `${Math.round(t / 60)} min`
+
+        setDriversTime((prev: Record<string, string>) => ({
+            ...prev,
+            [drivers[i].userId]: time
+        }))
+    })
+}
+
+export async function trackRideTime(ride: any, setTimeLeft: Dispatch<SetStateAction<{ hours: number, minutes: number, seconds: number, status: string }>>, isCancelled: boolean, setRide: Dispatch<SetStateAction<any>>) {
+    const rideDate = new Date(ride.rideDetails.date);
+    const [hours, minutes, period] = ride.rideDetails.time.match(/(\d+):(\d+)\s*(AM|PM)/).slice(1);
+
+    rideDate.setHours(
+        period === 'PM' ? (parseInt(hours) === 12 ? 12 : parseInt(hours) + 12) :
+            (parseInt(hours) === 12 ? 0 : parseInt(hours)),
+        parseInt(minutes)
+    );
+
+    const now = new Date();
+    const difference = rideDate.getTime() - now.getTime();
+
+    if (difference <= 0) {
+        if (!isCancelled) {
+            setTimeLeft({ hours: 0, minutes: 0, seconds: 0, status: 'started' });
+
+            try {
+                const response = await fetch('http://localhost:4000/rides/update-ride-status', {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rideId: ride._id, status: 'ready' })
+                });
+
+                const data = await response.json();
+                if (data.statusCode === 200) {
+                    setRide(data.data);
+                    socket.emit('ride-updated', { ride: data.data, rideId: ride._id });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        return;
+    }
+
+    const hoursLeft = Math.floor(difference / (1000 * 60 * 60));
+    const minutesLeft = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const secondsLeft = Math.floor((difference % (1000 * 60)) / 1000);
+
+    if (!isCancelled) {
+        setTimeLeft({ hours: hoursLeft, minutes: minutesLeft, seconds: secondsLeft, status: 'upcoming' });
+    }
+}
+
+//for drawing routes
+export async function drawRoute(from: any, to: any, map: any, toggleTheme: boolean | undefined) {
+    const res = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${from.lng},${from.lat};${to.lng},${to.lat}?geometries=geojson&access_token=${MAPBOX_ACCESS_TOKEN}`
+    );
+    const data = await res.json();
+    const route = data.routes[0].geometry;
+
+    if (map.getSource("route")) {
+        map.getSource("route").setData(route);
+    } else {
+        map.addSource("route", {
+            type: "geojson",
+            data: route,
+        });
+
+        map.addLayer({
+            id: "route",
+            type: "line",
+            source: "route",
+            layout: {
+                "line-join": "round",
+                "line-cap": "round"
+            },
+            paint: {
+                "line-color": toggleTheme ? "#f0f0f0" : "#202020",
+                "line-width": 4
+            }
+        });
+    }
+};
