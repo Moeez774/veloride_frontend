@@ -7,6 +7,7 @@ const page = () => {
     const router = useRouter()
     const authContext = useAuth()
     const fetchUser = authContext?.fetchUser
+
     const [loader, setLoader] = useState(true)
     const [message, setMessage] = useState('')
 
@@ -18,22 +19,18 @@ const page = () => {
                     credentials: "include"
                 });
 
-                const data = await response.json();
-                console.log('Validation - Auth response:', data);
-
-                if (fetchUser) {
-                    fetchUser();
-                }
+                const data = await response.json()
 
                 setLoader(false);
                 setMessage(data.message);
 
                 if (data.statusCode === 200) {
                     localStorage.setItem('_id', data.userId);
-
+                    if (fetchUser) {
+                        fetchUser();
+                    }
                     setTimeout(() => {
-                        router.push('/')
-                        router.refresh()
+                        router.push('/');
                     }, 100);
                 } else {
                     localStorage.removeItem('_id');
@@ -47,8 +44,8 @@ const page = () => {
             }
         };
 
-        verify();
-    }, [router, fetchUser]);
+        verify()
+    }, []);
 
     return (
         <div className='fixed left-0 flex-col gap-6 px-6 top-0 z-50 bg-white w-screen h-screen flex justify-center items-center'>
