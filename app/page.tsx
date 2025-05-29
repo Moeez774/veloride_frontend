@@ -1,14 +1,7 @@
 'use client'
 import NearRides from "@/app/(HomePage)/NearRides"
 import RideConnect from "@/components/hooks/RideConnect"
-import { getContacts } from '@/context/ContactsProvider'
-
-export const toggleTheme = () => {
-  const context = getContacts()
-  const toggleTheme = context?.toggleTheme
-  return toggleTheme
-}
-
+import { toggleTheme } from "./(HomePage)/MainMap"
 export default function Home() {
   return (
     <>

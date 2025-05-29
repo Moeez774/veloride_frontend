@@ -17,22 +17,22 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { User } from '@/context/AuthProvider'
-import { Bell, Dot, KeyRound, Route, EllipsisVertical, Bookmark, CheckCheck, Trash, UserRound, Car } from 'lucide-react'
+import { Bell, Dot, KeyRound, Route, EllipsisVertical, Bookmark, CheckCheck, Trash, UserRound, Car, Smile } from 'lucide-react'
 import { useRide } from '@/context/states'
 import Link from 'next/link'
 
-const Notification = ({ isLoading, _id, isRead, type, date, message, toggleTheme, setOpenNotifications, readNotification, currentlyActive }: { isLoading: boolean, _id: string, isRead: boolean, type: string, date: string, message: string, toggleTheme: boolean | undefined, setOpenNotifications: (open: boolean) => void, readNotification: (id: string) => void, currentlyActive: string }) => {
+const Notification = ({ isLoading, _id, isRead, type, date, message, toggleTheme, setOpenNotifications, readNotification, currentlyActive, deleteNotification }: { isLoading: boolean, _id: string, isRead: boolean, type: string, date: string, message: string, toggleTheme: boolean | undefined, setOpenNotifications: (open: boolean) => void, readNotification: (id: string) => void, currentlyActive: string, deleteNotification: (id: string) => void }) => {
 
     return (
         <div onClick={() => setOpenNotifications(false)} className={`relative ${toggleTheme ? 'text-[#fefefe] hover:bg-[#353535]' : 'text-[#202020] hover:bg-[#f7f7f7]'} cursor-pointer flex text-sm gap-3 p-4 justify-between items-start w-full`}>
 
-            {isRead && <div className={`absolute left-0 top-0 w-full h-full ${!toggleTheme ? 'bg-[rgba(255,255,255,0.5)]' : 'bg-[rgba(53,53,53,0.5)]'}`}>
+            {isRead && <div className={`absolute z-20 left-0 top-0 w-full h-full ${!toggleTheme ? 'bg-[rgba(255,255,255,0.5)]' : 'bg-[rgba(53,53,53,0.5)]'}`}>
 
             </div>}
 
             <div className='flex gap-3'>
-                <div className={`p-2 rounded-md ${type === 'rideCreated' ? 'bg-green-200' : type === 'rideStarted' ? 'bg-green-200' : type === 'passengerDeclined' ? 'bg-yellow-200' : type === 'otpArrived' ? 'bg-blue-200' : type === 'rideCancelled' ? 'bg-red-200' : type === 'passengerJoined' ? 'bg-yellow-200' : 'bg-gray-200'} h-fit w-fit`}>
-                    {type === 'rideCreated' ? <Route color='green' size={20} /> : type === 'rideStarted' ? <Car color='green' size={20} /> : type === 'passengerDeclined' ? <UserRound color='white' size={20} /> : type === 'otpArrived' ? <KeyRound color='blue' size={20} /> : type === 'rideCancelled' ? <Trash color='red' size={20} /> : type === 'passengerJoined' ? <UserRound color='white' size={20} /> : <Bell color='gray' size={20} />}
+                <div className={`p-2 rounded-md ${type === 'rideCreated' ? 'bg-green-200' : type === 'passengerDropped' ? 'bg-green-500' : type === 'passengerCancelled' ? 'bg-red-200' : type === 'welcome' ? 'bg-[#00563c]' : type === 'rideStarted' ? 'bg-green-200' : type === 'passengerDeclined' ? 'bg-yellow-200' : type === 'otpArrived' ? 'bg-blue-200' : type === 'rideCancelled' ? 'bg-red-200' : type === 'passengerJoined' ? 'bg-yellow-200' : 'bg-gray-200'} h-fit w-fit`}>
+                    {type === 'rideCreated' ? <Route color='green' size={20} /> : type === 'passengerDropped' ? <UserRound color='white' size={20} /> : type === 'passengerCancelled' ? <UserRound color='white' size={20} /> : type === 'welcome' ? <Smile color='white' size={20} /> : type === 'rideStarted' ? <Car color='green' size={20} /> : type === 'passengerDeclined' ? <UserRound color='white' size={20} /> : type === 'otpArrived' ? <KeyRound color='blue' size={20} /> : type === 'rideCancelled' ? <Trash color='red' size={20} /> : type === 'passengerJoined' ? <UserRound color='white' size={20} /> : <Bell color='gray' size={20} />}
                 </div>
 
                 <div>
@@ -51,20 +51,20 @@ const Notification = ({ isLoading, _id, isRead, type, date, message, toggleTheme
             </div>
 
             <DropdownMenu>
-                <DropdownMenuTrigger className={`cursor-pointer p-1 ${toggleTheme ? 'hover:bg-[#575656]' : 'hover:bg-[#f0f0f0]'} rounded-full`}>
+                <DropdownMenuTrigger className={`cursor-pointer relative z-30 p-1 ${toggleTheme ? 'hover:bg-[#575656]' : 'hover:bg-[#f0f0f0]'} rounded-full`}>
                     {isLoading && currentlyActive === _id ?
                         <svg className='authLoader w-[1.42em]' viewBox="25 25 50 50">
                             <circle stroke={toggleTheme ? '#fefefe' : '#575656'} className='authCircle' r="20" cy="50" cx="50"></circle>
                         </svg> :
-                        <EllipsisVertical size={18} className={`cursor-pointer ${isRead ? 'hidden' : 'block'}`} color={toggleTheme ? '#fefefe' : '#202020'} />}
+                        <EllipsisVertical size={18} className={`cursor-pointer`} color={toggleTheme ? '#fefefe' : '#202020'} />}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent onClick={(e) => {
                     e.stopPropagation()
                     e.preventDefault()
                 }} className={`border ${toggleTheme ? 'bg-[#353535] border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} -translate-x-16`}>
-                    <DropdownMenuItem onClick={() => readNotification(_id)} className='flex items-center gap-2 hover:bg-transparent'><CheckCheck size={18} /> Mark as read</DropdownMenuItem>
+                    {!isRead && <DropdownMenuItem onClick={() => readNotification(_id)} className='flex items-center gap-2 hover:bg-transparent'><CheckCheck size={18} /> Mark as read</DropdownMenuItem>}
                     <DropdownMenuItem className='flex items-center gap-2'><Bookmark size={18} /> Save</DropdownMenuItem>
-                    <DropdownMenuItem className='flex items-center gap-2'><Trash size={18} /> Delete</DropdownMenuItem>
+                    <DropdownMenuItem className='flex items-center gap-2' onClick={() => deleteNotification(_id)}><Trash size={18} /> Delete</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
@@ -97,7 +97,6 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
 
             const response = await res.json()
             setNotifications(notifications.map((e) => e._id === id ? { ...e, is_read: true } : e))
-            alert(response.message)
 
         } catch (err) {
             console.log(err)
@@ -130,6 +129,37 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
             alert(response.message)
 
         } catch (err) {
+            console.log(err)
+        } finally {
+            setIsLoading(false)
+            setCurrentlyActive('')
+        }
+    }
+
+    const deleteNotification = async (id: string) => {
+        setIsLoading(true)
+        setCurrentlyActive(id)
+
+        try {
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/delete?id=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+
+            if (!res.ok) {
+                alert('Failed to delete notification')
+                return
+            }
+
+            const response = await res.json()
+            setNotifications(notifications.filter((e) => e._id !== id))
+            alert(response.message)
+        }
+
+        catch (err) {
             console.log(err)
         } finally {
             setIsLoading(false)
@@ -178,7 +208,7 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
                             <TabsContent value="viewAll" className='mt-2 flex w-full text-start flex-col'>
 
                                 {notifications.length > 0 ? notifications.map((e, index) => {
-                                    return <Link key={index} onClick={() => readNotification(e._id)} href={`${e.reference_url}`}><Notification isRead={e.is_read} isLoading={isLoading} _id={e._id} setOpenNotifications={setOpenNotifications} type={e.type} currentlyActive={currentlyActive} date={e.createdAt} message={e.message} toggleTheme={toggleTheme} readNotification={readNotification} /></Link >
+                                    return <Link key={index} onClick={() => readNotification(e._id)} href={`${e.reference_url}`}><Notification isRead={e.is_read} isLoading={isLoading} _id={e._id} deleteNotification={deleteNotification} setOpenNotifications={setOpenNotifications} type={e.type} currentlyActive={currentlyActive} date={e.createdAt} message={e.message} toggleTheme={toggleTheme} readNotification={readNotification} /></Link >
                                 }) : <p className={`text-center text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>No notifications yet</p>}
 
                             </TabsContent>
@@ -189,7 +219,7 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
                                 {notifications.length > 0 && notifications.filter((notfi) => notfi.is_read === false).length === 0 && <p className={`text-center text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>No unread notifications</p>}
 
                                 {notifications.length > 0 ? notifications.filter((notfi) => notfi.is_read === false).map((e, index) => {
-                                    return <Link key={index} onClick={() => readNotification(e._id)} href={`${e.reference_url}`}><Notification isRead={e.is_read} isLoading={isLoading} _id={e._id} setOpenNotifications={setOpenNotifications} type={e.type} currentlyActive={currentlyActive} date={e.createdAt} message={e.message} toggleTheme={toggleTheme} readNotification={readNotification} /></Link >
+                                    return <Link key={index} onClick={() => readNotification(e._id)} href={`${e.reference_url}`}><Notification isRead={e.is_read} isLoading={isLoading} _id={e._id} deleteNotification={deleteNotification} setOpenNotifications={setOpenNotifications} type={e.type} currentlyActive={currentlyActive} date={e.createdAt} message={e.message} toggleTheme={toggleTheme} readNotification={readNotification} /></Link >
                                 }) : <p className={`text-center text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>No unread notifications</p>}
 
                             </TabsContent>

@@ -22,11 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="inter flex relative flex-col min-h-screen"
       >
-        <RideProvider>
           <AuthProvider>
-            <ContactsProvider>
-              <div className="fixed w-full left-0 z-40 top-0">
-              <Header />
+            <RideProvider>
+              <ContactsProvider>
+                <div className="fixed w-full left-0 z-40 top-0">
+                  <Header />
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -35,10 +35,10 @@ export default function RootLayout({
 
             <div className="bottom-0 z-30 fixed right-0 h-fit w-fit ml-auto">
               <MobileNavigator />
-            </div>
-            </ContactsProvider>
+                </div>
+              </ContactsProvider>
+            </RideProvider>
           </AuthProvider>
-        </RideProvider>
       </body>
     </html>
   );

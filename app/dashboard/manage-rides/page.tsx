@@ -1,9 +1,8 @@
 'use client'
 import { getContacts } from '@/context/ContactsProvider'
 import React, { useEffect, useRef, useState } from 'react'
-import { Search, Sliders, Car, Coins, Wallet, DollarSign, EllipsisVertical, MessageCircle, PhoneCall, XCircle, Navigation, ChevronLeft, Menu, X, PlayCircle, CheckCircle, AlertCircle, Clock, Info } from 'lucide-react'
+import { Search, Sliders, Car, Coins, Wallet, DollarSign, EllipsisVertical, MessageCircle, PhoneCall, XCircle, Navigation, ChevronLeft, Menu, X, PlayCircle, CheckCircle, AlertCircle, Clock, Info, CheckCheck } from 'lucide-react'
 import socket from '@/utils/socket'
-import VerifyPax from '../(Rides)/OwnedRides/VerifyPax'
 import {
     Accordion,
     AccordionContent,
@@ -11,6 +10,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 import { usePathname, useRouter } from 'next/navigation'
+import VerifyPax from '../(Rides)/Owned_Rides/VerifyPax'
 import { TargetIcon } from '@radix-ui/react-icons'
 import {
     Tooltip,
@@ -44,8 +44,9 @@ import { useAuth } from '@/context/AuthProvider'
 import { MapPinIcon } from '@heroicons/react/16/solid'
 import Map from '../(Rides)/Map'
 import Messages from '@/app/ride-detail/(Ride_Details)/Messages'
-import { declinePassenger } from '@/functions/ridesFunctions'
+import { declinePassenger, markPassengerDroppedOff } from '@/functions/ridesFunctions'
 import { useRide } from '@/context/states'
+import SearchRides from '../(Rides)/Owned_Rides/SearchRides'
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 const ManageRides = () => {
@@ -172,7 +173,6 @@ const ManageRides = () => {
 
     useEffect(() => {
         if (!selectedRide) return;
-        socket.emit('join-ride', selectedRide._id)
         socket.emit('join-passengers', selectedRide._id)
 
         socket.on('ride-joined', ({ ride, notificationForDriver }) => {
@@ -181,9 +181,12 @@ const ManageRides = () => {
             setNotifications(prev => [notificationForDriver, ...prev])
         })
 
-        socket.on('ride-cancelled', (data: any) => {
-            setSelectedRide(data)
-            setActiveRides((prevRides: any) => prevRides.map((ride: any) => ride._id === selectedRide._id ? data : ride))
+        socket.on('ride-cancelled', ({ ride, notification }) => {
+            setSelectedRide(ride)
+            setActiveRides((prevRides: any) => prevRides.map((ride: any) => ride._id === selectedRide._id ? ride : ride))
+            if(ride.userId === user?._id) {
+                setNotifications(prev => [notification, ...prev])
+            }
         })
 
         //setting location in object by selected rides id
@@ -217,10 +220,18 @@ const ManageRides = () => {
             }
         })
 
+        socket.on('passenger-dropped-off', ({ rideId, passengerId, ride }) => {
+            setActiveRides((prevRides: any) => prevRides.map((rideData: any) => rideData._id === rideId ? ride : rideData))
+            if (rideId === selectedRide._id) {
+                setSelectedRide(ride)
+            }
+        })
+
         return () => {
             socket.off('provide-location')
             socket.off('join-passengers')
             socket.off('join-ride')
+            socket.off('passenger-dropped-off')
             socket.off('ride-joined')
             socket.off('ride-cancelled')
             socket.off('ride-updated')
@@ -289,6 +300,10 @@ const ManageRides = () => {
 
     const startRide = async (rideId: string, status: string) => {
         setHasStarted(true)
+
+        if (status === 'started') {
+            setIsStarted(true)
+        }
 
         try {
 
@@ -372,10 +387,6 @@ const ManageRides = () => {
     return (
         <>
 
-        {selectedRide && selectedRide.status === 'started' &&
-        <VerifyPax />
-        }
-
             {/* //messages component */}
             {selectedRide && passengerForChat && <Messages chat_id={`${passengerForChat._id}_${user?._id}`} ride={selectedRide} openChat={openChat} setOpenChat={setOpenChat} receiver={passengerForChat} />}
 
@@ -422,7 +433,7 @@ const ManageRides = () => {
 
             <div className={`inter ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} overflow-hidden w-full min-h-screen flex`}>
 
-                <div ref={sideBarRef} className={`xl:w-1/4 ${openMenu ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'} transition-all duration-300 !z-[60] fixed w-full max-w-[400px] xl:relative h-screen overflow-y-auto px-6 py-4 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#f7f7f7]'}`} style={{ scrollbarWidth: 'thin' }}>
+                <div ref={sideBarRef} className={`xl:w-1/4 ${openMenu ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'} transition-all duration-300 !z-[10] fixed w-full max-w-[400px] xl:relative h-screen overflow-y-auto px-6 py-4 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#f7f7f7]'}`} style={{ scrollbarWidth: 'thin' }}>
                     <div className='flex justify-between items-center gap-2'>
                         <div className='flex items-center gap-2'>
                             <div onClick={() => {
@@ -436,13 +447,7 @@ const ManageRides = () => {
                         <X className='cursor-pointer lg:hidden' onClick={() => setOpenMenu(false)} size={20} />
                     </div>
 
-                    <div className={`mt-4 flex px-3 items-center gap-2 w-full ${toggleTheme ? 'bg-[#000000] text-[#b1b1b1]' : 'bg-[#fefefe] text-[#5b5b5b]'}`}>
-                        <div className='flex flex-1 gap-1 items-center'>
-                            <Search size={20} />
-                            <input type='text' placeholder='Search' className='w-full bg-transparent px-2 py-2.5 outline-none' />
-                        </div>
-                        <Sliders size={20} className='cursor-pointer rotate-90' />
-                    </div>
+                    <SearchRides toggleTheme={toggleTheme} activeRides={activeRides} setActiveRides={setActiveRides} />
 
                     <div className='mt-4'>
                         {activeRides.length === 0 && (
@@ -589,11 +594,11 @@ const ManageRides = () => {
                             {(selectedRide.status !== 'completed' && selectedRide.status !== 'expired') && <button onClick={() => startRide(selectedRide._id, 'cancelled')} className={`${toggleTheme ? 'border border-[#b1b1b1] bg-transparent hover:bg-[#202020cc]' : 'border bg-transparent hover:bg-[#f7f7f7cc]'} py-2.5 px-4 md:px-6 text-sm rounded-full cursor-pointer active:bg-transparent font-medium`}>Cancel ride</button>}
                             {selectedRide.status === 'ready' &&
                                 <button onClick={() => {
-                                    setIsStarted(true)
                                     startRide(selectedRide._id, 'started')
                                 }} className='py-2.5 px-4 md:px-6 text-sm md:text-[15px] hover:bg-[#00563ccc] cursor-pointer active:bg-[#00563c] bg-[#00563c] text-[#fefefe] rounded-full flex items-center gap-2 font-medium'>Start ride <PlayCircle size={20} />
                                 </button>
                             }
+                            {selectedRide.status === 'started' && !selectedRide.passengers.some((passenger: any) => passenger.status != 'dropped') && <button className='py-2.5 px-4 md:px-6 text-sm md:text-[15px] hover:bg-[#00563ccc] cursor-pointer active:bg-[#00563c] bg-[#00563c] text-[#fefefe] rounded-full flex items-center gap-2 font-medium'>Complete ride <CheckCheck size={20} /></button>}
                         </div>}
                     </div>
 
@@ -639,7 +644,7 @@ const ManageRides = () => {
                                     </TableHeader>
                                     <TableBody>
                                         <TableRow className={`${toggleTheme ? 'hover:bg-[#202020cc]' : 'hover:bg-[#f7f7f7cc]'}`}>
-                                            <TableCell className="font-medium px-6">#{selectedRide._id.slice(-8)}</TableCell>
+                                            <TableCell className="font-medium px-6">#{selectedRide._id.slice(-5)}</TableCell>
                                             <TableCell className="font-medium px-6">{selectedRide.rideDetails.vehicle}</TableCell>
                                             <TableCell className="px-6">{selectedRide.rideDetails.seats}</TableCell>
                                             <TableCell className="px-6">{selectedRide.rideDetails.bookedSeats}</TableCell>
@@ -675,10 +680,10 @@ const ManageRides = () => {
                                                     <TableCell className="px-6">{passenger.seatsBooked}</TableCell>
                                                     <TableCell className="px-6">{passenger.rating}</TableCell>
                                                     <TableCell className="px-6">Rs. {Math.round(passenger.paying * passenger.seatsBooked)}</TableCell>
-                                                    <TableCell className={`px-6 ${passenger.status === 'pending' ? 'text-[#2962FF]' : passenger.status === 'verified' ? 'text-[#4CAF50]' : passenger.status === 'declined' ? 'text-[#ff0000]' : passenger.status === 'not_verified' ? 'text-[#5b5b5b]' : 'text-[#5b5b5b]'}`}>{passenger.status.charAt(0).toUpperCase() + passenger.status.slice(1)}</TableCell>
+                                                    <TableCell className={`px-6 ${passenger.status === 'pending' ? 'text-[#2962FF]' : passenger.status === 'verified' ? 'text-[#4CAF50]' : passenger.status === 'declined' ? 'text-[#ff0000]' : passenger.status === 'not_verified' ? 'text-[#5b5b5b]' : passenger.status === 'dropped' ? 'text-[brown]' : 'text-[#5b5b5b]'}`}>{passenger.status.charAt(0).toUpperCase() + passenger.status.slice(1)}</TableCell>
                                                     <TableCell className="px-6">
                                                         <DropdownMenu>
-                                                            <DropdownMenuTrigger className='cursor-pointer outline-none'>
+                                                            <DropdownMenuTrigger className='cursor-pointer !z-[150] relative outline-none'>
                                                                 <EllipsisVertical size={20} />
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className={`${toggleTheme ? 'bg-[#202020] border-none text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`}>
@@ -731,6 +736,10 @@ const ManageRides = () => {
 
                 </div>}
             </div >
+
+            {selectedRide && selectedRide.passengers.some((passenger: any) => passenger.status != 'dropped') && <div className={`fixed ${selectedRide && selectedRide.status === 'started' ? 'z-[10] opacity-[1] bottom-10' : '-z-[10] opacity-[0] bottom-6'} mx-auto left-0 right-[0%] flex justify-center ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} transition-all duration-300`}>
+                <VerifyPax passengers={selectedRide?.passengers} ride={selectedRide} setSelectedRide={setSelectedRide} setActiveRides={setActiveRides} activeRides={activeRides} />
+            </div>}
         </>
     )
 }

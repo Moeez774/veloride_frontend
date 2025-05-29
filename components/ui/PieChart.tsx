@@ -56,15 +56,15 @@ export function PieChart({ toggleTheme, spendings }: { toggleTheme: boolean | un
       <CardHeader className="items-center pb-0">
         <CardTitle></CardTitle>
       </CardHeader>
-      <CardContent className="border-none outline-none px-0 h-[17em] pb-0">
+      <CardContent className="border-none shadow-none outline-none px-0 h-[17em] pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square -translate-y-8 w-[20em] max-h-[300px]"
+          className="mx-auto shadow-none border-none aspect-square -translate-y-8 w-[20em] max-h-[300px]"
         >
           <RechartsChart>
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent className={`${toggleTheme ? 'text-[#fefefe] bg-[#202020] border border-[#353535]' : 'text-[#202020] bg-[#fefefe] border'}`} hideLabel />}
             />
             <Pie data={chartData} dataKey="spending" nameKey="category" />
           </RechartsChart>

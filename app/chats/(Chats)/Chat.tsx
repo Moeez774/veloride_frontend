@@ -4,7 +4,7 @@ import { format, isToday } from 'date-fns'
 import { CheckCheck, ChevronLeft, MoreVertical, Phone, Send } from 'lucide-react'
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
-import '../commonOnes/Commons.css'
+import '@/components/commonOnes/Commons.css'
 interface Details {
     contact: any,
     user: any,

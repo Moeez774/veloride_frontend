@@ -139,7 +139,7 @@ const page = () => {
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
 
-                        {currStep != 5 && <div className={`inter mt-6 lg:mt-10 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
+                        {currStep != 5 && <div className={`inter ${currStep === 4? 'mt-2': 'mt-6'} flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
                             {currStep != 1 && <button className={`shadow-md font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`} onClick={() => {
                                 setStep(step - 1)

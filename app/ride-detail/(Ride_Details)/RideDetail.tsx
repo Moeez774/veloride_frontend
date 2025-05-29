@@ -4,7 +4,7 @@ import { ReadonlyURLSearchParams } from 'next/navigation'
 import socket from '@/utils/socket'
 import { useInView } from "react-intersection-observer";
 import Messages from './Messages'
-import { Car, ChevronLeft, Coins, Dot, Luggage, MessageCircle, Star, PawPrint, Clock, AlertCircle, Map, AlertTriangle } from 'lucide-react'
+import { Car, ChevronLeft, Coins, Dot, Luggage, MessageCircle, Star, PawPrint, Clock, AlertCircle, Map, AlertTriangle, Sparkles, Heart, HeartCrack } from 'lucide-react'
 import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
 import { FaSmoking } from 'react-icons/fa';
@@ -28,6 +28,7 @@ import LocalMap from './Map'
 import { fetchEta } from '@/functions/function'
 import { useRide } from '@/context/states'
 import { DialogDescription } from '@radix-ui/react-dialog';
+import Link from 'next/link';
 interface Details {
   ride: any,
   params: Params,
@@ -47,12 +48,15 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
   const { rideState, setRideState } = useRide()
   const [isDeclined, setIsDeclined] = useState(false)
   const [hasBooked, setHasBooked] = useState(false)
+  const [message, setMessage] = useState('')
   const [openChat, setOpenChat] = useState(false)
   const [otp, setOtp] = useState('')
   const [paying, setPaying] = useState(0)
   const [bookedSeats, setBookedSeats] = useState(0)
+  const [open, setOpen] = useState(false)
   const authContext = useAuth()
   const allDrivers = authContext?.drivers || []
+  const [passengerStatus, setPassengerStatus] = useState('')
   const user = authContext?.user || null
   const otherContext = getContacts()
   const toggleTheme = otherContext?.toggleTheme || false
@@ -88,8 +92,9 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
 
     if (bookedPassenger && bookedPassenger.status != 'declined') {
       setHasBooked(true)
+      setPassengerStatus(bookedPassenger.status)
       setBookedSeats(bookedPassenger.seatsBooked)
-      setPaying(bookedPassenger.paying)
+      setPaying(bookedPassenger.paying * bookedPassenger.seatsBooked)
     }
     else if (bookedPassenger && bookedPassenger.status === 'declined') {
       setIsDeclined(true)
@@ -179,7 +184,8 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
 
       const data = await response.json()
       if (data.statusCode === 200) {
-        alert("Ride joined successfully. Please check your notifications for the OTP, which will be used to verify your identity before ride starts to prevent fraud.")
+        setOpen(false)
+        setMessage("Ride joined successfully. Please check your notifications for the OTP, which will be used to verify your identity before ride starts to prevent fraud.")
         setNotifications(prev => [data.notification, ...prev])
         setRide(data.data)
         setOtp(data.data.otp)
@@ -226,21 +232,21 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
       })
 
       if (!response.ok) {
-        alert("Error cancelling ride")
+        setMessage("Error cancelling ride")
         return
       }
 
       const data = await response.json()
       if (data.statusCode === 200) {
-        alert("Ride cancelled successfully, We have also removed the OTP from your notifications.")
+        setMessage("Your ride has been cancelled. If something went wrong, we’re here to make it better. Veloride is built to move you smarter, safer, and together. Ready when you are. We'll be here.")
         setRide(data.data)
         setNotifications(prev => prev.filter((notfi) => notfi._id !== data.notification._id))
         setOtp('')
         setHasBooked(false)
         setPaying(0)
         setBookedSeats(0)
-
-        socket.emit('ride-cancelled', data.data)
+        setNotifications(prev => [data.notification, ...prev])
+        socket.emit('ride-cancelled', { ride: data.data, notificationForDriver: data.notificationForDriver })
       }
 
     } catch (err) {
@@ -249,26 +255,18 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
   }
 
   useEffect(() => {
-    socket.emit('join-ride', ride._id)
-
     socket.on('ride-joined', ({ ride, notificationForDriver }: { ride: any, notificationForDriver: any }) => {
       setRide(ride)
     })
 
-    socket.on('ride-cancelled', (data: any) => {
-      setRide(data)
+    socket.on('ride-cancelled', ({ ride, notification }: { ride: any, notification: any }) => {
+      setRide(ride)
     })
 
     socket.on('ride-updated', ({ ride, rideId }: { ride: any, rideId: string }) => {
       setRide(ride)
     })
 
-    socket.on('ride-updated-by-driver', ({ ride, rideId, notificationsForPassengers }: { ride: any, rideId: string, notificationsForPassengers: any }) => {
-      if(rideId === ride._id) {
-        const notification = notificationsForPassengers.find((noti: any) => noti.userId === user?._id)
-        setNotifications(prev => [notification, ...prev])
-      }
-    })
 
     socket.on('passenger-declined', ({ ride, notificationForPassenger }: { ride: any, notificationForPassenger: any }) => {
       setRide(ride)
@@ -278,10 +276,18 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
       setBookedSeats(0)
     })
 
+    socket.on('passenger-dropped-off', ({ ride, notification, passengerId, rideId }: { ride: any, notification: any, passengerId: string, rideId: string }) => {
+      if (passengerId === user?._id && rideId === ride._id) {
+        setPassengerStatus('dropped')
+        setRide(ride)
+      }
+    })
+
     return () => {
       socket.off('ride-joined')
       socket.off('ride-updated-by-driver')
       socket.off('ride-cancelled')
+      socket.off('passenger-dropped-off')
       socket.off('ride-started')
       socket.off('passenger-declined')
     }
@@ -304,6 +310,22 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
         </DialogContent>
       </Dialog>
 
+      <Dialog open={message !== ''} onOpenChange={() => setMessage('')}>
+        <DialogTrigger></DialogTrigger>
+        <DialogContent className={`border-none ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'text-[#202020] bg-[#fefefe]'}`}>
+          <DialogHeader>
+            <DialogTitle>
+              {!message.includes('wrong') ? <p className='flex items-center gap-2'>Congratulations! <Sparkles size={20} color={toggleTheme ? '#fefefe' : '#202020'} /></p> : (
+                <p className='flex items-center gap-2'>Oops! <HeartCrack size={20} color={toggleTheme ? '#fefefe' : '#202020'} /></p>
+              )}
+            </DialogTitle>
+            <div className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} font-medium mt-2`}>
+              <h1 className='text-sm'>{message}</h1>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
       {/* //messages component */}
       {driver && <Messages chat_id={`${user?._id}_${driver._id}`} ride={ride} openChat={openChat} setOpenChat={setOpenChat} receiver={driver} />}
 
@@ -321,9 +343,14 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
               }
 
               {!isDeclined && <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${toggleTheme ? 'bg-[#202020]/80' : 'bg-[#f0f0f0]/80'} backdrop-blur-md border ${toggleTheme ? 'border-[#202020]' : 'border-[#e0e0e0]'} whitespace-nowrap`}>
-                {ride.status === "started" ? 'Ride in progress' : timeLeft.status === 'started' || (ride.status === 'waiting' || ride.status === 'ready') ? 'Waiting' : ride.status === 'cancelled' ? 'Ride cancelled' : 'Time until ride starts'}
+                {passengerStatus === 'dropped' ? 'Dropped' : ride.status === "started" ? 'Ride in progress' : timeLeft.status === 'started' || (ride.status === 'waiting' || ride.status === 'ready') ? 'Waiting' : ride.status === 'cancelled' ? 'Ride cancelled' : 'Time until ride starts'}
               </div>}
-              {!isDeclined && ((timeLeft.status === 'started' && ride.status === 'waiting') || ride.status === 'ready') ? (
+              {!isDeclined && passengerStatus === 'dropped' ? (
+                <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full ${toggleTheme ? 'bg-[#202020]/80' : 'bg-[#f0f0f0]/80'} shadow-lg transition-all duration-300 hover:scale-105 backdrop-blur-md border ${toggleTheme ? 'border-[#202020]' : 'border-[#e0e0e0]'} w-fit md:w-full md:justify-center`}>
+                  <AlertCircle size={16} className="text-[#01B580] rounded-full animate-pulse" />
+                  <span className="text-xs sm:text-sm font-medium">Please pay for the ride</span>
+                </div>
+              ) : !isDeclined && ((timeLeft.status === 'started' && ride.status === 'waiting') || ride.status === 'ready') ? (
                 <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full ${toggleTheme ? 'bg-[#202020]/80' : 'bg-[#f0f0f0]/80'} shadow-lg transition-all duration-300 hover:scale-105 backdrop-blur-md border ${toggleTheme ? 'border-[#202020]' : 'border-[#e0e0e0]'} w-fit md:w-full md:justify-center`}>
                   <AlertCircle size={16} className="text-[#01B580] rounded-full animate-pulse" />
                   <span className="text-xs sm:text-sm font-medium">Waiting for driver to start ride</span>
@@ -420,153 +447,155 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
 
                     {ride && !isDeclined && <LocalMap ride={ride} />}
 
-                   <button onClick={() => setOpenChat(true)} className={`p-2 cursor-pointer rounded-md font-medium ${toggleTheme ? 'text-[#fefefe] border hover:bg-[#202020cc] border-[#202020]' : 'text-[#202020] border hover:bg-[#f0f0f0cc]'}`}><MessageCircle size={20} /> </button>
+                    <button onClick={() => setOpenChat(true)} className={`p-2 cursor-pointer rounded-md font-medium ${toggleTheme ? 'text-[#fefefe] border hover:bg-[#202020cc] border-[#202020]' : 'text-[#202020] border hover:bg-[#f0f0f0cc]'}`}><MessageCircle size={20} /> </button>
 
                     {isDeclined ? (
                       <button className={`px-4 py-2.5 w-32 md:w-40 text-sm sm:text-base cursor-pointer rounded-md font-medium  ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020] hover:bg-[#202020cc]' : 'text-[#5b5b5b] hover:bg-[#f0f0f0cc] bg-[#f0f0f0]'}`} onClick={() => setSeeReason(true)}>See reason</button>
-                    ) : !hasBooked && ride.rideDetails.bookedSeats < ride.rideDetails.seats ? (
-                      <Dialog>
-                        <DialogTrigger className='px-4 py-2.5 bg-[#00563c] w-40 text-[#fefefe] hover:bg-[#00563ccc] active:bg-[#00563c] cursor-pointer rounded-md font-medium'>Join Ride
-                        </DialogTrigger>
-                        <DialogContent className={`inter ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'bg-[#f0f0f0] text-[#202020]'} border-none`}>
-                          <DialogHeader>
-                            <DialogTitle className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>How many seats are you booking?</DialogTitle>
-                            <div className="mt-4">
-                              <input
-                                type="number"
-                                min="1"
-                                value={bookedSeats}
-                                onChange={(e) => setBookedSeats(e.target.value as unknown as number)}
-                                max={ride.rideDetails.seats - ride.rideDetails.bookedSeats}
-                                className={`w-full p-2 outline-none rounded-md ${toggleTheme ? 'bg-[#202020] text-[#fefefe] border border-[#b1b1b1]' : 'bg-[#f0f0f0] border text-[#202020]'}`}
-                                placeholder="Enter number of seats"
-                                onKeyPress={(e) => {
-                                  if (!/[0-9]/.test(e.key)) {
-                                    e.preventDefault();
-                                  }
-                                }}
-                              />
-                              <p className={`mt-2 text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
-                                Available seats: {ride.rideDetails.seats - ride.rideDetails.bookedSeats}
-                              </p>
-                            </div>
-                          </DialogHeader>
-                          <DialogFooter>
-                            <button onClick={joinRide} className='px-8 text-sm sm:text-base py-2.5 bg-[#00563c] text-[#fefefe] hover:bg-[#00563ccc] active:bg-[#00563c] cursor-pointer rounded-md font-medium'>Join ride</button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    ) : hasBooked && ride.status !== 'started' ? (
-                      <button onClick={cancelRide} className={`px-4 py-2.5 w-32 text-sm sm:text-base md:w-40 cursor-pointer rounded-md font-medium ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020] hover:bg-[#202020cc]' : 'text-[#5b5b5b] hover:bg-[#f0f0f0cc] bg-[#f0f0f0]'}`}>Cancel ride</button>
-                    ) : ride.status === 'started' ? (
-                      <button disabled className={`px-4 py-2.5 w-32 md:w-40 text-sm sm:text-base cursor-not-allowed rounded-md font-medium ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020]' : 'text-[#5b5b5b] bg-[#f0f0f0]'}`}>Ride in progress</button>
-                    ) : (
-                      <button disabled className={`px-4 py-2.5 w-32 md:w-40 text-sm sm:text-base cursor-not-allowed rounded-md font-medium ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020]' : 'text-[#5b5b5b] bg-[#f0f0f0]'}`}>Ride full</button>
+                    ) : passengerStatus === 'dropped' ? (
+                      <Link href={`/checkout?rideId=${ride._id}&amount=${Math.round(paying)}&by=${user?._id}&to=${ride.userId}`}><button className={`px-4 py-2.5 w-32 md:w-40 text-sm sm:text-base cursor-pointer rounded-md font-medium text-white hover:bg-[#00563ccc] bg-[#00563c]`}>Pay</button></Link>
+                  ) : !hasBooked && ride.rideDetails.bookedSeats < ride.rideDetails.seats ? (
+                  <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger onClick={() => setOpen(true)} className='px-4 py-2.5 bg-[#00563c] w-40 text-[#fefefe] hover:bg-[#00563ccc] active:bg-[#00563c] cursor-pointer rounded-md font-medium'>Join Ride
+                    </DialogTrigger>
+                    <DialogContent className={`inter ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'bg-[#f0f0f0] text-[#202020]'} border-none`}>
+                      <DialogHeader>
+                        <DialogTitle className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>How many seats are you booking?</DialogTitle>
+                        <div className="mt-4">
+                          <input
+                            type="number"
+                            min="1"
+                            value={bookedSeats}
+                            onChange={(e) => setBookedSeats(e.target.value as unknown as number)}
+                            max={ride.rideDetails.seats - ride.rideDetails.bookedSeats}
+                            className={`w-full p-2 outline-none rounded-md ${toggleTheme ? 'bg-[#202020] text-[#fefefe] border border-[#b1b1b1]' : 'bg-[#f0f0f0] border text-[#202020]'}`}
+                            placeholder="Enter number of seats"
+                            onKeyPress={(e) => {
+                              if (!/[0-9]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                          />
+                          <p className={`mt-2 text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
+                            Available seats: {ride.rideDetails.seats - ride.rideDetails.bookedSeats}
+                          </p>
+                        </div>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <button onClick={joinRide} className='px-8 text-sm sm:text-base py-2.5 bg-[#00563c] text-[#fefefe] hover:bg-[#00563ccc] active:bg-[#00563c] cursor-pointer rounded-md font-medium'>Join ride</button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  ) : hasBooked && ride.status !== 'started' ? (
+                  <button onClick={cancelRide} className={`px-4 py-2.5 w-32 text-sm sm:text-base md:w-40 cursor-pointer rounded-md font-medium ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020] hover:bg-[#202020cc]' : 'text-[#5b5b5b] hover:bg-[#f0f0f0cc] bg-[#f0f0f0]'}`}>Cancel ride</button>
+                  ) : ride.status === 'started' ? (
+                  <button disabled className={`px-4 py-2.5 w-32 md:w-40 text-sm sm:text-base cursor-not-allowed rounded-md font-medium ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020]' : 'text-[#5b5b5b] bg-[#f0f0f0]'}`}>Ride in progress</button>
+                  ) : (
+                  <button disabled className={`px-4 py-2.5 w-32 md:w-40 text-sm sm:text-base cursor-not-allowed rounded-md font-medium ${toggleTheme ? 'text-[#b1b1b1] bg-[#202020]' : 'text-[#5b5b5b] bg-[#f0f0f0]'}`}>Ride full</button>
                     )}
-
-                  </div>
-
-                </div>
-
-                <div className={`mt-10 h-auto max-w-4xl rounded-xl w-full ${toggleTheme ? 'border border-[#202020]' : 'border'}`}>
-                  <div className={`h-fit ${toggleTheme ? 'bg-[#202020]' : 'bg-[#f0f0f0]'} px-6 py-4 sm:p-6 flex sm:flex-row flex-col-reverse gap-2 sm:gap-0 sm:justify-between sm:items-start w-full rounded-t-xl`}>
-
-                    <div className='flex gap-3 items-center'>
-                      <div className='flex flex-col items-center gap-0.5'>
-                        <div className={`${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} rounded-full w-2.5 h-2.5`}></div>
-                        <div className={`${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} w-[1px] h-8 mr-[1px]`}></div>
-                        <div className={`${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} rounded-full w-2.5 h-2.5`}></div>
-                      </div>
-
-                      <div className='flex text-sm font-medium flex-col gap-6'>
-                        <h1>{ride.rideDetails.pickupLocation.pickupName}</h1>
-                        <h1>{ride.rideDetails.dropoffLocation.dropoffName}</h1>
-                      </div>
-                    </div>
-
-                    <div className={`py-1.5 px-2.5 w-fit rounded-full ${toggleTheme ? 'bg-[#0d0d0d] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} text-sm flex items-center gap-1.5`}><Car size={20} /> {ride.rideDetails.vehicle}</div>
-
-                  </div>
-
-                  <div className='flex px-6 py-7 sm:flex-row flex-col sm:justify-between gap-2'>
-                    <div className='flex gap-2'>
-                      <img className='w-12 h-12 rounded-full' src={ride.additionalInfo.photo === "" ? '/Images/user(1).png' : ride.additionalInfo.photo} />
-
-                      <h1 className='text-base sm:text-lg font-medium'>{ride.driverName} <p className={`text-xs sm:text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Gender: {ride.preferences.gender.charAt(0).toUpperCase() + ride.preferences.gender.slice(1)} {ride.userId != user?._id ? `- ${driversTime[ride.userId] ? `ETA: ${driversTime[ride.userId]}` : 'Driver is offline'}` : ''}</p>
-                        <p className='flex sm:hidden mt-1 items-center gap-1 text-sm font-medium'>{ride.driver_rating} <Star fill={toggleTheme ? '#fefefe' : '#202020'} size={16} color={toggleTheme ? '#fefefe' : '#202020'} /></p>
-                      </h1>
-
-                    </div>
-
-                    <h1 className='sm:flex items-center gap-1 hidden text-sm font-medium'>{ride.driver_rating} <Star fill={toggleTheme ? '#fefefe' : '#202020'} size={16} color={toggleTheme ? '#fefefe' : '#202020'} /></h1>
-                  </div>
-
-                </div>
-
-                <div className={`mt-10 flex flex-wrap w-full gap-x-8 gap-y-6 items-center ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
-
-                  <h1 className='text-xs font-medium'>
-                    Total seats
-                    <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{ride.rideDetails.seats}</p>
-                  </h1>
-
-                  <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
-
-                  <h1 className='text-xs font-medium'>
-                    Booked seats
-                    <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{ride.rideDetails.bookedSeats}</p>
-                  </h1>
-
-                  <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
-
-                  <h1 className='text-xs font-medium'>
-                    Distance
-                    <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{Math.round(ride.rideDetails.distance)}km</p>
-                  </h1>
-
-                  <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
-
-                  <h1 className='text-xs font-medium'>
-                    Duration
-                    <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{Math.round(ride.rideDetails.duration)}mins</p>
-                  </h1>
-
-                  <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
-
-                  <h1 className='text-xs font-medium'>
-                    Ride type
-                    <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{ride.preferences.rideType === "" ? 'No type' : ride.preferences.rideType}</p>
-                  </h1>
-
-                </div>
-
-                <div className='mt-12 max-w-4xl w-full flex sm:flex-row sm:justify-between sm:items-center flex-col gap-y-6'>
-
-                  <div className='flex font-medium items-center sm:items-start sm:flex-col gap-2.5 sm:gap-1'>
-                    <div className='p-2 rounded-full w-fit bg-[#FFD700]'><Luggage size={25} color='#fefefe' /></div>
-                    {ride.preferences.ridePreferences.luggageAllowed ? 'Luggage allowed' : 'Luggage not allowed'}
-                  </div>
-
-                  <div className='flex font-medium items-center sm:items-start sm:flex-col gap-2.5 sm:gap-1'>
-                    <div className='p-2 rounded-full w-fit bg-[#46C5FF]'><PawPrint size={25} color='#fefefe' /></div>
-                    {ride.preferences.ridePreferences.petAllowed ? 'Pet allowed' : 'Pet not allowed'}
-                  </div>
-
-                  <div className='flex font-medium items-center sm:items-start sm:flex-col gap-2.5 sm:gap-1'>
-                    <div className='p-2 rounded-full w-fit bg-[#2E2E2E]'><FaSmoking size={25} color='#fefefe' /> </div>
-                    {ride.preferences.ridePreferences.smokingAllowed ? 'Smoking allowed' : 'Smoking not allowed'}
-                  </div>
 
                 </div>
 
               </div>
 
-            </div>
-          </div>
+              <div className={`mt-10 h-auto max-w-4xl rounded-xl w-full ${toggleTheme ? 'border border-[#202020]' : 'border'}`}>
+                <div className={`h-fit ${toggleTheme ? 'bg-[#202020]' : 'bg-[#f0f0f0]'} px-6 py-4 sm:p-6 flex sm:flex-row flex-col-reverse gap-2 sm:gap-0 sm:justify-between sm:items-start w-full rounded-t-xl`}>
 
+                  <div className='flex gap-3 items-center'>
+                    <div className='flex flex-col items-center gap-0.5'>
+                      <div className={`${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} rounded-full w-2.5 h-2.5`}></div>
+                      <div className={`${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} w-[1px] h-8 mr-[1px]`}></div>
+                      <div className={`${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} rounded-full w-2.5 h-2.5`}></div>
+                    </div>
+
+                    <div className='flex text-sm font-medium flex-col gap-6'>
+                      <h1>{ride.rideDetails.pickupLocation.pickupName}</h1>
+                      <h1>{ride.rideDetails.dropoffLocation.dropoffName}</h1>
+                    </div>
+                  </div>
+
+                  <div className={`py-1.5 px-2.5 w-fit rounded-full ${toggleTheme ? 'bg-[#0d0d0d] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} text-sm flex items-center gap-1.5`}><Car size={20} /> {ride.rideDetails.vehicle}</div>
+
+                </div>
+
+                <div className='flex px-6 py-7 sm:flex-row flex-col sm:justify-between gap-2'>
+                  <div className='flex gap-2'>
+                    <img className='w-12 h-12 rounded-full' src={ride.additionalInfo.photo === "" ? '/Images/user(1).png' : ride.additionalInfo.photo} />
+
+                    <h1 className='text-base sm:text-lg font-medium'>{ride.driverName} <p className={`text-xs sm:text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Gender: {ride.preferences.gender.charAt(0).toUpperCase() + ride.preferences.gender.slice(1)} {ride.userId != user?._id ? `- ${driversTime[ride.userId] ? `ETA: ${driversTime[ride.userId]}` : 'Driver is offline'}` : ''}</p>
+                      <p className='flex sm:hidden mt-1 items-center gap-1 text-sm font-medium'>{ride.driver_rating} <Star fill={toggleTheme ? '#fefefe' : '#202020'} size={16} color={toggleTheme ? '#fefefe' : '#202020'} /></p>
+                    </h1>
+
+                  </div>
+
+                  <h1 className='sm:flex items-center gap-1 hidden text-sm font-medium'>{ride.driver_rating} <Star fill={toggleTheme ? '#fefefe' : '#202020'} size={16} color={toggleTheme ? '#fefefe' : '#202020'} /></h1>
+                </div>
+
+              </div>
+
+              <div className={`mt-10 flex flex-wrap w-full gap-x-8 gap-y-6 items-center ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
+
+                <h1 className='text-xs font-medium'>
+                  Total seats
+                  <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{ride.rideDetails.seats}</p>
+                </h1>
+
+                <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
+
+                <h1 className='text-xs font-medium'>
+                  Booked seats
+                  <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{ride.rideDetails.bookedSeats}</p>
+                </h1>
+
+                <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
+
+                <h1 className='text-xs font-medium'>
+                  Distance
+                  <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{Math.round(ride.rideDetails.distance)}km</p>
+                </h1>
+
+                <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
+
+                <h1 className='text-xs font-medium'>
+                  Duration
+                  <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{Math.round(ride.rideDetails.duration)}mins</p>
+                </h1>
+
+                <div className={`w-[1px] h-6 ${toggleTheme ? 'bg-[#202020]' : 'bg-[#d0d0d0]'}`}></div>
+
+                <h1 className='text-xs font-medium'>
+                  Ride type
+                  <p className={`mt-2 text-base sm:text-lg font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{ride.preferences.rideType === "" ? 'No type' : ride.preferences.rideType}</p>
+                </h1>
+
+              </div>
+
+              <div className='mt-12 max-w-4xl w-full flex sm:flex-row sm:justify-between sm:items-center flex-col gap-y-6'>
+
+                <div className='flex font-medium items-center sm:items-start sm:flex-col gap-2.5 sm:gap-1'>
+                  <div className='p-2 rounded-full w-fit bg-[#FFD700]'><Luggage size={25} color='#fefefe' /></div>
+                  {ride.preferences.ridePreferences.luggageAllowed ? 'Luggage allowed' : 'Luggage not allowed'}
+                </div>
+
+                <div className='flex font-medium items-center sm:items-start sm:flex-col gap-2.5 sm:gap-1'>
+                  <div className='p-2 rounded-full w-fit bg-[#46C5FF]'><PawPrint size={25} color='#fefefe' /></div>
+                  {ride.preferences.ridePreferences.petAllowed ? 'Pet allowed' : 'Pet not allowed'}
+                </div>
+
+                <div className='flex font-medium items-center sm:items-start sm:flex-col gap-2.5 sm:gap-1'>
+                  <div className='p-2 rounded-full w-fit bg-[#2E2E2E]'><FaSmoking size={25} color='#fefefe' /> </div>
+                  {ride.preferences.ridePreferences.smokingAllowed ? 'Smoking allowed' : 'Smoking not allowed'}
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
         </div>
 
       </div>
+
+    </div >
     </>
   )
 }

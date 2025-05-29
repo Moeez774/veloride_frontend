@@ -25,12 +25,12 @@ const page = () => {
     }
   }, [])
   return (
-    <div className={`inter min-h-screen gap-4 overflow-hidden flex w-full ${toggleTheme? 'bg-[#202020]': 'bg-[#f0f0f0]' }`}>
-      <div ref={sideBarRef} className={`py-2 absolute z-30 md:relative transition-all ${showSideBar? 'translate-x-0': '-translate-x-28 md:translate-x-0'} duration-200 pl-2`}>
+    <div className={`inter min-h-screen gap-4 overflow-hidden flex ${toggleTheme? 'bg-[#202020]': 'bg-[#f0f0f0]' }`}>
+      <div ref={sideBarRef} className={`py-2 absolute z-30 xl:relative transition-all ${showSideBar? 'translate-x-0': '-translate-x-28 xl:translate-x-0'} duration-200 pl-2`}>
         <Sidebar toggleTheme={toggleTheme} setShowSideBar={setShowSideBar} />
       </div>
 
-      <div className='flex-1 py-2 px-2 w-full'>
+      <div className='py-2 px-2 max-w-7xl w-full mx-auto'>
         <Dashboard setShowSideBar={setShowSideBar} showSideBar={showSideBar} toggleTheme={toggleTheme}  />
       </div>
     </div>

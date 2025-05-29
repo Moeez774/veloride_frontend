@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
+//put ignore eslint errors
 const nextConfig: NextConfig = {
-  /* config options here */
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

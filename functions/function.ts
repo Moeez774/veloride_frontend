@@ -1,4 +1,4 @@
-import { toggleTheme } from './../app/page';
+import { toggleTheme } from './../app/(HomePage)/MainMap';
 import { auth } from "@/firebase"
 import socket from "@/utils/socket"
 import { User } from "firebase/auth"

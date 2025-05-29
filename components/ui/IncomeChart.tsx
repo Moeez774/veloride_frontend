@@ -71,7 +71,7 @@ export function Component({ walletData }: { walletData: WalletData }) {
               tickMargin={8}
               tickFormatter={(value) => value.slice(0, 3)}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent className={`border-none ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'text-[#202020] bg-[#fefefe]'}`} />} />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent className={`${toggleTheme ? 'text-[#fefefe] border border-[#353535] bg-[#202020]' : 'text-[#202020] border bg-[#fefefe]'}`} />} />
             <defs>
               <linearGradient id="fillSpent" x1="0" y1="0" x2="0" y2="1">
                 <stop

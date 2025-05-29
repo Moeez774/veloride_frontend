@@ -11,6 +11,12 @@ interface Details {
 }
 mapboxgl.accessToken = 'pk.eyJ1IjoibW9lZXoxMjMiLCJhIjoiY204Z3p3cHNrMDUxbjJrcjhvbGYxanU2MyJ9.ErFjedlF8xF7QZQmyTnIiw'
 
+export const toggleTheme = () => {
+    const context = getContacts()
+    const toggleTheme = context?.toggleTheme
+    return toggleTheme
+}
+
 const MainMap: React.FC<Details> = ({ setShowMap }) => {
     const [map, setMap] = useState<mapboxgl.Map | null>(null)
     const [markers, setMarkers] = useState<Record<string, mapboxgl.Marker>>({})

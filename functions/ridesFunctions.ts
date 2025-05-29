@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthProvider";
 import { Notification } from "@/context/states";
+import socket from "@/utils/socket";
 import { Dispatch, SetStateAction } from "react"
 
 const accessToken = 'pk.eyJ1IjoibW9lZXoxMjMiLCJhIjoiY204Z3p3cHNrMDUxbjJrcjhvbGYxanU2MyJ9.ErFjedlF8xF7QZQmyTnIiw';
@@ -62,7 +63,7 @@ export async function findRide(pickup: string | null, drop: string | null, date:
     }
 
     // returning error if all fields are not filled properly
-    if (data.pickup === '' || data.drop === '' || data.date === '' || data.time === '' || data.vehicle === '' || (!data.number && !data.email)) {
+    if (data.pickup === '' || data.drop === '' || data.date === '' || data.time === '' || data.vehicle === '') {
         setHideForm(false)
         setLoader(true)
         setTimeout(() => {
@@ -120,6 +121,30 @@ export async function declinePassenger(rideId: string, passengerId: string, decl
         }
     } catch (error) {
         alert(error)
+        return
+    }
+}
+
+//for marking passenger dropped off
+export async function markPassengerDroppedOff(rideId: string, passengerId: string) {
+    try {
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/drop-passenger`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ rideId: rideId, passengerId: passengerId })
+        })
+
+        const data = await res.json()
+        alert(data.message)
+        if (data.statusCode === 200) {
+            socket.emit('passenger-dropped-off', { rideId: rideId, passengerId: passengerId, ride: data.ride, notification: data.notification })
+            return data.ride
+        }
+    } catch (error) {
+        console.log(error)
         return
     }
 }

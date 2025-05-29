@@ -7,6 +7,14 @@ import Additional from '@/app/find-ride/(Find-Ride)/Steps/Additional'
 import RideDetails from './RideDetails'
 import SuccessLoader from '@/components/SuccessLoader'
 import { getContacts } from '@/context/ContactsProvider'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface Details {
     formData: any,
@@ -31,6 +39,8 @@ const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, s
         <>
             {/* // loader */}
             {loader && <SuccessLoader message={message} statusCode={statusCode} setLoader={setLoader} setShowMessage={setShowMessage} showMessage={showMessage} />}
+
+
 
             <div className='w-full flex justify-center sm:px-10 items-center'>
                 <ScrollArea

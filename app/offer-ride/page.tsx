@@ -97,34 +97,6 @@ const page = () => {
         if (!loader && statusCode === 200) router.push('/')
     }, [loader, statusCode])
 
-    // Update SVG colors when theme changes
-    useEffect(() => {
-        setGender(<>
-            <Users size={20} color={toggleTheme ? '#fefefe' : '#202020'} />
-            <h1 className={`text-[13px] inter font-normal ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Driver</h1>
-        </>)
-
-        setMale(
-            <>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H22M22 2V10M22 2L13 11" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="10" cy="14" r="6" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" />
-                </svg>
-                <h1 className={`font-normal text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Male</h1>
-            </>
-        )
-
-        setFemale(
-            <>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="8" r="6" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" />
-                    <path d="M12 14V22M9 19H15" stroke={toggleTheme ? '#fefefe' : '#202020'} strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                <h1 className={`font-normal text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Female</h1>
-            </>
-        )
-    }, [toggleTheme])
-
     return (
 
         <>
@@ -176,7 +148,7 @@ const page = () => {
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
-                        {currStep != 5 && <div className={`inter mt-6 lg:mt-10 flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
+                        {currStep != 5 && <div className={`inter ${currStep === 4? 'mt-2': 'mt-6'} flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
                             {currStep != 1 && <button className={`shadow-lg font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`} onClick={() => {
                                 setStep(step - 1)

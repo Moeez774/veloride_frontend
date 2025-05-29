@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import React, { useState, Dispatch, SetStateAction } from 'react'
 import { Check, User2, Eye, EyeOff } from 'lucide-react'
 import { signUserUp } from '@/functions/function'
+import countries from '@/public/data/countries.json'
 import {
     Select,
     SelectContent,
@@ -10,6 +11,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import PhoneInput from './PhoneInput'
+import { signOut } from 'firebase/auth'
+import { auth } from '@/firebase'
+
 interface Details {
     step: number,
     setStep: Dispatch<SetStateAction<number>>,
@@ -28,20 +33,26 @@ interface Details {
     setMessage: Dispatch<SetStateAction<string>>,
     setShowSteps: Dispatch<SetStateAction<boolean>>,
     gender: string,
-    setGender: Dispatch<SetStateAction<string>>
+    setGender: Dispatch<SetStateAction<string>>,
+    setter: Dispatch<SetStateAction<boolean>>
 }
 
-const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname, user, role, setRole, number, city, setCity, setNumber, saveUser, setShowMessage, setMessage, setShowSteps, gender, setGender }) => {
+const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname, user, role, setRole, number, city, setCity, setNumber, saveUser, setShowMessage, setMessage, setShowSteps, gender, setGender, setter }) => {
 
     const router = useRouter()
     const [pass, setPass] = useState('')
     const [rider, setRider] = useState(role === 'rider' ? true : false)
     const [driver, setDriver] = useState(role === 'driver' ? true : false)
     const [showPass, setShowPass] = useState(false)
+    const [country, setCountry] = useState<string>(countries[129].phone)
     const [loader, setLoader] = useState(false)
 
+    const handleChange = (value: string) => {
+        setNumber(value)
+    }
+
     // sending signup request to backend
-    const signUp = async () => await signUserUp(setLoader, email, fullname, pass, number, city, role, router, gender)
+    const signUp = async () => await signUserUp(setLoader, email, fullname, pass, `${country}${number}`, city, role, router, gender)
 
     const delay = async (ms: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms))
 
@@ -59,6 +70,8 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
         setStep(prev => prev - 1)
         await delay(100)
         setStep(prev => prev - 1)
+        setter(false)
+        await signOut(auth)
     }
 
     return (
@@ -110,19 +123,29 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                         </button>
                     </div>
 
-                    <div className='flex items-center justify-end gap-10 mt-4'>
-                        <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => {
-                            setRole('Any')
-                            proceed()
-                        }}>Skip</button>
-                        <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
-                            if (role === 'Any') {
-                                setShowSteps(true)
-                                setMessage("Please select at least one option.")
-                                setTimeout(() => setShowMessage(true), 100)
-                            }
-                            else proceed()
-                        }}>Continue</button>
+                    <div className='flex items-center justify-between gap-10 mt-4'>
+
+                        <div>
+                            <button onClick={() => {
+                                back()
+                                setStep(prev => prev - 1)
+                            }} className={`${toggleTheme ? 'bg-[#202020] text-[#fefefe] hover:bg-[#202020ccc] active:bg-[#202020]' : 'bg-[#f0f0f0] text-[#202020] hover:bg-[#f0f0f0cc] active:bg-[#fefefe]'} cursor-pointer transition-all duration-200 px-6 md:px-8 py-3 rounded-md font-medium text-sm`}>Back</button>
+                        </div>
+
+                        <div className='flex items-center gap-10'>
+                            <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => {
+                                setRole('Any')
+                                proceed()
+                            }}>Skip</button>
+                            <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
+                                if (role === 'Any') {
+                                    setShowSteps(true)
+                                    setMessage("Please select at least one option.")
+                                    setTimeout(() => setShowMessage(true), 100)
+                                }
+                                else proceed()
+                            }}>Continue</button>
+                        </div>
                     </div>
                 </div>}
 
@@ -132,9 +155,20 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                         <h1 className={`font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-sm`}>Just a few more details to get you rolling, your city, phone, and a secure password.</h1>
                     </div>
 
-                    <div className='flex flex-col mt-8 gap-1.5'>
-                        <label className='text-[13px]'>Your city or location</label>
-                        <input value={city} onChange={(e) => setCity(e.target.value)} className='border outline-none font-normal focus:shadow-lg transition-all duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm p-[0.90rem] w-full' />
+                    <div className='flex items-center gap-2 mt-8 w-full'>
+                        <div className='flex w-full flex-col gap-1.5'>
+                            <label className='text-[13px]'>Your city or location</label>
+                            <input value={city} onChange={(e) => setCity(e.target.value)} className='border outline-none font-normal focus:shadow-lg transition-all duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm p-[0.90rem] w-full' />
+                        </div>
+                        <Select value={gender} onValueChange={setGender}>
+                            <SelectTrigger className={`w-[180px] mt-6 border py-6 ${toggleTheme ? 'bg-[black]' : 'bg-[#fefefe]'}`}>
+                                <SelectValue placeholder="Gender" />
+                            </SelectTrigger>
+                            <SelectContent className={`${toggleTheme ? 'bg-[black] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} inter`}>
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {!user && <div className='flex flex-col mt-3 gap-1.5'>
@@ -147,20 +181,8 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                     </div>}
 
                     <div className='flex items-center w-full mt-3 gap-0.5'>
-                        <div className='flex flex-col w-full gap-1.5'>
-                            <label className='text-[13px]'>Phone number</label>
-                            <input value={number} onChange={(e) => setNumber(e.target.value)} className='border outline-none font-normal focus:shadow-lg transition-all duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm p-[0.90rem] w-full' />
-                        </div>
 
-                        <Select value={gender} onValueChange={setGender}>
-                            <SelectTrigger className={`w-[180px] mt-6 border py-6 ${toggleTheme ? 'bg-[black]' : 'bg-[#fefefe]'}`}>
-                                <SelectValue placeholder="Gender" />
-                            </SelectTrigger>
-                            <SelectContent className={`${toggleTheme ? 'bg-[black] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} inter`}>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <PhoneInput number={number} country={country} setNumber={setNumber} setCountry={setCountry} />
 
                     </div>
 

@@ -31,7 +31,7 @@ const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMes
                     }}
                         className="text-gray-600 cursor-pointer hover:bg-white/5 p-1 rounded-md transition-colors ease-linear"
                     >
-                        <X size={20} color='#fefefe' />
+                        <X size={17} color='#fefefe' />
                     </button>
 
 

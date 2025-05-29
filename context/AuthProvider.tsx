@@ -3,6 +3,7 @@ import socket from "@/utils/socket";
 import { createContext, Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 
 export interface User {
+  ownedRides: any;
   _id: string | null;
   fullname: string | null;
   email: string | null;
@@ -15,6 +16,7 @@ export interface User {
   contacts: any[];
   rating: number;
   gender: string | null;
+  activeRides: string[]
 }
 
 interface AuthContextType {

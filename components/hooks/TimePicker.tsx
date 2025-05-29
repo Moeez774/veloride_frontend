@@ -5,10 +5,11 @@ import { getContacts } from '@/context/ContactsProvider'
 
 interface Details {
     value: string,
-    setValue: Dispatch<SetStateAction<string>>
+    setValue: Dispatch<SetStateAction<string>>,
+    type?: string
 }
 
-const MyTimePicker: React.FC<Details> = ({ value, setValue }) => {
+const MyTimePicker: React.FC<Details> = ({ value, setValue, type }) => {
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
     const [timeSelection, setTimeSelection] = useState(false)
@@ -16,7 +17,7 @@ const MyTimePicker: React.FC<Details> = ({ value, setValue }) => {
 
     return (
         <div className='relative flex'>
-            <div className={`relative w-[8.5rem] cursor-pointer flex justify-between items-center ${toggleTheme ? 'bg-[#202020] border border-[#2d2d2d]' : 'bg-white border'} p-3 rounded-md shadow-md`} onClick={() => setTimeSelection(!timeSelection)}>
+            <div className={`relative w-[8.5rem] cursor-pointer flex justify-between items-center ${toggleTheme && type ? 'bg-transparent border-none' : toggleTheme && !type ? 'bg-[#202020] border border-[#2d2d2d]' : !toggleTheme && type ? 'bg-transparent shadow-none border-none' : 'bg-white border shadow-md'} p-3 rounded-md`} onClick={() => setTimeSelection(!timeSelection)}>
                 <div className='flex items-center gap-1'>
                     <Clock size={20} color={toggleTheme ? '#fefefe' : '#202020'} />
                     <h1 className={`text-sm inter ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} style={{ userSelect: 'none' }}>{value}</h1>
