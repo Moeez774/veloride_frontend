@@ -45,7 +45,7 @@ const Nearby: React.FC<Details> = ({ currentTab, user, getMap, nearRides, setNea
         if (!user) return
 
         const fetchRides = async () => {
-            let a = await fetch('http://localhost:4000/saved-routes/fetchNearRides', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/saved-routes/fetchNearRides`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },
@@ -77,7 +77,7 @@ const Nearby: React.FC<Details> = ({ currentTab, user, getMap, nearRides, setNea
     // fetch favorite by rideId
     const checkFavorite = async (rideId: string) => {
         try {
-            const res = await fetch('http://localhost:4000/saved-routes/get-favorite', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/saved-routes/get-favorite`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -158,7 +158,7 @@ const Nearby: React.FC<Details> = ({ currentTab, user, getMap, nearRides, setNea
                                         const isFavorite = !isNearMap[e._id]
 
                                         //save to db
-                                        await fetch('http://localhost:4000/saved-routes/set-favorite', {
+                                        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/saved-routes/set-favorite`, {
                                             method: "POST", headers: {
                                                 "Content-Type": "application/json"
                                             },

@@ -17,7 +17,7 @@ const page = () => {
     if (!rideId) return
 
     const fetchRide = async () => {
-      let a = await fetch(`http://localhost:4000/rides/fetchRide?rideId=${rideId}`, {
+      let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/fetchRide?rideId=${rideId}`, {
         method: "GET", headers: {
           "Content-Type": "application/json"
         },

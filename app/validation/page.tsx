@@ -15,27 +15,27 @@ const page = () => {
     useEffect(() => {
 
         const verify = async () => {
-            let a = await fetch('http://localhost:4000/users/auth', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/auth`, {
                 method: "GET",
                 credentials: "include"
             })
 
             let response = await a.json()
             if (fetchUser) {
-               fetchUser()
+                fetchUser()
             }
             setTimeout(() => {
                 setLoader(false)
                 setMessage(response.message)
 
-                setTimeout(async() => {
-                if (response.statusCode === 200) {
-                    localStorage.setItem('_id', response.userId)
-                    router.push('/')
-                }
-                else {
-                    router.push('/auth/sign-in')
-                }
+                setTimeout(async () => {
+                    if (response.statusCode === 200) {
+                        localStorage.setItem('_id', response.userId)
+                        router.push('/')
+                    }
+                    else {
+                        router.push('/auth/sign-in')
+                    }
                 }, 10)
             }, 1500)
         }

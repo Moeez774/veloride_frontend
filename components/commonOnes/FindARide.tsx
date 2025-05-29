@@ -13,7 +13,7 @@ const FindARide = () => {
     useEffect(() => {
 
         const fetchFeatures = async () => {
-            let a = await fetch('http://localhost:4000/data', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/data`, {
                 method: "GET"
             })
 

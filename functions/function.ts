@@ -12,7 +12,7 @@ const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any, gender: string) {
 
     // calling server for saving user's data if not saved already
-    let a = await fetch('http://localhost:4000/users/providers-sign-in', {
+    let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/providers-sign-in`, {
         method: "POST", headers: {
             "Content-Type": "application/json"
         },
@@ -47,7 +47,7 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, e
     const userId = `${email}_${new Date().getTime()}`
     setLoader(true)
     try {
-        let a = await fetch('http://localhost:4000/users/sign-up', {
+        let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/sign-up`, {
             method: "POST", headers: {
                 "Content-Type": "application/json"
             },
@@ -83,7 +83,7 @@ export async function sendMessage(chat_id: string, sender_id: string, receiver_i
         setMessage('')
     }
 
-    let a = await fetch('http://localhost:4000/messages/send-message', {
+    let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/send-message`, {
         method: "POST", headers: {
             "Content-Type": "application/json"
         },
@@ -107,7 +107,7 @@ export async function handlingProceeding(setShowSteps: Dispatch<SetStateAction<b
         setStep(prev => prev + 1)
 
         setTimeout(async () => {
-            let a = await fetch('http://localhost:4000/users/user-existance', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/user-existance`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },
@@ -144,7 +144,7 @@ export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolea
         await signInWithPopup(auth, google)
 
         // for chekcing whther user's data already availabale in database or not so we can ask for more info
-        let a = await fetch(`http://localhost:4000/users/check-user?id=${auth.currentUser?.uid}`, {
+        let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/check-user?id=${auth.currentUser?.uid}`, {
             method: "GET"
         })
 
@@ -222,7 +222,7 @@ export async function trackRideTime(ride: any, setTimeLeft: Dispatch<SetStateAct
             setTimeLeft({ hours: 0, minutes: 0, seconds: 0, status: 'started' });
 
             try {
-                const response = await fetch('http://localhost:4000/rides/update-ride-status', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/update-ride-status`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ rideId: ride._id, status: 'ready' })

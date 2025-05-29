@@ -45,7 +45,7 @@ const Chat: React.FC<Details> = ({ contact, user, setOpenChat, setChat, showProf
             }
         }
         const addMessage = (data: any) => {
-            if(data.chat_id===chat_id) setMessages((prev) => [...prev, data])
+            if (data.chat_id === chat_id) setMessages((prev) => [...prev, data])
         }
 
         socket.on("message-sent", addMessage)
@@ -67,7 +67,7 @@ const Chat: React.FC<Details> = ({ contact, user, setOpenChat, setChat, showProf
         if (chat_id === '') return
         setLoader(true)
         const fetchMessages = async () => {
-            let a = await fetch('http://localhost:4000/messages/fetch-chat', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/fetch-chat`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },
@@ -96,18 +96,18 @@ const Chat: React.FC<Details> = ({ contact, user, setOpenChat, setChat, showProf
 
     // for blocking going back
     useEffect(() => {
-        if(window.matchMedia("(max-width: 1023px)").matches) {
-        const handlePopState = (event: PopStateEvent) => {
-            setOpenChat(false)
-            setShowProfile(false)
-            event.preventDefault()
+        if (window.matchMedia("(max-width: 1023px)").matches) {
+            const handlePopState = (event: PopStateEvent) => {
+                setOpenChat(false)
+                setShowProfile(false)
+                event.preventDefault()
+                window.history.pushState(null, "", window.location.href)
+            }
             window.history.pushState(null, "", window.location.href)
-        }
-        window.history.pushState(null, "", window.location.href)
-        window.addEventListener("popstate", handlePopState)
+            window.addEventListener("popstate", handlePopState)
 
-        return () => window.removeEventListener("popstate", handlePopState)
-    }
+            return () => window.removeEventListener("popstate", handlePopState)
+        }
     }, [])
 
     const handleTyping = () => {
@@ -206,7 +206,7 @@ const Chat: React.FC<Details> = ({ contact, user, setOpenChat, setChat, showProf
                         setMessage(e.target.value)
                         handleTyping()
                     }} placeholder='Type a message' onKeyDown={(e) => {
-                        if(e.key==="Enter") messageIt()
+                        if (e.key === "Enter") messageIt()
                     }} className='text-[15px] pl-3 pr-1 outline-none w-full py-3 md:py-[0.90rem] bg-[#fefefe] rounded-sm text-[#202020]' style={{ border: '1px solid #e0e0e0' }} />
                 </div>
 

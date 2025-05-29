@@ -29,7 +29,7 @@ export async function offerRide(userId: string | null | undefined, driverName: s
             _id: rideId, driver_rating: user?.rating, driverName: driverName, userId: userId, pickupName: pickup, coordinates: [location.long, location.lat], dropLocationCoordinates: [dropLocation.long, dropLocation.lat], dropoffLocation: drop, date: date, seats: seats, time: time, vehicle: vehicle, rideType: ride, luggageAllowed: luggage, petAllowed: petFriendly, smokingAllowed: smoking, gender: user?.gender, totalBudget: budget, negotiate: negotiate, photo: photo, note: note, number: number, email: email, distance: distance, duration: duration, passengers: [], rating: user?.rating
         }
 
-        let a = await fetch('http://localhost:4000/rides/offer-ride', {
+        let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/offer-ride`, {
             method: "POST", headers: {
                 "Content-Type": "application/json",
             },
@@ -75,7 +75,7 @@ export async function findRide(pickup: string | null, drop: string | null, date:
 
     setHideForm(true)
 
-    let a = await fetch('http://localhost:4000/rides/find-ride', {
+    let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/find-ride`, {
         method: "POST", headers: {
             "Content-Type": "application/json"
         },
@@ -106,7 +106,7 @@ export async function findRide(pickup: string | null, drop: string | null, date:
 //for declining passenger
 export async function declinePassenger(rideId: string, passengerId: string, declineMessage: string) {
     try {
-        const response = await fetch('http://localhost:4000/rides/decline-passenger', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/decline-passenger`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"

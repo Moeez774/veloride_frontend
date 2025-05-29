@@ -31,7 +31,7 @@ const Messages: React.FC<Details> = ({ receiver, openChat, setOpenChat, chat_id,
     const [message, setMessage] = useState('')
     const [chat, setChat] = useState<any[]>([])
     const [isExist, setIsExist] = useState(false)
-    
+
     //for sending message
     const messageIt = async () => {
         socket.emit("joinRoom", (`${user?._id}_${receiver._id}`))
@@ -59,7 +59,7 @@ const Messages: React.FC<Details> = ({ receiver, openChat, setOpenChat, chat_id,
         if (!user) return
 
         const fetchChat = async () => {
-            let a = await fetch('http://localhost:4000/messages/fetch-chat', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/fetch-chat`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },

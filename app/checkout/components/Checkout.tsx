@@ -225,6 +225,7 @@ const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
             if (data.statusCode === 200) {
                 setNotifications(notifications.filter((notification: any) => notification._id !== rideId + amount.toString() + by + to))
             }
+            alert(data.message)
 
         } catch (err) {
             toast.error(err as string, { id: 'payment', style: { backgroundColor: '#ff0000', color: '#fefefe' } })
@@ -325,7 +326,7 @@ const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
                                         <h1 className='text-xs font-medium'>Method</h1>
                                         {paymentMethod === '' && <h1 className='text-sm font-semibold'>Not selected</h1>}
 
-                                        {paymentMethod === 'Easypaisa' && <PaymentMethod paymentMethod={paymentMethod} src="/Images/idPncNv7mC_1746162971646.png" />}
+                                        {paymentMethod === 'EasyPaisa' && <PaymentMethod paymentMethod={paymentMethod} src="/Images/idPncNv7mC_1746162971646.png" />}
 
                                         {paymentMethod === 'Payooner' && <PaymentMethod paymentMethod={paymentMethod} src="/Images/idRRAw_KPy_logos.png" />}
 

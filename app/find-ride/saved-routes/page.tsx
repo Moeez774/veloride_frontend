@@ -31,7 +31,7 @@ const page = () => {
         if (!user) return
 
         const fetchData = async () => {
-            let a = await fetch('http://localhost:4000/saved-routes/get-recents', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/saved-routes/get-recents`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },
@@ -49,7 +49,7 @@ const page = () => {
     // fetch favorite by rideId
     const checkFavorite = async (rideId: string) => {
         try {
-            const res = await fetch('http://localhost:4000/saved-routes/get-favorite', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/saved-routes/get-favorite`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

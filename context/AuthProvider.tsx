@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [drivers, setDrivers] = useState<any[]>([])
 
   const fetchUser = async () => {
-    let a = await fetch('http://localhost:4000/users/user-data', {
+    let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/user-data`, {
       method: 'GET',
       credentials: 'include'
     })
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // for checking user own any drive or not
   const checkRide = async () => {
     try {
-      const response = await fetch('http://localhost:4000/rides/check-user-ride', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/check-user-ride`, {
         method: "GET",
         credentials: 'include'
       })

@@ -92,7 +92,7 @@ const Recents: React.FC<Details> = ({ currentTab, recentSearches, isFavoriteMap,
                                         const isFavorite = !isFavoriteMap[e._id]
 
                                         //save to db
-                                        await fetch('http://localhost:4000/saved-routes/set-favorite', {
+                                        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/saved-routes/set-favorite`, {
                                             method: "POST", headers: {
                                                 "Content-Type": "application/json"
                                             },

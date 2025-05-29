@@ -60,7 +60,7 @@ const SignIn = () => {
     const signIn = async () => {
         setMessage('')
         try {
-            let a = await fetch('http://localhost:4000/users/sign-in', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/sign-in`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },
@@ -112,7 +112,7 @@ const SignIn = () => {
         setMessage('')
         setShowSteps(true)
         try {
-            let a = await fetch('http://localhost:4000/users/reset-password', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/reset-password`, {
                 method: "PUT", headers: {
                     "Content-Type": "application/json"
                 },
@@ -170,7 +170,7 @@ const SignIn = () => {
                         {step === 0 && <div className={`w-14 h-14 rounded-full transition-all duration-200 relative mt-56 -ml-5 ${!toggleForm ? 'opacity-[1]' : 'opacity-0'} bg-[#02835D]`}></div>}
                     </div>
 
-                    {step === 0 && <h1 className='absolute bottom-0 pb-14 pr-6 flex items-end font-light text-[13px] text-[#eeeeee]'>{toggleForm ? 'Sign up to unlock a world where every ride connects you with people, purpose, and possibilities. This is the start of your VeloRide journey.' : 'Every journey is more than just a destination, It’s about riding with people who get you. Welcome again to the future of travel.'}</h1>}
+                    {step === 0 && <h1 className='absolute bottom-0 pb-14 pr-6 flex items-end font-light text-[13px] text-[#eeeeee]'>{toggleForm ? 'Sign up to unlock a world where every ride connects you with people, purpose, and possibilities. This is the start of your VeloRide journey.' : "Every journey is more than just a destination, It's about riding with people who get you. Welcome again to the future of travel."}</h1>}
 
                 </div>
 
@@ -221,13 +221,13 @@ const SignIn = () => {
                                 <PasswordField value={value} setValue={setValue} showPass={showPass} setShowPass={setShowPass} toggleTheme={toggleTheme} toggleForm={toggleForm} />
                             </div>
 
-                           { !toggleForm && <h1 className={`${toggleTheme ? 'text-[#b1b1b1] hover:text-[#fefefe]' : 'text-[#5b5b5b] hover:text-[#202020]'} my-2 w-fit cursor-pointer transition-all duration-200 font-medium text-xs sm:text-[13px]`} onClick={() => {
+                            {!toggleForm && <h1 className={`${toggleTheme ? 'text-[#b1b1b1] hover:text-[#fefefe]' : 'text-[#5b5b5b] hover:text-[#202020]'} my-2 w-fit cursor-pointer transition-all duration-200 font-medium text-xs sm:text-[13px]`} onClick={() => {
                                 setForType('reset-password')
                                 setStep(prev => prev + 1)
                                 setValue('')
                                 setEmail('')
                                 setShowPass(false)
-                            }}>Forgot password?</h1> }
+                            }}>Forgot password?</h1>}
 
                             {toggleForm && <h1 className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} my-2 text-center justify-center font-medium text-xs sm:text-[13px] flex flex-wrap items-center gap-1`}>By signing up, you agree to our <p className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} font-semibold`}>Terms & Conditions</p> and <p className={`text-[#202020] font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Privacy Policy</p></h1>}
 

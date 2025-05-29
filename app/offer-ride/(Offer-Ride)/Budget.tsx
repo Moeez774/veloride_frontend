@@ -18,7 +18,7 @@ const Budget = ({ negotiate, setNegotiate, budget, setBudget, vehicle, location,
 
     //sending request to server for fetching ride price whenever user goes to 3rd step
     const fetchPrice = async () => {
-        let a = await fetch('http://localhost:4000/rides/fetchPrice', {
+        let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/fetchPrice`, {
             method: "POST", headers: {
                 "Content-Type": "application/json"
             },

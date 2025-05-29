@@ -20,7 +20,7 @@ const Upcomingrides: React.FC<Details> = ({ user, getImage }) => {
         if (!user) return
 
         const userRides = async () => {
-            let a = await fetch('http://localhost:4000/rides/owned-rides', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/owned-rides`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },

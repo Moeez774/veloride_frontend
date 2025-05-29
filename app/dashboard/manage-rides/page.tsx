@@ -112,7 +112,7 @@ const ManageRides = () => {
         if (!user) return;
         const fetchActiveRides = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/rides/active-rides?userId=${user._id}`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/active-rides?userId=${user._id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
@@ -184,7 +184,7 @@ const ManageRides = () => {
         socket.on('ride-cancelled', ({ ride, notification }) => {
             setSelectedRide(ride)
             setActiveRides((prevRides: any) => prevRides.map((ride: any) => ride._id === selectedRide._id ? ride : ride))
-            if(ride.userId === user?._id) {
+            if (ride.userId === user?._id) {
                 setNotifications(prev => [notification, ...prev])
             }
         })
@@ -279,7 +279,7 @@ const ManageRides = () => {
                     setSelectedRide((prevRide: any) => ({ ...prevRide, status: newStatus }))
                 }
 
-                const promise = fetch(`http://localhost:4000/rides/update-ride-status`, {
+                const promise = fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/update-ride-status`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ const ManageRides = () => {
 
         try {
 
-            const response = await fetch(`http://localhost:4000/rides/update-ride`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/update-ride`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

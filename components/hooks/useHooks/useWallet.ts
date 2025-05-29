@@ -1,5 +1,4 @@
-
-export const url = 'http://localhost:4000'
+export const url = process.env.NEXT_PUBLIC_API_URL
 
 export const fetchWalletDetails = async ({ id }: { id: string }) => {
     try {

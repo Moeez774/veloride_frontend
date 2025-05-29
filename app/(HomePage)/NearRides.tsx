@@ -193,7 +193,7 @@ const NearRides = () => {
         const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
 
         const fetchRides = async () => {
-            let a = await fetch('http://localhost:4000/rides/fetchRides', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/fetchRides`, {
                 method: "POST", headers: {
                     "Content-Type": "application/json"
                 },

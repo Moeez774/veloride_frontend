@@ -18,7 +18,7 @@ export const ContactsProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchContacts = async () => {
     try {
-      let a = await fetch('http://localhost:4000/messages/all-contacts', {
+      let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/all-contacts`, {
         method: "POST", headers: {
           "Content-Type": "application/json"
         },
@@ -71,15 +71,15 @@ export const ContactsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const themeOn = localStorage.getItem("theme")
-    setToggleTheme(themeOn && themeOn==='true'? true: false)
+    setToggleTheme(themeOn && themeOn === 'true' ? true : false)
   }, [])
 
   useEffect(() => {
-    if(toggleTheme) {
+    if (toggleTheme) {
       localStorage.setItem("theme", 'true')
       document.body.style.backgroundColor = 'black'
     }
-    else if(!toggleTheme) {
+    else if (!toggleTheme) {
       localStorage.setItem("theme", 'false')
       document.body.style.backgroundColor = 'white'
     }

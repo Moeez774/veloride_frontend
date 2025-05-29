@@ -55,7 +55,7 @@ const Header = () => {
     useEffect(() => {
 
         const fetchFeatures = async () => {
-            let a = await fetch('http://localhost:4000/data/sub-features', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/data/sub-features`, {
                 method: "GET"
             })
 
@@ -89,7 +89,7 @@ const Header = () => {
     // for logging out user
     const logOut = async () => {
         try {
-            let a = await fetch('http://localhost:4000/users/log-out', {
+            let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/log-out`, {
                 method: "GET",
                 credentials: 'include'
             })

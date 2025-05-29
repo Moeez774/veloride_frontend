@@ -33,7 +33,7 @@ const Budget: React.FC<Details> = ({ seats, setSeats, price, setPrice, currStep,
   const [avgFare, setAvgFare] = useState<any[]>([])
 
   const fetchPrice = async () => {
-    let a = await fetch('http://localhost:4000/rides/fetchPrice', {
+    let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/fetchPrice`, {
       method: "POST", headers: {
         "Content-Type": "application/json"
       },

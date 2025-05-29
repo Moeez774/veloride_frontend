@@ -333,9 +333,9 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
 
                     <h1 className={`text-[13px] ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#9F9F9F]'} mt-5 flex items-center gap-[0.90rem]`}>
 
-                        {walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange >= 0 && <span className={`${toggleTheme ? 'text-[#d2f5d9] bg-[#01b580]' : 'text-[#01b580] bg-[#D2F5D9]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowUp size={14} /> {Math.abs(Math.round(walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange))}%</span>}
+                        {walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange >= 0 && <span className={`${toggleTheme ? 'text-[#d2f5d9] bg-[#01b580]' : 'text-[#01b580] bg-[#D2F5D9]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowDown size={14} /> {Math.abs(Math.round(walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange))}%</span>}
 
-                        {walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange < 0 && <span className={`${toggleTheme ? 'text-[#ffdede] bg-[#ff8080]' : 'text-[#FF8080] bg-[#FFDEDE]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowDown size={14} /> {Math.abs(Math.round(walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange))}%</span>} Compared to last month
+                        {walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange < 0 && <span className={`${toggleTheme ? 'text-[#ffdede] bg-[#ff8080]' : 'text-[#FF8080] bg-[#FFDEDE]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowUp size={14} /> {Math.abs(Math.round(walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange))}%</span>} Compared to last month
                     </h1>
 
                 </div>
