@@ -24,7 +24,7 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
     const [isUploading, setUploading] = useState(false)
 
     return (
-        <div className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} w-[80vw] sm:w-[20rem] lg:w-auto flex flex-col gap-6 inter`}>
+        <div className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} w-[80vw] sm:w-[30rem] lg:w-auto flex flex-col gap-6 inter`}>
 
             <div className='flex flex-col sm:flex-row items-center gap-4'>
                 {photo === "" && <div onClick={() => inputRef.current?.click()} className={`h-32 cursor-pointer w-32 flex justify-center items-center ${toggleTheme ? 'bg-[#2d2d2d]' : 'bg-[#eaeaea]'} rounded-full shadow-md`}>

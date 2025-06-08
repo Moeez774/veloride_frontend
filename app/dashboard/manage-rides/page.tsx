@@ -1,7 +1,7 @@
 'use client'
 import { getContacts } from '@/context/ContactsProvider'
 import React, { useEffect, useRef, useState } from 'react'
-import { Search, Sliders, Car, Coins, Wallet, DollarSign, EllipsisVertical, MessageCircle, PhoneCall, XCircle, Navigation, ChevronLeft, Menu, X, PlayCircle, CheckCircle, AlertCircle, Clock, Info, CheckCheck } from 'lucide-react'
+import { Car, XCircle, Navigation, ChevronLeft, X, PlayCircle, CheckCircle, AlertCircle, } from 'lucide-react'
 import socket from '@/utils/socket'
 import {
     Accordion,
@@ -13,20 +13,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import VerifyPax from '../(Rides)/Owned_Rides/VerifyPax'
 import { TargetIcon } from '@radix-ui/react-icons'
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import {
     Dialog,
     DialogContent,
     DialogFooter,
@@ -34,12 +20,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import { useAuth } from '@/context/AuthProvider'
 import { MapPinIcon } from '@heroicons/react/16/solid'
 import Map from '../(Rides)/Map'
@@ -47,6 +28,7 @@ import Messages from '@/app/ride-detail/(Ride_Details)/Messages'
 import { declinePassenger, markPassengerDroppedOff } from '@/functions/ridesFunctions'
 import { useRide } from '@/context/states'
 import SearchRides from '../(Rides)/Owned_Rides/SearchRides'
+import RideInfo from './components/RideInfo'
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 const ManageRides = () => {
@@ -58,7 +40,6 @@ const ManageRides = () => {
     const authContext = useAuth()
     const [hasStarted, setHasStarted] = useState(false)
     const [message, setMessage] = useState('')
-    const [showToolTip, setShowToolTip] = useState(false)
     const [subline, setSubline] = useState('')
     const [openDeclineDialog, setOpenDeclineDialog] = useState(false)
     const [activeRides, setActiveRides] = useState([])
@@ -77,6 +58,7 @@ const ManageRides = () => {
     const [passengerForChat, setPassengerForChat] = useState<any>(null)
     const user = authContext?.user || null
     const [isStarted, setIsStarted] = useState(false)
+    const [isCancelled, setIsCancelled] = useState(false)
     const router = useRouter()
     const location = authContext?.userLocation || null
     const toggleTheme = context?.toggleTheme || false
@@ -177,13 +159,13 @@ const ManageRides = () => {
 
         socket.on('ride-joined', ({ ride, notificationForDriver }) => {
             setSelectedRide(ride)
-            setActiveRides((prevRides: any) => prevRides.map((ride: any) => ride._id === selectedRide._id ? ride : ride))
+            setActiveRides((prevRides: any) => prevRides.map((r: any) => r._id === selectedRide._id ? ride : r))
             setNotifications(prev => [notificationForDriver, ...prev])
         })
 
         socket.on('ride-cancelled', ({ ride, notification }) => {
             setSelectedRide(ride)
-            setActiveRides((prevRides: any) => prevRides.map((ride: any) => ride._id === selectedRide._id ? ride : ride))
+            setActiveRides((prevRides: any) => prevRides.map((r: any) => r._id === selectedRide._id ? ride : r))
             if (ride.userId === user?._id) {
                 setNotifications(prev => [notification, ...prev])
             }
@@ -262,7 +244,7 @@ const ManageRides = () => {
 
             let newStatus = null;
 
-            if (now > expiryTime && ride.status === 'waiting') {
+            if (now > expiryTime && (ride.status === 'waiting' || ride.status === 'ready')) {
                 newStatus = 'expired';
             } else if (now > rideTime && now <= expiryTime && ride.status === 'waiting') {
                 newStatus = 'ready';
@@ -301,7 +283,7 @@ const ManageRides = () => {
     const startRide = async (rideId: string, status: string) => {
         setHasStarted(true)
 
-        if (status === 'started') {
+        if (status === 'started' || status === 'completed') {
             setIsStarted(true)
         }
 
@@ -546,196 +528,8 @@ const ManageRides = () => {
                     </div>
                 </div>
 
-                {selectedRide && <div className='flex-1 xl:max-w-5xl px-3 sm:px-6 py-4 mx-auto w-full h-screen overflow-y-auto'>
-
-                    <div className='relative w-full flex md:flex-row flex-col gap-y-4 md:items-center justify-between'>
-
-                        {/* //last 8 words of ride._id */}
-                        <div className='flex items-center gap-2'>
-                            <h1 className={`text-base flex items-center gap-2 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} font-medium`}><Menu size={20} onClick={() => setOpenMenu(true)} className='cursor-pointer xl:hidden' ref={menuRef} /> Ride OTP: <p className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} text-2xl font-semibold`}>{selectedRide.otp}</p></h1>
-
-                            <TooltipProvider>
-                                <Tooltip open={showToolTip} onOpenChange={() => setShowToolTip(false)}>
-                                    <TooltipTrigger onMouseLeave={() => setShowToolTip(false)} onMouseEnter={() => setShowToolTip(true)} onClick={() => setShowToolTip(true)} onBlur={() => setShowToolTip(false)}><Info size={16} className='cursor-pointer' color={toggleTheme ? '#b1b1b1' : '#5b5b5b'} /></TooltipTrigger>
-                                    <TooltipContent className='max-w-[200px] bg-[#00563c] text-[#fefefe] text-center'>
-                                        <p>Ask this OTP from the passenger before starting the ride. Enter it in the verification tab to confirm their identity and prevent fraud.</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
-
-                        {(timeLeft.status === "upcoming" && selectedRide.status === "waiting") && <div className={`flex absolute md:relative items-center sm:mx-auto right-0 gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-full ${toggleTheme ? 'text-[#fefefe] bg-[#202020]/80' : 'text-[#202020] bg-[#f0f0f0]/80'} shadow-lg transition-all duration-300 hover:scale-105 backdrop-blur-md border ${toggleTheme ? 'border-[#202020]' : 'border-[#e0e0e0]'} w-fit z-50 md:justify-center`}>
-                            <Clock size={16} className="text-[#00563c] flex-shrink-0" />
-                            <div className="flex items-center gap-2 sm:gap-4">
-                                {timeLeft.hours > 0 && (
-                                    <div className="flex flex-col items-center min-w-[35px] sm:min-w-[45px]">
-                                        <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-[#00563c] to-[#01B580] bg-clip-text text-transparent">
-                                            {String(timeLeft.hours).padStart(2, '0')}
-                                        </span>
-                                        <span className="text-[10px] opacity-70">hours</span>
-                                    </div>
-                                )}
-                                <div className="flex flex-col items-center min-w-[35px] sm:min-w-[45px]">
-                                    <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-[#00563c] to-[#01B580] bg-clip-text text-transparent">
-                                        {String(timeLeft.minutes).padStart(2, '0')}
-                                    </span>
-                                    <span className="text-[10px] opacity-70">mins</span>
-                                </div>
-                                <div className="flex flex-col items-center min-w-[35px] sm:min-w-[45px]">
-                                    <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-[#00563c] to-[#01B580] bg-clip-text text-transparent">
-                                        {String(timeLeft.seconds).padStart(2, '0')}
-                                    </span>
-                                    <span className="text-[10px] opacity-70">secs</span>
-                                </div>
-                            </div>
-                        </div>}
-
-                        {selectedRide.status !== 'cancelled' && selectedRide.status !== 'expired' && selectedRide.status !== 'completed' && <div className='flex items-center gap-2'>
-                            {(selectedRide.status !== 'completed' && selectedRide.status !== 'expired') && <button onClick={() => startRide(selectedRide._id, 'cancelled')} className={`${toggleTheme ? 'border border-[#b1b1b1] bg-transparent hover:bg-[#202020cc]' : 'border bg-transparent hover:bg-[#f7f7f7cc]'} py-2.5 px-4 md:px-6 text-sm rounded-full cursor-pointer active:bg-transparent font-medium`}>Cancel ride</button>}
-                            {selectedRide.status === 'ready' &&
-                                <button onClick={() => {
-                                    startRide(selectedRide._id, 'started')
-                                }} className='py-2.5 px-4 md:px-6 text-sm md:text-[15px] hover:bg-[#00563ccc] cursor-pointer active:bg-[#00563c] bg-[#00563c] text-[#fefefe] rounded-full flex items-center gap-2 font-medium'>Start ride <PlayCircle size={20} />
-                                </button>
-                            }
-                            {selectedRide.status === 'started' && !selectedRide.passengers.some((passenger: any) => passenger.status != 'dropped') && <button className='py-2.5 px-4 md:px-6 text-sm md:text-[15px] hover:bg-[#00563ccc] cursor-pointer active:bg-[#00563c] bg-[#00563c] text-[#fefefe] rounded-full flex items-center gap-2 font-medium'>Complete ride <CheckCheck size={20} /></button>}
-                        </div>}
-                    </div>
-
-                    <div className='w-full mt-8 md:mt-6 flex-wrap gap-y-6 gap-x-8 sm:gap-0 flex items-center justify-between'>
-                        <div className='flex items-center gap-2'>
-                            <div className='rounded-full p-3 bg-[#2196F3]'><Coins size={20} color='#fefefe' /></div>
-                            <h1 className='flex flex-col md:text-lg font-semibold'>Rs. {selectedRide.budget.totalBudget} <p className={`text-xs mt-1 font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Total budget</p></h1>
-                        </div>
-
-                        <div className='flex items-center gap-2'>
-                            <div className='rounded-full p-3 bg-[#9C27B0]'><DollarSign size={20} color='#fefefe' /> </div>
-                            <h1 className='flex flex-col md:text-lg font-semibold'>Rs. {Math.round(selectedRide.budget.totalBudget / (selectedRide.rideDetails.bookedSeats + 1.5))} Per Seat <p className={`text-xs mt-1 font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Current fare</p></h1>
-                        </div>
-
-                        <div className='flex items-center gap-2'>
-                            <div className='rounded-full p-3 bg-[#FF7043]'><Wallet size={20} color='#fefefe' /> </div>
-                            <h1 className='flex flex-col md:text-lg font-semibold'>Rs. {
-                                payingByYou
-                            } <p className={`text-xs mt-1 font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Paying by You</p></h1>
-                        </div>
-                    </div>
-
-                    <div className='w-full mt-6 h-[25em] md:h-[18em] lg:h-[15em] bg-[#f0f0f0]'>
-                        <Map setOpen={setOpen} open={open} selectedRide={selectedRide} passengers={passengers} />
-                    </div>
-
-                    <div className='mt-4 w-full'>
-                        <h1 className='text-lg font-semibold'>Ride Info</h1>
-
-                        <div className='mt-3'>
-                            <div>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className={`w-full overflow-x-auto whitespace-nowrap  ${toggleTheme ? 'bg-[#202020] border-b border-[#000000] hover:bg-[#202020cc] text-[#fefefe]' : 'bg-[#f7f7f7] border-b hover:bg-[#f7f7f7cc] text-[#202020]'}`}>
-                                            {['Ride ID', 'Vehicle', 'Total seats', 'Booked seats', 'Distance', 'Duration', 'Status'].map((item, index) => {
-                                                if (item === 'Status') {
-                                                    return <TableHead className={`px-6 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} key={index}>{item}</TableHead>
-                                                } else {
-                                                    return <TableHead className={`px-6 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} key={index}>{item}</TableHead>
-                                                }
-                                            })}
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow className={`${toggleTheme ? 'hover:bg-[#202020cc]' : 'hover:bg-[#f7f7f7cc]'}`}>
-                                            <TableCell className="font-medium px-6">#{selectedRide._id.slice(-5)}</TableCell>
-                                            <TableCell className="font-medium px-6">{selectedRide.rideDetails.vehicle}</TableCell>
-                                            <TableCell className="px-6">{selectedRide.rideDetails.seats}</TableCell>
-                                            <TableCell className="px-6">{selectedRide.rideDetails.bookedSeats}</TableCell>
-                                            <TableCell className="px-6">{selectedRide.rideDetails.distance}km</TableCell>
-                                            <TableCell className="px-6">{Math.round(selectedRide.rideDetails.duration)}mins</TableCell>
-                                            <TableCell className={`px-6 ${selectedRide.status === 'started' ? 'text-[#4CAF50]' : selectedRide.status === 'waiting' ? 'text-[#2962FF]' : selectedRide.status === 'ready' ? 'text-[#FF7043]' : selectedRide.status === 'expired' ? 'text-[#ff0000]' : selectedRide.status === 'cancelled' ? 'text-[brown]' : 'text-[green]'} font-medium`}>{selectedRide.status.split("-")[0].charAt(0).toUpperCase() + selectedRide.status.split("-").join(" ").slice(1)}</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className='mt-4 w-full'>
-                        <h1 className='text-lg font-semibold'>Passengers</h1>
-
-                        <div className='mt-3'>
-                            <div>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className={`${toggleTheme ? 'bg-[#202020] border-b border-[#000000] hover:bg-[#202020cc] text-[#fefefe]' : 'bg-[#f7f7f7] border-b hover:bg-[#f7f7f7cc] text-[#202020]'}`}>
-                                            {['Name', 'Phone', 'Booked seats', 'Rating', 'Paying', 'Status', 'Actions'].map((item, index) => {
-                                                return <TableHead key={index} className={`px-6 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{item}</TableHead>
-                                            })}
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {selectedRide.passengers.length > 0 ? selectedRide.passengers.map((passenger: any, index: number) => {
-                                            return (
-                                                <TableRow className={`w-full ${toggleTheme ? 'hover:bg-[#202020cc]' : 'hover:bg-[#f7f7f7cc]'}`} key={index}>
-                                                    <TableCell className="font-medium px-6">{passenger.fullname}</TableCell>
-                                                    <TableCell className="px-6">{passenger.phone}</TableCell>
-                                                    <TableCell className="px-6">{passenger.seatsBooked}</TableCell>
-                                                    <TableCell className="px-6">{passenger.rating}</TableCell>
-                                                    <TableCell className="px-6">Rs. {Math.round(passenger.paying * passenger.seatsBooked)}</TableCell>
-                                                    <TableCell className={`px-6 ${passenger.status === 'pending' ? 'text-[#2962FF]' : passenger.status === 'verified' ? 'text-[#4CAF50]' : passenger.status === 'declined' ? 'text-[#ff0000]' : passenger.status === 'not_verified' ? 'text-[#5b5b5b]' : passenger.status === 'dropped' ? 'text-[brown]' : 'text-[#5b5b5b]'}`}>{passenger.status.charAt(0).toUpperCase() + passenger.status.slice(1)}</TableCell>
-                                                    <TableCell className="px-6">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger className='cursor-pointer !z-[150] relative outline-none'>
-                                                                <EllipsisVertical size={20} />
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent className={`${toggleTheme ? 'bg-[#202020] border-none text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`}>
-                                                                <DropdownMenuItem onClick={() => {
-                                                                    const pax = {
-                                                                        _id: passenger.userId,
-                                                                        phone: passenger.phone,
-                                                                        fullname: passenger.fullname,
-                                                                        photo: passenger.photo,
-                                                                        rating: passenger.rating,
-                                                                        paying: passenger.paying,
-                                                                        seatsBooked: passenger.seatsBooked,
-                                                                        luggage: passenger.luggage,
-                                                                        pet: passenger.pet,
-                                                                        smoking: passenger.smoking,
-                                                                    }
-                                                                    setPassengerForChat(pax)
-                                                                    setOpenChat(true)
-                                                                }}><MessageCircle size={20} /> Message</DropdownMenuItem>
-                                                                <DropdownMenuItem><PhoneCall size={20} /> Call</DropdownMenuItem>
-                                                                {passenger.status !== 'declined' && <DropdownMenuItem onClick={() => {
-                                                                    const pax = {
-                                                                        _id: passenger.userId,
-                                                                        phone: passenger.phone,
-                                                                        paying: passenger.paying,
-                                                                        fullname: passenger.fullname,
-                                                                        photo: passenger.photo,
-                                                                        rating: passenger.rating,
-                                                                        seatsBooked: passenger.seatsBooked,
-                                                                        luggage: passenger.luggage,
-                                                                        pet: passenger.pet,
-                                                                        smoking: passenger.smoking,
-                                                                    }
-                                                                    setPassengerForChat(pax)
-                                                                    setOpenDeclineDialog(true)
-                                                                }}><XCircle size={20} /> Decline Request</DropdownMenuItem>}
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        }) : <TableRow className='w-full'>
-                                            <TableCell colSpan={7} className={`w-full ${toggleTheme ? 'hover:bg-[#202020cc] bg-[#000000] text-[#fefefe]' : 'hover:bg-[#f7f7f7cc] bg-[#f7f7f7] text-[#202020]'} text-center my-2`}>No passengers yet</TableCell>
-                                        </TableRow>}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>}
-            </div >
+                <RideInfo selectedRide={selectedRide} timeLeft={timeLeft} startRide={startRide} open={open} setOpen={setOpen} payingByYou={payingByYou} passengers={passengers} setOpenMenu={setOpenMenu} setOpenChat={setOpenChat} setOpenDeclineDialog={setOpenDeclineDialog} menuRef={menuRef} setPassengerForChat={setPassengerForChat} isCancelled={isCancelled} setIsCancelled={setIsCancelled}/>
+            </div>
 
             {selectedRide && selectedRide.passengers.some((passenger: any) => passenger.status != 'dropped') && <div className={`fixed ${selectedRide && selectedRide.status === 'started' ? 'z-[10] opacity-[1] bottom-10' : '-z-[10] opacity-[0] bottom-6'} mx-auto left-0 right-[0%] flex justify-center ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} transition-all duration-300`}>
                 <VerifyPax passengers={selectedRide?.passengers} ride={selectedRide} setSelectedRide={setSelectedRide} setActiveRides={setActiveRides} activeRides={activeRides} />

@@ -1,5 +1,5 @@
 'use client'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useAuth } from '@/context/AuthProvider'
@@ -27,58 +27,92 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
     const user = authContext?.user || null
     const userLocation = authContext?.userLocation || null || undefined
     const drivers = authContext?.drivers || null
+    const hasCenteredRef = useRef(false)
+    const lastPositionRef = useRef<[number, number] | null>(null)
+    const lastUpdateTimeRef = useRef<number>(0)
+
+    // Add position smoothing function
+    const smoothPosition = (newPosition: [number, number]): [number, number] => {
+        const now = Date.now()
+        const timeDiff = now - lastUpdateTimeRef.current
+
+        if (!lastPositionRef.current || timeDiff > 1000) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const [lastLng, lastLat] = lastPositionRef.current
+        const [newLng, newLat] = newPosition
+        const distance = Math.sqrt(
+            Math.pow(newLng - lastLng, 2) + Math.pow(newLat - lastLat, 2)
+        )
+
+        if (distance > 0.0001) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const smoothingFactor = 0.3
+        const smoothedLng = lastLng + (newLng - lastLng) * smoothingFactor
+        const smoothedLat = lastLat + (newLat - lastLat) * smoothingFactor
+
+        lastPositionRef.current = [smoothedLng, smoothedLat]
+        lastUpdateTimeRef.current = now
+        return [smoothedLng, smoothedLat]
+    }
 
     useEffect(() => {
-        const long = localStorage.getItem("long")
-        const lat = localStorage.getItem("lat")
-        const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
+        if (!map) return
+        setMap(map.setStyle(`mapbox://styles/mapbox/${toggleTheme ? 'dark-v11' : 'streets-v11'}`))
+    }, [toggleTheme])
 
-        const location: [number, number] = userLocation && userLocation.length === 2
-            ? [userLocation[0], userLocation[1]]
-            : [currLocation[0], currLocation[1]]
+    useEffect(() => {
+        if (!userLocation || !map || !userMarker || hasCenteredRef.current) return
+        setMap(map?.setCenter(userLocation))
+        setUserMarker(userMarker?.setLngLat(userLocation))
+        hasCenteredRef.current = true
+    }, [userLocation, map, userMarker])
 
+    useEffect(() => {
         const mapInstance = new mapboxgl.Map({
             container: 'map',
-            style: toggleTheme ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v11',
-            center: location,
-            zoom: 14
+            style: `mapbox://styles/mapbox/${toggleTheme ? 'dark-v11' : 'streets-v11'}`,
+            center: [0, 0],
+            zoom: 14.5
         })
 
         mapInstance.resize()
-        mapInstance.addControl(new mapboxgl.NavigationControl());
+        mapInstance.addControl(new mapboxgl.NavigationControl())
+
         const blueDot = document.createElement('div')
         blueDot.className = 'user-location-dot'
 
-        // Add a red marker for user's location
-        const userMarker = new mapboxgl.Marker({
+        const marker = new mapboxgl.Marker({
             element: blueDot
         })
-            .setLngLat(location)
+            .setLngLat([0, 0])
             .addTo(mapInstance)
 
         setMap(mapInstance)
-        setUserMarker(userMarker)
-
-        // for detecting user's location in realtime
-        const watcherId = navigator.geolocation.watchPosition(position => {
-            const { longitude, latitude } = position.coords
-
-            userMarker.setLngLat([longitude, latitude])
-            localStorage.setItem('long', longitude.toString())
-            localStorage.setItem('lat', latitude.toString())
-        }, err => console.log(err),
-            {
-                enableHighAccuracy: true,
-                timeout: Infinity,
-                maximumAge: 0
-            }
-        )
+        setUserMarker(marker)
 
         return () => {
             mapInstance.remove()
-            navigator.geolocation.clearWatch(watcherId);
         }
-    }, [toggleTheme])
+    }, [])
+
+    useEffect(() => {
+        if (!userLocation || !userMarker || !map) return
+
+        const smoothedPosition = smoothPosition(userLocation)
+        userMarker.setLngLat(smoothedPosition)
+        if (!hasCenteredRef.current) {
+            map.setCenter(smoothedPosition)
+            hasCenteredRef.current = true
+        }
+    }, [userLocation, userMarker, map])
 
     //for changing drivers location in realtime
     useEffect(() => {

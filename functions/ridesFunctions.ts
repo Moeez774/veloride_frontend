@@ -6,7 +6,7 @@ import { Dispatch, SetStateAction } from "react"
 const accessToken = 'pk.eyJ1IjoibW9lZXoxMjMiLCJhIjoiY204Z3p3cHNrMDUxbjJrcjhvbGYxanU2MyJ9.ErFjedlF8xF7QZQmyTnIiw';
 
 // for offering a ride
-export async function offerRide(userId: string | null | undefined, driverName: string, location: { long: number, lat: number }, dropLocation: { long: number, lat: number }, pickup: string | null, drop: string | null, seats: number, time: string, date: string | undefined, vehicle: string, ride: string, luggage: boolean, petFriendly: boolean, smoking: boolean, negotiate: boolean, photo: string, note: string, number: boolean, email: boolean, setLoader: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, budget: number, setShowMessage: Dispatch<SetStateAction<boolean>>, setStatusCode: Dispatch<SetStateAction<number>>, user: any, setNotifications: Dispatch<SetStateAction<Notification[]>>) {
+export async function offerRide(userId: string | null | undefined, driverName: string, location: { long: number, lat: number }, dropLocation: { long: number, lat: number }, pickup: string | null, drop: string | null, seats: number, time: string, date: string | undefined, vehicle: string, ride: string, luggage: boolean, petFriendly: boolean, smoking: boolean, negotiate: boolean, photo: string, note: string, number: boolean, email: boolean, setLoader: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, budget: number, setShowMessage: Dispatch<SetStateAction<boolean>>, setStatusCode: Dispatch<SetStateAction<number>>, user: any, setNotifications: Dispatch<SetStateAction<Notification[]>>, setIsLoading: Dispatch<SetStateAction<boolean>>) {
 
     setLoader(true)
     setMessage('')
@@ -16,19 +16,25 @@ export async function offerRide(userId: string | null | undefined, driverName: s
     const info = await fetch(url)
     const jsonInfo = await info.json()
 
-    if (jsonInfo.code === 'Ok') {
-        const route = jsonInfo.routes[0];
-        const distance = (route.distance / 1000).toFixed(2)
-        const duration = (route.duration / 60).toFixed(2)
+    if (jsonInfo.code != 'Ok') {
+        setStatusCode(404)
+        setShowMessage(true)
+        setMessage("Failed to fetch routes. Please ensure all fields are filled or try again.")
+        return
+    }
+    const route = jsonInfo.routes[0];
+    const distance = (route.distance / 1000).toFixed(2)
+    const duration = (route.duration / 60).toFixed(2)
 
-        //generating randomg id for ride
-        const rideId = `${location.long}_${location.lat}_${new Date().getTime()}`
+    //generating randomg id for ride
+    const rideId = `${location.long}_${location.lat}_${new Date().getTime()}`
 
-        // complete data
-        const data = {
-            _id: rideId, driver_rating: user?.rating, driverName: driverName, userId: userId, pickupName: pickup, coordinates: [location.long, location.lat], dropLocationCoordinates: [dropLocation.long, dropLocation.lat], dropoffLocation: drop, date: date, seats: seats, time: time, vehicle: vehicle, rideType: ride, luggageAllowed: luggage, petAllowed: petFriendly, smokingAllowed: smoking, gender: user?.gender, totalBudget: budget, negotiate: negotiate, photo: photo, note: note, number: number, email: email, distance: distance, duration: duration, passengers: [], rating: user?.rating
-        }
+    // complete data
+    const data = {
+        _id: rideId, driver_rating: user?.rating, driverName: driverName, userId: userId, pickupName: pickup, coordinates: [location.long, location.lat], dropLocationCoordinates: [dropLocation.long, dropLocation.lat], dropoffLocation: drop, date: date, seats: seats, time: time, vehicle: vehicle, rideType: ride, luggageAllowed: luggage, petAllowed: petFriendly, smokingAllowed: smoking, gender: user?.gender, totalBudget: budget, negotiate: negotiate, photo: photo, note: note, number: number, email: email, distance: distance, duration: duration, passengers: [], rating: user?.rating
+    }
 
+    try {
         let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/offer-ride`, {
             method: "POST", headers: {
                 "Content-Type": "application/json",
@@ -37,6 +43,15 @@ export async function offerRide(userId: string | null | undefined, driverName: s
         })
 
         let response = await a.json()
+
+        if (response.statusCode != 200) {
+            setIsLoading(false)
+            setShowMessage(true)
+            setMessage(response.message)
+            setStatusCode(response.statusCode)
+            return
+        }
+
         setStatusCode(response.statusCode)
         setShowMessage(true)
         setMessage(response.message)
@@ -45,8 +60,7 @@ export async function offerRide(userId: string | null | undefined, driverName: s
         const otpNotification = response.otpNotification
 
         setNotifications(prev => [otpNotification, notification, ...prev])
-
-    } else {
+    } catch (error) {
         setStatusCode(404)
         setShowMessage(true)
         setMessage("Failed to fetch routes. Please ensure all fields are filled or try again.")
@@ -126,9 +140,9 @@ export async function declinePassenger(rideId: string, passengerId: string, decl
 }
 
 //for marking passenger dropped off
-export async function markPassengerDroppedOff(rideId: string, passengerId: string) {
-    try {
+export async function markPassengerDroppedOff(rideId: string, passengerId: string, setIsLoading: Dispatch<SetStateAction<boolean>>) {
 
+    try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/drop-passenger`, {
             method: "PUT",
             headers: {
@@ -146,5 +160,7 @@ export async function markPassengerDroppedOff(rideId: string, passengerId: strin
     } catch (error) {
         console.log(error)
         return
+    } finally {
+        setIsLoading(false)
     }
 }

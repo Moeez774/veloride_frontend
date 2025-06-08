@@ -21,8 +21,11 @@ const page = () => {
 
                 const data = await response.json()
 
-                setLoader(false);
                 setMessage(data.message);
+
+                setTimeout(() => {
+                    setLoader(false);
+                }, 3000);
 
                 if (data.statusCode === 200) {
                     localStorage.setItem('_id', data.userId);

@@ -46,9 +46,37 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
     const [showPass, setShowPass] = useState(false)
     const [country, setCountry] = useState<string>(countries[129].phone)
     const [loader, setLoader] = useState(false)
+    const [errors, setErrors] = useState<{ role?: string; city?: string; number?: string; pass?: string; gender?: string }>({})
 
     const handleChange = (value: string) => {
         setNumber(value)
+        if (errors.number) {
+            setErrors(prev => ({ ...prev, number: undefined }))
+        }
+    }
+
+    // Add validation function
+    const validateFields = () => {
+        const newErrors: { role?: string; city?: string; number?: string; pass?: string; gender?: string } = {}
+
+        if (step === 5 && role === 'Any') {
+            newErrors.role = 'Please select a role'
+        }
+
+        if (step >= 6) {
+            if (!city) {
+                newErrors.city = 'City is required'
+            }
+            if (!number) {
+                newErrors.number = 'Phone number is required'
+            }
+            if (!user && !pass) {
+                newErrors.pass = 'Password is required'
+            }
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
     }
 
     // sending signup request to backend
@@ -57,6 +85,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
     const delay = async (ms: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms))
 
     const proceed = async () => {
+        if (!validateFields()) return
         setStep(prev => prev + 1)
         await delay(400)
         setStep(prev => prev + 1)
@@ -74,8 +103,16 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
         await signOut(auth)
     }
 
+    // Add error styles
+    const getInputStyles = (field: 'city' | 'number' | 'pass') => {
+        const baseStyles = `border outline-none font-normal transition-all duration-300 flex gap-3 items-center justify-center rounded-md p-[0.90rem] w-full ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`
+        return errors[field]
+            ? `${baseStyles} border-red-500 focus:border-red-500`
+            : `${baseStyles} border-[#c7c7c7] focus:border-[#00563c]`
+    }
+
     return (
-        <div className='w-full flex flex-col items-center h-full'>
+        <div className='w-full flex flex-col overflow-hidden pb-12 items-center h-full'>
 
             <div className='w-full flex items-center justify-between'>
                 <img className='w-11' src='/Images/Leonardo_Phoenix_10_A_sleek_modern_and_minimalistic_logo_desig_3-removebg-preview__1_-removebg-preview.png' />
@@ -93,7 +130,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
 
             <div className='h-full md:max-w-xl w-full flex mx-auto'>
 
-                {step < 6 && <div className={`flex h-full w-full ease-out transition-all duration-400 flex-col ${step === 5 ? '-translate-x-12 opacity-0' : 'translate-x-0 opacity-[1]'} justify-center gap-12`}>
+                {step < 6 && <div className={`flex h-full w-full ease-out transition-all duration-400 flex-col my-5 ${step === 5 ? '-translate-x-12 opacity-0' : 'translate-x-0 opacity-[1]'} justify-center gap-12`}>
                     <div className='flex flex-col gap-4'>
                         <h1 className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} text-3xl font-semibold`}>Choose Your Role</h1>
                         <h1 className={`font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-sm`}>Are you planning to drive or looking for a ride? Let us know to match you better.</h1>
@@ -147,74 +184,111 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                             }}>Continue</button>
                         </div>
                     </div>
+                    {errors.role && (
+                        <p className="text-red-500 text-xs mt-1">{errors.role}</p>
+                    )}
                 </div>}
 
-                {step >= 6 && step < 9 && <div className={`flex w-full ease-out h-full ${step === 7 ? 'opacity-[1] translate-x-0' : step === 8 ? '-translate-x-12 opacity-0' : ' opacity-0 translate-x-12'} flex-col transition-all duration-400 justify-center ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
+                {step >= 6 && step < 9 && <div className={`flex w-full ease-out my-5 h-full ${step === 7 ? 'opacity-[1] translate-x-0' : step === 8 ? '-translate-x-12 opacity-0' : ' opacity-0 translate-x-12'} flex-col transition-all duration-400 justify-center overflow-hidden ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
                     <div className='flex flex-col gap-4'>
                         <h1 className='text-3xl font-semibold'>Complete Your Details</h1>
                         <h1 className={`font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-sm`}>Just a few more details to get you rolling, your city, phone, and a secure password.</h1>
                     </div>
 
-                    <div className='flex items-center gap-2 mt-8 w-full'>
-                        <div className='flex w-full flex-col gap-1.5'>
-                            <label className='text-[13px]'>Your city or location</label>
-                            <input value={city} onChange={(e) => setCity(e.target.value)} className='border outline-none font-normal focus:shadow-lg transition-all duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm p-[0.90rem] w-full' />
+                    <div className='flex flex-col gap-6 mt-8 w-full'>
+                        <div className='flex gap-2 w-full'>
+                            <div className='flex w-full flex-col gap-1.5'>
+                                <label className='text-[13px]'>Your city or location</label>
+                                <input
+                                    value={city}
+                                    onChange={(e) => {
+                                        setCity(e.target.value)
+                                        if (errors.city) {
+                                            setErrors(prev => ({ ...prev, city: undefined }))
+                                        }
+                                    }}
+                                    className={getInputStyles('city')}
+                                />
+                                {errors.city && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                                )}
+                            </div>
+                            <div className='flex flex-col mt-0.5 gap-1.5'>
+                                <label className='text-[13px] flex items-center gap-1'>
+                                    Gender
+                                    <span className='text-[11px] text-[#5b5b5b]'>(optional)</span>
+                                </label>
+                                <Select
+                                    value={gender}
+                                    onValueChange={(value) => {
+                                        setGender(value)
+                                        if (errors.gender) {
+                                            setErrors(prev => ({ ...prev, gender: undefined }))
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger className={`w-[180px] border py-6 ${toggleTheme ? 'bg-[black]' : 'bg-[#fefefe]'}`}>
+                                        <SelectValue placeholder="Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent className={`${toggleTheme ? 'bg-[black] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} inter`}>
+                                        <SelectItem value="male">Male</SelectItem>
+                                        <SelectItem value="female">Female</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <Select value={gender} onValueChange={setGender}>
-                            <SelectTrigger className={`w-[180px] mt-6 border py-6 ${toggleTheme ? 'bg-[black]' : 'bg-[#fefefe]'}`}>
-                                <SelectValue placeholder="Gender" />
-                            </SelectTrigger>
-                            <SelectContent className={`${toggleTheme ? 'bg-[black] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'} inter`}>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
 
-                    {!user && <div className='flex flex-col mt-3 gap-1.5'>
-                        <label className='text-[13px]'>Password</label>
-                        <div className='w-full flex items-center gap-2'>
-                            <input value={pass} type={showPass ? 'text' : 'password'} onChange={(e) => setPass(e.target.value)} className={`border outline-none font-normal focus:shadow-lg transition-all w-full duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm pl-[0.90rem] pr-12 py-[0.90rem] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} />
-                            {!showPass && <Eye onClick={() => setShowPass(true)} size={20} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
-                            {showPass && <EyeOff size={20} onClick={() => setShowPass(false)} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
+                        {!user && <div className='flex flex-col gap-1.5'>
+                            <label className='text-[13px]'>Password</label>
+                            <div className='w-full flex items-center gap-2'>
+                                <input
+                                    value={pass}
+                                    type={showPass ? 'text' : 'password'}
+                                    onChange={(e) => {
+                                        setPass(e.target.value)
+                                        if (errors.pass) {
+                                            setErrors(prev => ({ ...prev, pass: undefined }))
+                                        }
+                                    }}
+                                    className={getInputStyles('pass')}
+                                />
+                                {!showPass && <Eye onClick={() => setShowPass(true)} size={20} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
+                                {showPass && <EyeOff size={20} onClick={() => setShowPass(false)} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
+                            </div>
+                            {errors.pass && (
+                                <p className="text-red-500 text-xs mt-1">{errors.pass}</p>
+                            )}
+                        </div>}
+
+                        <div className='flex items-center w-full gap-0.5'>
+                            <PhoneInput
+                                number={number}
+                                country={country}
+                                setNumber={(value) => {
+                                    setNumber(value)
+                                    if (errors.number) {
+                                        setErrors(prev => ({ ...prev, number: undefined }))
+                                    }
+                                }}
+                                setCountry={setCountry}
+                                error={errors.number}
+                            />
                         </div>
-                    </div>}
-
-                    <div className='flex items-center w-full mt-3 gap-0.5'>
-
-                        <PhoneInput number={number} country={country} setNumber={setNumber} setCountry={setCountry} />
-
                     </div>
 
                     <div className='flex items-center justify-end gap-10 mt-10'>
                         <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => back()}>Back</button>
                         <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
-                            if ((!user && (pass === '' || number === '' || city === '' || gender === ''))) {
-                                setShowSteps(true)
-                                setMessage("Please fill in all the required fields.")
-                                setTimeout(() => setShowMessage(true), 100)
-                            }
-                            else {
-                                for (let i = 0; i < number.length; i++) {
-                                    const n = parseInt(number.charAt(i))
-                                    if (Number.isNaN(n)) {
-                                        setShowSteps(true)
-                                        setMessage("Invalid phone number.")
-                                        setTimeout(() => setShowMessage(true), 100)
-                                        return
-                                    }
-                                }
-                                proceed()
-                            }
+                            if (!validateFields()) return
+                            proceed()
                         }}>Continue</button>
                     </div>
-
                 </div>}
 
-                {step >= 9 && <div className={`flex w-full ease-out h-full ${step === 10 ? 'opacity-[1] translate-x-0' : step === 11 ? '-translate-x-12 opacity-0' : ' opacity-0 translate-x-12'} flex-col transition-all duration-400 justify-center gap-12 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
+                {step >= 9 && <div className={`flex w-full ease-out h-full ${step === 10 ? 'opacity-[1] translate-x-0' : step === 11 ? '-translate-x-12 opacity-0' : ' opacity-0 translate-x-12'} mt-5 flex-col transition-all duration-400 justify-center gap-12 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
                     <div className='flex flex-col gap-4'>
-                        <h1 className='text-3xl font-semibold'>You’re All Set!</h1>
-                        <h1 className={`font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-sm`}>Let’s get you on the road—whether you’re driving or riding.</h1>
+                        <h1 className='text-3xl font-semibold'>You're All Set!</h1>
+                        <h1 className={`font-normal ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-sm`}>Let's get you on the road—whether you're driving or riding.</h1>
                     </div>
 
                     <div className='w-full flex justify-center'>

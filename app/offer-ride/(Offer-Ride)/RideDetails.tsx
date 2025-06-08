@@ -89,17 +89,14 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
 
                         <div>
                             <TooltipProvider>
-                                <Tooltip open={showPickupTip} onOpenChange={() => setShowPickupTip(!showPickupTip)}>
-                                    <TooltipTrigger className='translate-y-[4px]'>
+                                <Tooltip open={showPickupTip} onOpenChange={() => setShowPickupTip(false)}>
+                                    <TooltipTrigger onMouseLeave={() => setShowPickupTip(false)} onMouseEnter={() => setShowPickupTip(true)} onClick={() => setShowPickupTip(true)} onBlur={() => setShowPickupTip(false)} className='translate-y-[4px]'>
                                         <HelpCircle
-                                            onClick={() => setShowPickupTip(true)}
-                                            onFocus={() => setShowPickupTip(true)}
-                                            onBlur={() => setShowPickupTip(false)}
                                             size={20}
                                             color={toggleTheme ? '#fefefe' : '#202020'}
                                         />
                                     </TooltipTrigger>
-                                    <TooltipContent className={`relative z-[100] ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020] text-[#fefefe]' : 'bg-white text-[#202020]'}`}>
+                                    <TooltipContent className={`relative z-[100] bg-[#00563c] text-[#fefefe]`}>
                                         <p className='inter w-24 text-center'>Enter your starting location for the ride.</p>
                                     </TooltipContent>
                                 </Tooltip>
@@ -127,17 +124,14 @@ const RideDetails: React.FC<Details> = ({ seats, setseats, date, setDate, time, 
 
                         <div>
                             <TooltipProvider>
-                                <Tooltip open={showDropoffTip} onOpenChange={() => setShowDropoffTip(!showDropoffTip)}>
-                                    <TooltipTrigger className='translate-y-[4px]'>
+                                <Tooltip open={showDropoffTip} onOpenChange={() => setShowDropoffTip(false)}>
+                                    <TooltipTrigger onMouseLeave={() => setShowDropoffTip(false)} onMouseEnter={() => setShowDropoffTip(true)} onClick={() => setShowDropoffTip(true)} onBlur={() => setShowDropoffTip(false)} className='translate-y-[4px]'>
                                         <HelpCircle
-                                            onClick={() => setShowDropoffTip(true)}
-                                            onFocus={() => setShowDropoffTip(true)}
-                                            onBlur={() => setShowDropoffTip(false)}
                                             size={20}
                                             color={toggleTheme ? '#fefefe' : '#202020'}
                                         />
                                     </TooltipTrigger>
-                                    <TooltipContent className={`relative z-[100] ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020] text-[#fefefe]' : 'bg-white text-[#202020]'}`}>
+                                    <TooltipContent className={`relative z-[100] bg-[#00563c] text-[#fefefe]`}>
                                         <p className='inter w-24 text-center'>Enter your destination for the ride.</p>
                                     </TooltipContent>
                                 </Tooltip>

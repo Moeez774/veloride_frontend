@@ -26,7 +26,7 @@ const MyTimePicker: React.FC<Details> = ({ value, setValue, type }) => {
             </div>
 
             <div style={{ transition: 'all 0.05s ease-in-out', transform: timeSelection ? 'scale(1)' : 'scale(0.8)' }} className={`absolute ${timeSelection ? 'z-10 opacity-[1]' : '-z-10 opacity-0'} translate-y-[3rem]`}>
-                <ScrollArea className={`h-[200px] ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020] text-[#fefefe]' : 'bg-white border text-[#202020]'} -z-10 relative flex flex-col w-[8.5rem] rounded-md p-2`}>
+                <ScrollArea className={`h-[150px] ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020] text-[#fefefe]' : 'bg-white border text-[#202020]'} -z-10 relative flex flex-col w-[8.5rem] rounded-md p-2`}>
                     {times.map((e, index) => {
                         return (
                             <h1 key={index} onClick={() => {

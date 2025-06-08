@@ -194,7 +194,7 @@ const Header = () => {
                             }} className='transition-all duration-200 cursor-pointer' style={{ display: !showSearchBar ? 'block' : 'none' }} color={toggleTheme ? '#fefefe' : '#202020'} />
 
                             {/* // user's profile and logout access */}
-                            <div className='hidden md:flex items-center'>
+                            <div className='flex items-center'>
 
                                 {user && <DropdownMenu>
                                     <DropdownMenuTrigger className='outline-none'>
@@ -214,12 +214,12 @@ const Header = () => {
                                             )}
                                         </div>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className='inter hidden h-28 lg:flex flex-col justify-center w-60 text-[#202020] p-2 -translate-x-32'>
+                                    <DropdownMenuContent className={`inter h-28 flex flex-col justify-center w-48 md:w-60 p-2 -translate-x-28 md:-translate-x-32 ${toggleTheme? 'bg-[#202020] border border-[#353535] text-white': 'text-[#202020] border bg-[#fefefe]'}`}>
 
                                         <Link href='/dashboard'><DropdownMenuItem className='cursor-pointer text-lg'>Dashboard</DropdownMenuItem></Link>
 
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className='cursor-pointer' onClick={async () => {
+                                        <hr className={`my-1 ${toggleTheme? 'border border-[#353535]': 'border border-[#e0e0e0]'}`} />
+                                        <DropdownMenuItem className={`${toggleTheme? 'hover:bg-[#353535]': 'hover:bg-[#f0f0f0]'} cursor-pointer`} onClick={async () => {
                                             await logOut()
                                             await signOut(auth)
                                             router.push('/hop-in')
@@ -238,7 +238,7 @@ const Header = () => {
                                 <MainMap setShowMap={setShowMap} />
                             </div>}
 
-                            <div className='bar flex items-center'>
+                            {/* <div className='bar flex items-center'>
                                 <Sheet>
                                     <SheetTrigger className='flex items-center'>
                                         <Bars3BottomLeftIcon className={`bar ${scroll ? 'w-[1.40rem] h-[1.40rem]' : 'w-7 h-7'} transition-all duration-200 cursor-pointer`} />
@@ -256,7 +256,7 @@ const Header = () => {
                                         </SheetHeader>
                                     </SheetContent>
                                 </Sheet>
-                            </div>
+                            </div> */}
                         </div>
                     </div>}
                 </div>

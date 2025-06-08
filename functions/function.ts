@@ -150,7 +150,7 @@ export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolea
 
         let response = await a.json()
 
-        if (response.user === null) {
+        if (response.statusCode != 200) {
             setStep(prev => prev + 1)
             await delay(1000)
             setStep(prev => prev + 1)

@@ -34,13 +34,13 @@ const NearRides = () => {
     const [mostRatedDrivers, setMostRatedDrivers] = useState<any[]>([])
     const userLocation = authContext?.userLocation || null || undefined
     const drivers = authContext?.drivers || null
-    const setUserLocation = authContext?.setUserLocation
     const nearRidesRef = useRef(nearRides)
     const user = authContext?.user || null
     const detailsRef = useRef<HTMLDivElement>(null)
     const hasCenteredRef = useRef(false)
+    const lastPositionRef = useRef<[number, number] | null>(null)
+    const lastUpdateTimeRef = useRef<number>(0)
 
-    //hiding details popup on outside click of popup
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
             if (detailsRef.current && !detailsRef.current.contains(e.target as Node)) {
@@ -75,7 +75,6 @@ const NearRides = () => {
     }, [userLocation, map, userMarker])
 
     useEffect(() => {
-
         const mapInstance = new mapboxgl.Map({
             container: 'map',
             style: `mapbox://styles/mapbox/${toggleTheme ? 'dark-v11' : 'streets-v11'}`,
@@ -107,27 +106,52 @@ const NearRides = () => {
             })
         })
 
-        const watcherId = navigator.geolocation.watchPosition(
-            (position) => {
-                const { longitude, latitude } = position.coords
-                userMarker?.setLngLat([longitude, latitude])
-                if (setUserLocation) setUserLocation([longitude, latitude])
-                localStorage.setItem('long', longitude.toString())
-                localStorage.setItem('lat', latitude.toString())
-            },
-            (err) => console.error(err),
-            {
-                enableHighAccuracy: true,
-                timeout: Infinity,
-                maximumAge: 0
-            }
-        )
-
         return () => {
             mapInstance.remove()
-            navigator.geolocation.clearWatch(watcherId)
         }
     }, [])
+
+    const smoothPosition = (newPosition: [number, number]): [number, number] => {
+        const now = Date.now()
+        const timeDiff = now - lastUpdateTimeRef.current
+
+        if (!lastPositionRef.current || timeDiff > 1000) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const [lastLng, lastLat] = lastPositionRef.current
+        const [newLng, newLat] = newPosition
+        const distance = Math.sqrt(
+            Math.pow(newLng - lastLng, 2) + Math.pow(newLat - lastLat, 2)
+        )
+
+        if (distance > 0.0001) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const smoothingFactor = 0.3
+        const smoothedLng = lastLng + (newLng - lastLng) * smoothingFactor
+        const smoothedLat = lastLat + (newLat - lastLat) * smoothingFactor
+
+        lastPositionRef.current = [smoothedLng, smoothedLat]
+        lastUpdateTimeRef.current = now
+        return [smoothedLng, smoothedLat]
+    }
+
+    useEffect(() => {
+        if (!userLocation || !userMarker || !map) return
+
+        const smoothedPosition = smoothPosition(userLocation)
+        userMarker.setLngLat(smoothedPosition)
+        if (!hasCenteredRef.current) {
+            map.setCenter(smoothedPosition)
+            hasCenteredRef.current = true
+        }
+    }, [userLocation, userMarker, map])
 
     //for changing drivers location in realtime
     useEffect(() => {

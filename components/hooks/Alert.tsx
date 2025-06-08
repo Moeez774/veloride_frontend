@@ -7,9 +7,10 @@ interface Details {
     statements: string[],
     func1: () => void,
     func2: () => void,
+    error?: boolean
 }
 
-const Alert: React.FC<Details> = ({ item, setter, statements, func1, func2 }) => {
+const Alert: React.FC<Details> = ({ item, setter, statements, func1, func2, error }) => {
     return (
         <div className='inter'>
             <AlertDialog open={item} onOpenChange={() => setter(false)}>

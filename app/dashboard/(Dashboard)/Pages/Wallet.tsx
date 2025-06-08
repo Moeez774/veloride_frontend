@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
-import { Calendar, ChevronDown, ArrowUp, Copy, Plus, CheckCircle, Clock, EllipsisVertical, ArrowDown } from 'lucide-react'
+import { Calendar, ChevronDown, ArrowUp, Copy, Plus, CheckCircle, Clock, EllipsisVertical, ArrowDown, Info, DownloadCloud } from 'lucide-react'
 import {
     Tooltip,
     TooltipContent,
@@ -23,26 +23,57 @@ import { QuestionMarkCircledIcon } from '@radix-ui/react-icons'
 import AddPaymentMethods from '@/components/items/AddPaymentMethods'
 import PieChart from '@/components/ui/PieChart'
 import Actions from './Wallet_Components/Actions'
+import ToolTip from '@/components/commonOnes/Tooltip'
+import InvoiceGenerator from './Wallet_Components/InvoiceGenerator'
+import SelectOptions from '@/components/commonOnes/Select'
+
 interface WalletProps {
     toggleTheme: boolean | undefined,
     user: any,
     formattedDate: string
 }
 
-const Filter = ({ text, textSize, toggleTheme }: { text: string, textSize: string, toggleTheme?: boolean | undefined }) => {
-    return (
-        <div className={`flex items-center text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} justify-between`}>
-            <h1 className={`${textSize} font-semibold ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{text}</h1>
-            <button className={`rounded-full flex items-center gap-1 ${toggleTheme ? 'border border-[#202020]' : 'border'} px-2.5 py-2`}>This Month <ChevronDown className='ml-0.5 mt-1' size={14} /></button>
-        </div>
-    )
-}
+const DateFilter = ({ text, toggleTheme, data, setMonthlyStatistics, walletData }: { text: string, toggleTheme: boolean | undefined, data?: any[], setMonthlyStatistics: (value: any) => void, walletData: any }) => {
+    const [options, setOptions] = useState<string[]>([])
+    const [value, setValue] = useState<string>('')
 
-const DateFilter = ({ text, toggleTheme, formattedDate }: { text: string, toggleTheme: boolean | undefined, formattedDate?: string | undefined }) => {
+    useEffect(() => {
+        if(!value) return
+        const getTime = value.split(" ")
+        if(text === "Monthly Spent") {
+            const getData = walletData.monthlySpent.find((stat: any) => {
+                return stat.month === getTime[0] && stat.year === Number(getTime[1])
+            })
+            setMonthlyStatistics({
+                monthlySpent: getData,
+                monthlyEarnings: walletData.monthlyEarnings[walletData.monthlyEarnings.length - 1]
+            })
+        }
+
+        if (text === "Monthly Income") {
+            const getData = walletData.monthlyEarnings.find((stat: any) => {
+                return stat.month === getTime[0] && stat.year === Number(getTime[1])
+            })
+            setMonthlyStatistics({
+                monthlySpent: walletData.monthlySpent[walletData.monthlySpent.length - 1],
+                monthlyEarnings: getData
+            })
+        }
+    }, [value])
+
+    useEffect(() => {
+        if(!data) return
+        const months = data.map((transaction) => {
+            return transaction.month + " " + transaction.year
+        })
+        setValue(months[months.length - 1])
+        setOptions(months)
+    }, [data])
     return (
         <div className={`flex items-center text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} justify-between`}>
             <h1 className={`text-sm ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{text}</h1>
-            <button className={`rounded-full text-xs xl:text-sm flex items-center ${toggleTheme ? 'border border-[#202020]' : 'border'} gap-1 px-2.5 py-1`}>{text === 'My Balance' ? <Calendar size={15} /> : ""} {text === "My Balance" ? formattedDate?.split(",")[0] : `This Month`} {text != "My Balance" ? <ChevronDown className='xl:ml-0.5 mt-1' size={14} /> : ""}</button>
+
+            <SelectOptions placeholder='This Month' options={options} styles={`rounded-full ${toggleTheme ? 'border border-[#202020]' : 'border'} flex w-fit items-center gap-1 px-2.5 py-1`} value={value} setValue={setValue} contentStyles={`${toggleTheme ? 'bg-[#202020] border border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020] border'}`} />
         </div>
     )
 }
@@ -63,7 +94,7 @@ const RecentlyActivities = ({ toggleTheme, data }: { toggleTheme?: boolean | und
                 <h1 className={`${toggleTheme ? 'text-[#b1b1b1b]' : 'text-[#5b5b5b]'} text-sm text-center font-medium mt-10`}>You haven't done any transactions recently.</h1>
             </div>}
 
-            {data.length != 0 && data.map((transaction, index) => (
+            {data.length != 0 && data.reverse().map((transaction, index) => (
                 <React.Fragment key={index}>
                     <div className={`grid grid-cols-3 mt-3 text-[15px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} font-medium gap-x-4`}>
                         <h1>#{transaction.rideId.slice(-5)}</h1>
@@ -178,10 +209,22 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
     const { data, loading, error } = useFetch(() => fetchWalletDetails({ id: user?._id }))
     const [walletData, setWalletData] = useState<WalletData | null>(null)
     const hasFetched = useRef(false)
+    const [monthlyStatistics, setMonthlyStatistics] = useState<{
+        monthlyEarnings: any,
+        monthlySpent: any
+    }>({
+        monthlyEarnings: null,
+        monthlySpent: null
+    })
 
     useEffect(() => {
         if (!data || hasFetched.current) return
         setWalletData(data)
+
+        setMonthlyStatistics({
+            monthlyEarnings: data.monthlyEarnings[data.monthlyEarnings.length - 1],
+            monthlySpent: data.monthlySpent[data.monthlySpent.length - 1]
+        })
         hasFetched.current = true
     }, [data])
 
@@ -196,7 +239,10 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
                 <div className='flex flex-col lg:w-3/4 xl:w-1/2 gap-y-5'>
                     <div className={`w-full p-5 ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020]' : 'bg-[#fefefe] border'} rounded-xl  h-auto`}>
 
-                        <DateFilter toggleTheme={toggleTheme} formattedDate={formattedDate} text='My Balance' />
+                        <div className='flex justify-between items-center'>
+                            <h1 className={`text-sm ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>My Balance</h1>
+                            <InvoiceGenerator walletData={walletData} user={user} formattedDate={formattedDate} />
+                        </div>
 
                         <h1 className='text-4xl mt-4 flex items-center gap-4'>PKR {walletData.balance.currentBalance}
 
@@ -217,10 +263,8 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
                         </div>
 
                     </div>
-
                     <div className={`w-full mb-4 lg:mb-0 overflow-y-auto h-[28.5em] ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020]' : 'bg-[#fefefe] border'} rounded-xl p-5`} style={{ scrollbarWidth: 'thin' }}>
-                        <Filter toggleTheme={toggleTheme} textSize='text-base' text='Recently Activity' />
-
+                        <h1 className={`text-sm ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Recently Activity</h1>
                         <RecentlyActivities data={walletData.transactions} toggleTheme={toggleTheme} />
                     </div>
                 </div>
@@ -258,7 +302,8 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
                     </div>
 
                     <div className={`w-full h-auto ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020]' : 'bg-[#fefefe] border'} rounded-xl px-5 pt-5 pb-8`}>
-                        <Filter toggleTheme={toggleTheme} textSize='text-base' text='Refund Tracker' />
+
+                        <h1 className={`text-sm ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Refund Tracker</h1>
 
                         <h1 className={`mt-2.5 text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Total Requested Refund
                             <p className={`text-2xl mt-2 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} font-medium`}>PKR {walletData.refundTracker.totalRequested}</p>
@@ -325,42 +370,52 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
             <div className='flex flex-col w-full lg:flex-row items-center gap-4'>
                 <div className={`w-full h-auto ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020]' : 'bg-[#fefefe] border'} rounded-xl p-5`}>
 
-                    <DateFilter toggleTheme={toggleTheme} text='Monthly Spent' />
-
+                    <DateFilter toggleTheme={toggleTheme} walletData={walletData} setMonthlyStatistics={setMonthlyStatistics} text='Monthly Spent' data={walletData.monthlySpent} />
 
                     <h1 className={`text-2xl mt-4 flex items-center gap-4 ${toggleTheme ? 'text-[#fefefe]' : ''}`}>PKR {walletData.monthlySpent[walletData.monthlySpent.length - 1].spent}
                     </h1>
 
-                    <h1 className={`text-[13px] ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#9F9F9F]'} mt-5 flex items-center gap-[0.90rem]`}>
+                    <div className='flex items-center justify-between'>
+                        <h1 className={`text-[13px] ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#9F9F9F]'} mt-5 flex items-center gap-[0.90rem]`}>
 
-                        {walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange >= 0 && <span className={`${toggleTheme ? 'text-[#d2f5d9] bg-[#01b580]' : 'text-[#01b580] bg-[#D2F5D9]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowDown size={14} /> {Math.abs(Math.round(walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange))}%</span>}
+                            {monthlyStatistics?.monthlySpent?.percentageChange < 0 && <span className={`${toggleTheme ? 'text-[#d2f5d9] bg-[#01b580]' : 'text-[#01b580] bg-[#D2F5D9]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowDown size={14} /> {Math.abs(Math.round(monthlyStatistics?.monthlySpent?.percentageChange))}%</span>}
 
-                        {walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange < 0 && <span className={`${toggleTheme ? 'text-[#ffdede] bg-[#ff8080]' : 'text-[#FF8080] bg-[#FFDEDE]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowUp size={14} /> {Math.abs(Math.round(walletData.monthlySpent[walletData.monthlySpent.length - 1].percentageChange))}%</span>} Compared to last month
-                    </h1>
+                            {monthlyStatistics?.monthlySpent?.percentageChange >= 0 && <span className={`${toggleTheme ? 'text-[#ffdede] bg-[#ff8080]' : 'text-[#FF8080] bg-[#FFDEDE]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowUp size={14} /> {Math.abs(Math.round(monthlyStatistics?.monthlySpent?.percentageChange))}%</span>} Compared to last month
+                        </h1>
+
+
+                        <div className='translate-y-3'>
+                            <ToolTip icon={<Info className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} cursor-pointer`} size={16} />} text={`You spent ${Math.abs(Math.round(monthlyStatistics?.monthlySpent?.percentageChange))}% ${monthlyStatistics?.monthlySpent?.percentageChange < 0 ? 'less' : 'more'} this month compared to last month.`} />
+                        </div>
+                    </div>
 
                 </div>
 
                 <div className={`${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020]' : 'bg-[#fefefe] border'} rounded-xl p-5 w-full`}>
 
-                    <DateFilter toggleTheme={toggleTheme} text='Monthly Income' />
+                    <DateFilter toggleTheme={toggleTheme} walletData={walletData} setMonthlyStatistics={setMonthlyStatistics} text='Monthly Income' data={walletData.monthlyEarnings} />
 
-
-                    <h1 className={`text-2xl mt-4 flex items-center gap-4 ${toggleTheme ? 'text-[#fefefe]' : ''}`}>PKR {walletData.monthlyEarnings[walletData.monthlyEarnings.length - 1].earned}
+                    <h1 className={`text-2xl mt-4 flex items-center gap-4 ${toggleTheme ? 'text-[#fefefe]' : ''}`}>PKR {monthlyStatistics?.monthlyEarnings?.earned}
                     </h1>
 
-                    <h1 className={`text-[13px] ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#9F9F9F]'} mt-5 flex items-center gap-[0.90rem]`}>
-                        {walletData.monthlyEarnings[walletData.monthlyEarnings.length - 1].percentageChange >= 0 && <span className={`${toggleTheme ? 'text-[#d2f5d9] bg-[#01b580]' : 'text-[#01b580] bg-[#D2F5D9]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowUp size={14} /> {Math.abs(Math.round(walletData.monthlyEarnings[walletData.monthlyEarnings.length - 1].percentageChange))}%</span>}
+                    <div className='flex items-center justify-between'>
+                        <h1 className={`text-[13px] ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#9F9F9F]'} mt-5 flex items-center gap-[0.90rem]`}>
+                            {monthlyStatistics?.monthlyEarnings?.percentageChange >= 0 && <span className={`${toggleTheme ? 'text-[#d2f5d9] bg-[#01b580]' : 'text-[#01b580] bg-[#D2F5D9]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowUp size={14} /> {Math.abs(Math.round(monthlyStatistics?.monthlyEarnings?.percentageChange))}%</span>}
 
-                        {walletData.monthlyEarnings[walletData.monthlyEarnings.length - 1].percentageChange < 0 && <span className={`${toggleTheme ? 'text-[#ffdede] bg-[#ff8080]' : 'text-[#FF8080] bg-[#FFDEDE]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowDown size={14} /> {Math.abs(Math.round(walletData.monthlyEarnings[walletData.monthlyEarnings.length - 1].percentageChange))}%</span>} Compared to last month
-                    </h1>
+                            {monthlyStatistics?.monthlyEarnings?.percentageChange < 0 && <span className={`${toggleTheme ? 'text-[#ffdede] bg-[#ff8080]' : 'text-[#FF8080] bg-[#FFDEDE]'} flex items-center py-1 px-1.5 rounded-full text-xs`}><ArrowDown size={14} /> {Math.abs(Math.round(monthlyStatistics?.monthlyEarnings?.percentageChange))}%</span>} Compared to last month
+                        </h1>
 
+                        <div className='translate-y-3'>
+                            <ToolTip icon={<Info className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} cursor-pointer`} size={16} />} text={`You earned ${Math.abs(Math.round(monthlyStatistics?.monthlyEarnings?.percentageChange))}% ${monthlyStatistics?.monthlyEarnings?.percentageChange < 0 ? 'less' : 'more'} this month compared to last month.`} />
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* Cashflow graph */}
             <div className={`w-full h-auto ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020]' : 'bg-[#fefefe] border'} rounded-xl pt-5 px-5`}>
 
-                <Filter toggleTheme={toggleTheme} textSize='text-xl' text='Cashflow' />
+                <h1 className={`font-semibold text-xl mb-1 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Cashflow</h1>
 
                 <div className='flex items-center justify-between'>
                     <h1 className={`mt-3 text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Total Balance

@@ -24,15 +24,24 @@ const Map = ({ selectedRide, passengers, setOpen, open }: MapProps) => {
     const [userMarker, setUserMarker] = useState<mapboxgl.Marker | null>(null)
     const authContext = useAuth()
     const userLocation = authContext?.userLocation || null || undefined
-    const setUserLocation = authContext?.setUserLocation
     const markersRef = useRef<Record<string, mapboxgl.Marker>>({})
-    const hasCenteredRef = useRef(false)
-    const [mainMapId, setMainMapId] = useState('map')
-    const [dialogMapId, setDialogMapId] = useState('')
     const [selectedTarget, setSelectedTarget] = useState<any>(null)
-
+    const hasCenteredRef = useRef(false)
+    const lastPositionRef = useRef<[number, number] | null>(null)
+    const lastUpdateTimeRef = useRef<number>(0)
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
+
+     //adding destination marker
+     useEffect(() => {
+        if (!selectedRide || !map) return
+        const destination = selectedRide.rideDetails.dropoffLocation.coordinates
+        const destinationMarker = new mapboxgl.Marker({ color: "green" })
+
+        destinationMarker.setLngLat(destination).addTo(map).getElement().addEventListener('click', () => {
+            setSelectedTarget({ lng: destination[0], lat: destination[1] })
+        })
+    }, [selectedRide, map])
 
     useEffect(() => {
         if (!map) return
@@ -46,20 +55,7 @@ const Map = ({ selectedRide, passengers, setOpen, open }: MapProps) => {
         hasCenteredRef.current = true
     }, [userLocation, map, userMarker])
 
-    //adding destination marker
     useEffect(() => {
-        if (!selectedRide || !map) return
-        const destination = selectedRide.rideDetails.dropoffLocation.coordinates
-        const destinationMarker = new mapboxgl.Marker({ color: "green" })
-
-        destinationMarker.setLngLat(destination).addTo(map).getElement().addEventListener('click', () => {
-            setSelectedTarget({ lng: destination[0], lat: destination[1] })
-        })
-    }, [selectedRide, map])
-
-
-    useEffect(() => {
-
         const mapInstance = new mapboxgl.Map({
             container: 'map',
             style: `mapbox://styles/mapbox/${toggleTheme ? 'dark-v11' : 'streets-v11'}`,
@@ -82,27 +78,61 @@ const Map = ({ selectedRide, passengers, setOpen, open }: MapProps) => {
         setMap(mapInstance)
         setUserMarker(marker)
 
-        const watcherId = navigator.geolocation.watchPosition(
-            (position) => {
-                const { longitude, latitude } = position.coords
-                userMarker?.setLngLat([longitude, latitude])
-                if (setUserLocation) setUserLocation([longitude, latitude])
-                localStorage.setItem('long', longitude.toString())
-                localStorage.setItem('lat', latitude.toString())
-            },
-            (err) => console.error(err),
-            {
-                enableHighAccuracy: true,
-                timeout: Infinity,
-                maximumAge: 0
-            }
-        )
+        mapInstance.on('style.load', () => {
+            const layers = mapInstance.getStyle().layers
+            layers.forEach(layer => {
+                if (layer.type === 'symbol') {
+                    mapInstance.removeLayer(layer.id)
+                }
+            })
+        })
 
         return () => {
             mapInstance.remove()
-            navigator.geolocation.clearWatch(watcherId)
         }
     }, [])
+
+    const smoothPosition = (newPosition: [number, number]): [number, number] => {
+        const now = Date.now()
+        const timeDiff = now - lastUpdateTimeRef.current
+
+        if (!lastPositionRef.current || timeDiff > 1000) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const [lastLng, lastLat] = lastPositionRef.current
+        const [newLng, newLat] = newPosition
+        const distance = Math.sqrt(
+            Math.pow(newLng - lastLng, 2) + Math.pow(newLat - lastLat, 2)
+        )
+
+        if (distance > 0.0001) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const smoothingFactor = 0.3
+        const smoothedLng = lastLng + (newLng - lastLng) * smoothingFactor
+        const smoothedLat = lastLat + (newLat - lastLat) * smoothingFactor
+
+        lastPositionRef.current = [smoothedLng, smoothedLat]
+        lastUpdateTimeRef.current = now
+        return [smoothedLng, smoothedLat]
+    }
+
+    useEffect(() => {
+        if (!userLocation || !userMarker || !map) return
+
+        const smoothedPosition = smoothPosition(userLocation)
+        userMarker.setLngLat(smoothedPosition)
+        if (!hasCenteredRef.current) {
+            map.setCenter(smoothedPosition)
+            hasCenteredRef.current = true
+        }
+    }, [userLocation, userMarker, map])
 
     //adding markers for passengers
     useEffect(() => {

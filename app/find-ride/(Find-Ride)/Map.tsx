@@ -34,13 +34,12 @@ const Map = ({ matchedRides, driversTime, setDriversTime, currentDriver }: { mat
     const userLocation = authContext?.userLocation || null || undefined
     const drivers = authContext?.drivers as Driver[] || null
     const user = authContext?.user || null
-    const setUserLocation = authContext?.setUserLocation
-
+    const hasCenteredRef = useRef(false)
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
+    const mapContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-
         if (!drivers || drivers.length === 0 || !matchedRides) return
 
         const avlDrivers = drivers.filter((driver: Driver) => {
@@ -48,7 +47,6 @@ const Map = ({ matchedRides, driversTime, setDriversTime, currentDriver }: { mat
         })
 
         setFoundDrivers(avlDrivers)
-
     }, [drivers, matchedRides])
 
     useEffect(() => {
@@ -57,22 +55,30 @@ const Map = ({ matchedRides, driversTime, setDriversTime, currentDriver }: { mat
     }, [toggleTheme])
 
     useEffect(() => {
-        const long = localStorage.getItem("long")
-        const lat = localStorage.getItem("lat")
+        if (!userLocation || !map || !userMarker || hasCenteredRef.current) return
+        setMap(map?.setCenter(userLocation))
+        setUserMarker(userMarker?.setLngLat(userLocation))
+        hasCenteredRef.current = true
+    }, [userLocation, map, userMarker])
 
-        const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
-
-        const location: [number, number] = userLocation && userLocation.length === 2
-            ? [userLocation[0], userLocation[1]]
-            : [currLocation[0], currLocation[1]]
+    useEffect(() => {
+        if (!mapContainerRef.current) return;
 
         const mapInstance = new mapboxgl.Map({
             container: 'map',
             style: `mapbox://styles/mapbox/${toggleTheme ? 'dark-v11' : 'streets-v11'}`,
-            center: location,
+            center: [0, 0],
             zoom: 14.5
         })
 
+        // Handle window resize to ensure map fills container properly
+        const handleResize = () => {
+            if (mapInstance) {
+                mapInstance.resize();
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
         mapInstance.resize()
         mapInstance.addControl(new mapboxgl.NavigationControl())
 
@@ -82,33 +88,36 @@ const Map = ({ matchedRides, driversTime, setDriversTime, currentDriver }: { mat
         const marker = new mapboxgl.Marker({
             element: blueDot
         })
-            .setLngLat(location)
+            .setLngLat([0, 0])
             .addTo(mapInstance)
 
         setMap(mapInstance)
         setUserMarker(marker)
 
-        const watcherId = navigator.geolocation.watchPosition(
-            (position) => {
-                const { longitude, latitude } = position.coords
-                userMarker?.setLngLat([longitude, latitude])
-                if (setUserLocation) setUserLocation([longitude, latitude])
-                localStorage.setItem('long', longitude.toString())
-                localStorage.setItem('lat', latitude.toString())
-            },
-            (err) => console.error(err),
-            {
-                enableHighAccuracy: true,
-                timeout: Infinity,
-                maximumAge: 0
-            }
-        )
+        mapInstance.on('style.load', () => {
+            const layers = mapInstance.getStyle().layers
+            layers.forEach(layer => {
+                if (layer.type === 'symbol') {
+                    mapInstance.removeLayer(layer.id)
+                }
+            })
+        })
 
         return () => {
+            window.removeEventListener('resize', handleResize);
             mapInstance.remove()
-            navigator.geolocation.clearWatch(watcherId)
         }
     }, [])
+
+    useEffect(() => {
+        if (!userLocation || !userMarker || !map) return
+
+        userMarker.setLngLat(userLocation)
+        if (!hasCenteredRef.current) {
+            map.setCenter(userLocation)
+            hasCenteredRef.current = true
+        }
+    }, [userLocation, userMarker, map])
 
     //for changing drivers location in realtime
     useEffect(() => {
@@ -184,7 +193,6 @@ const Map = ({ matchedRides, driversTime, setDriversTime, currentDriver }: { mat
         const targets = [currLocation]
 
         fetchEta({ sources, targets, setAvgTime, setDriversTime, drivers })
-
     }, [drivers])
 
     useEffect(() => {
@@ -209,10 +217,8 @@ const Map = ({ matchedRides, driversTime, setDriversTime, currentDriver }: { mat
     }, [currentDriver])
 
     return (
-        <div className={`inter flex flex-col gap-6 w-full mx-auto ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
-            <div className={`relative flex justify-center w-full overflow-x-hidden items-center`}>
-                <div id="map" className={`w-full h-[50em]`} />
-            </div>
+        <div className={`h-full w-full`}>
+            <div id="map" className="w-full h-full absolute inset-0" ref={mapContainerRef} />
         </div>
     )
 }

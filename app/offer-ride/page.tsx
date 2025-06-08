@@ -20,6 +20,7 @@ const page = () => {
     const pathname = usePathname()
     const router = useRouter()
     const { setNotifications } = useRide()
+    const [isLoading, setIsLoading] = useState(false)
     const authContext = useAuth()
     const user = authContext?.user || null
 
@@ -91,7 +92,54 @@ const page = () => {
     const formData: any = { pickup, setPickup, drop, setDrop, date, setDate, seats, setseats, setTime, time, ride, setRide, luggage, setLuggage, petFriendly, setPetFriendly, smoking, setSmoking, needs, setNeeds, showGender, setShowGender, gender, setGender, female, male, negotiate, setNegotiate, photo, setPhoto, instruct, setInstruct, number, setNumber, email, setEmail, budget, setBudget, vehicle, setVehicle, setLocation, setDropLocation, setGenderType, currStep, location, dropLocation }
 
     // for offering a ride
-    const offer = async () => await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, negotiate, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode, user, setNotifications)
+    const offer = async () => {
+        // Validate required fields
+        setLoader(true)
+        if (!pickup) {
+            setStatusCode(404)
+            setMessage('Pickup location is required')
+            setShowMessage(true)
+            return
+        }
+        if (!drop) {
+            setStatusCode(404)
+            setMessage('Drop location is required')
+            setShowMessage(true)
+            return
+        }
+        if (!date) {
+            setStatusCode(404)
+            setMessage('Date is required')
+            setShowMessage(true)
+            return
+        }
+        if (time === 'Time') {
+            setStatusCode(404)
+            setMessage('Time is required')
+            setShowMessage(true)
+            return
+        }
+        if (seats < 1) {
+            setStatusCode(404)
+            setMessage('At least 1 seat is required')
+            setShowMessage(true)
+            return
+        }
+        if (!vehicle) {
+            setStatusCode(404)
+            setMessage('Vehicle type is required')
+            setShowMessage(true)
+            return
+        }
+        if (budget <= 0) {
+            setStatusCode(404)
+            setMessage('Budget must be greater than 0')
+            setShowMessage(true)
+            return
+        }
+
+        await offerRide(user?._id, user?.fullname || 'Unknown Driver', location, dropLocation, pickup, drop, seats, time, date, vehicle, ride, luggage, petFriendly, smoking, negotiate, photo, instruct, number, email, setLoader, setMessage, budget, setShowMessage, setStatusCode, user, setNotifications, setIsLoading)
+    }
 
     useEffect(() => {
         if (!loader && statusCode === 200) router.push('/')
@@ -102,7 +150,7 @@ const page = () => {
         <>
 
             <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center ${toggleTheme ? 'bg-[#0d0d0d3f]' : 'bg-[#2020203f]'}`}>
-                <Submit statusCode={statusCode} offer={offer} loader={loader} setLoader={setLoader} message={message} setShowMessage={setShowMessage} showMessage={showMessage} formData={formData} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
+                <Submit isLoading={isLoading} setIsLoading={setIsLoading} statusCode={statusCode} offer={offer} loader={loader} setLoader={setLoader} message={message} setShowMessage={setShowMessage} showMessage={showMessage} formData={formData} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
             </div>
 
             {/* // decors */}
@@ -148,7 +196,7 @@ const page = () => {
 
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
-                        {currStep != 5 && <div className={`inter ${currStep === 4? 'mt-2': 'mt-6'} flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
+                        {currStep != 5 && <div className={`inter ${currStep === 4 ? 'mt-2' : 'mt-6'} flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
                             {currStep != 1 && <button className={`shadow-lg font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`} onClick={() => {
                                 setStep(step - 1)

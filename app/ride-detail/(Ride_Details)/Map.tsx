@@ -1,18 +1,10 @@
 'use client'
-import React, { useEffect, useState, useRef, Dispatch, SetStateAction } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import "swiper/css"
 import { getContacts } from '@/context/ContactsProvider'
 import { useAuth } from '@/context/AuthProvider'
 import mapboxgl from 'mapbox-gl'
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
-import { Map } from 'lucide-react'
+import { X, Minimize2, Maximize2, LocateFixed, Navigation, Info } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import socket from '@/utils/socket'
 import '@/app/(HomePage)/Main.css'
@@ -24,8 +16,7 @@ interface Driver {
     location: [number, number];
 }
 
-const LocalMap = ({ ride }: { ride: any }) => {
-
+const LocalMap = ({ ride, isOpen, onClose }: { ride: any, isOpen: boolean, onClose: () => void }) => {
     const [map, setMap] = useState<mapboxgl.Map | null>(null)
     const [markers, setMarkers] = useState<Record<string, mapboxgl.Marker>>({})
     const [userMarker, setUserMarker] = useState<mapboxgl.Marker | null>(null)
@@ -34,18 +25,52 @@ const LocalMap = ({ ride }: { ride: any }) => {
     const userLocation = authContext?.userLocation || null || undefined
     const drivers = authContext?.drivers as Driver[] || null
     const user = authContext?.user || null
-    const setUserLocation = authContext?.setUserLocation
-    const [opened, setOpened] = useState(false)
-    const [selectedTarget, setSelectedTarget] = useState<any>(null)
+    const hasCenteredRef = useRef(false)
+    const lastPositionRef = useRef<[number, number] | null>(null)
+    const lastUpdateTimeRef = useRef<number>(0)
+    const mapContainerRef = useRef<HTMLDivElement>(null)
+    const [showControls, setShowControls] = useState(true)
 
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
+
+    // Add position smoothing function
+    const smoothPosition = (newPosition: [number, number]): [number, number] => {
+        const now = Date.now()
+        const timeDiff = now - lastUpdateTimeRef.current
+
+        if (!lastPositionRef.current || timeDiff > 1000) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const [lastLng, lastLat] = lastPositionRef.current
+        const [newLng, newLat] = newPosition
+        const distance = Math.sqrt(
+            Math.pow(newLng - lastLng, 2) + Math.pow(newLat - lastLat, 2)
+        )
+
+        if (distance > 0.0001) {
+            lastPositionRef.current = newPosition
+            lastUpdateTimeRef.current = now
+            return newPosition
+        }
+
+        const smoothingFactor = 0.3
+        const smoothedLng = lastLng + (newLng - lastLng) * smoothingFactor
+        const smoothedLat = lastLat + (newLat - lastLat) * smoothingFactor
+
+        lastPositionRef.current = [smoothedLng, smoothedLat]
+        lastUpdateTimeRef.current = now
+        return [smoothedLng, smoothedLat]
+    }
 
     useEffect(() => {
         if (!drivers || drivers.length === 0 || !ride) return
         const rideDriver = drivers.find((driver: Driver) => driver.userId === ride.userId)
         setRideDriver(rideDriver)
-    }, [drivers, ride, opened])
+    }, [drivers, ride, isOpen])
 
     useEffect(() => {
         if (!map) return
@@ -53,43 +78,42 @@ const LocalMap = ({ ride }: { ride: any }) => {
     }, [toggleTheme, map])
 
     useEffect(() => {
-        if (!opened) return
+        if (!userLocation || !map || !userMarker || hasCenteredRef.current) return
+        setMap(map?.setCenter(userLocation))
+        setUserMarker(userMarker?.setLngLat(userLocation))
+        hasCenteredRef.current = true
+    }, [userLocation, map, userMarker])
+
+    useEffect(() => {
+        if (!isOpen || !mapContainerRef.current) return
 
         const timer = setTimeout(() => {
-            const mapContainer = document.getElementById("map")
-            if (!mapContainer) return
-
-            const long = localStorage.getItem("long")
-            const lat = localStorage.getItem("lat")
-
-            const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
-
-            const location: [number, number] = userLocation && userLocation.length === 2
-                ? [userLocation[0], userLocation[1]]
-                : [currLocation[0], currLocation[1]]
-
             const mapInstance = new mapboxgl.Map({
-                container: mapContainer,
+                container: mapContainerRef.current!,
                 style: `mapbox://styles/mapbox/${toggleTheme ? 'dark-v11' : 'streets-v11'}`,
-                center: location,
-                zoom: 14.5
+                center: [0, 0],
+                zoom: 14.5,
+                attributionControl: false
             })
 
             mapInstance.resize()
             mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-left')
+            mapInstance.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right')
 
+            // Create user location marker
             const blueDot = document.createElement('div')
             blueDot.className = 'user-location-dot'
 
             const marker = new mapboxgl.Marker({
                 element: blueDot
             })
-                .setLngLat(location)
+                .setLngLat([0, 0])
                 .addTo(mapInstance)
 
             setMap(mapInstance)
             setUserMarker(marker)
 
+            // Add driver marker if exists
             if (rideDriver && rideDriver.userId !== user?._id) {
                 const driverEl = document.createElement('div')
                 driverEl.className = 'driver-location-dot'
@@ -113,35 +137,188 @@ const LocalMap = ({ ride }: { ride: any }) => {
                 }))
             }
 
-            const watcherId = navigator.geolocation.watchPosition(
-                (position) => {
-                    const { longitude, latitude } = position.coords
-                    marker.setLngLat([longitude, latitude])
-                    if (setUserLocation) setUserLocation([longitude, latitude])
-                    localStorage.setItem('long', longitude.toString())
-                    localStorage.setItem('lat', latitude.toString())
-                },
-                (err) => console.error(err),
-                {
-                    enableHighAccuracy: true,
-                    timeout: Infinity,
-                    maximumAge: 0
+            // Add pickup and dropoff markers
+            if (ride && ride.rideDetails) {
+                if (ride.rideDetails.pickupLocation.coordinates && ride.rideDetails.dropoffLocation.coordinates) {
+                    const start = ride.rideDetails.pickupLocation.coordinates;
+                    const end = ride.rideDetails.dropoffLocation.coordinates;
+
+                    mapInstance.on('load', () => {
+                        mapInstance.addSource('route', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'properties': {},
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': [
+                                        start,
+                                        end
+                                    ]
+                                }
+                            }
+                        })
+
+                        mapInstance.addLayer({
+                            'id': 'route',
+                            'type': 'line',
+                            'source': 'route',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round'
+                            },
+                            'paint': {
+                                'line-color': '#00563c',
+                                'line-width': 4,
+                                'line-opacity': 0.8
+                            }
+                        });
+
+                        const size = 150;
+
+                        const pulsingDot = {
+                            width: size,
+                            height: size,
+                            data: new Uint8Array(size * size * 4),
+
+                            onAdd: function () {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = this.width;
+                                canvas.height = this.height;
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) {
+                                    (this as any).context = ctx;
+                                }
+                            },
+
+                            render: function () {
+                                const duration = 1000;
+                                const t = (performance.now() % duration) / duration;
+
+                                const radius = (size / 2) * 0.3;
+                                const outerRadius = (size / 2) * 0.7 * t + radius;
+                                const context = (this as any).context;
+
+                                context.clearRect(0, 0, this.width, this.height);
+                                context.beginPath();
+                                context.arc(
+                                    this.width / 2,
+                                    this.height / 2,
+                                    outerRadius,
+                                    0,
+                                    Math.PI * 2
+                                );
+                                context.fillStyle = `rgba(0, 86, 60, ${1 - t})`;
+                                context.fill();
+
+                                // draw inner circle
+                                context.beginPath();
+                                context.arc(
+                                    this.width / 2,
+                                    this.height / 2,
+                                    radius,
+                                    0,
+                                    Math.PI * 2
+                                );
+                                context.fillStyle = 'rgba(0, 86, 60, 1)';
+                                context.strokeStyle = 'white';
+                                context.lineWidth = 2;
+                                context.fill();
+                                context.stroke();
+
+                                this.data = context.getImageData(0, 0, this.width, this.height).data;
+
+                                mapInstance.triggerRepaint();
+
+                                return true;
+                            }
+                        };
+
+                        mapInstance.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
+
+                        // Create pickup marker
+                        const pickupEl = document.createElement('div')
+                        pickupEl.className = 'pickup-location-marker'
+
+                        const pickupMarker = new mapboxgl.Marker({
+                            element: pickupEl,
+                            color: '#00563c'
+                        })
+                            .setLngLat(start)
+                            .setPopup(new mapboxgl.Popup({
+                                offset: 25,
+                                className: toggleTheme ? 'dark-popup' : 'light-popup'
+                            }).setHTML(`<h3 class="font-bold">Pickup</h3><p>${ride.rideDetails.pickupLocation.pickupName}</p>`))
+                            .addTo(mapInstance)
+
+                        // Create dropoff marker
+                        const dropoffEl = document.createElement('div')
+                        dropoffEl.className = 'dropoff-location-marker'
+
+                        const dropoffMarker = new mapboxgl.Marker({
+                            element: dropoffEl,
+                            color: '#e74c3c'
+                        })
+                            .setLngLat(end)
+                            .setPopup(new mapboxgl.Popup({
+                                offset: 25,
+                                className: toggleTheme ? 'dark-popup' : 'light-popup'
+                            }).setHTML(`<h3 class="font-bold">Dropoff</h3><p>${ride.rideDetails.dropoffLocation.dropoffName}</p>`))
+                            .addTo(mapInstance)
+
+                        // Fit bounds to include all markers
+                        const bounds = new mapboxgl.LngLatBounds()
+                        bounds.extend(start)
+                        bounds.extend(end)
+                        if (userLocation) bounds.extend(userLocation)
+                        if (rideDriver) bounds.extend(rideDriver.location)
+
+                        mapInstance.fitBounds(bounds, { padding: { top: 100, bottom: 100, left: 50, right: 50 } })
+                    });
                 }
-            )
+            }
+
+            // Hide controls when map is being interacted with
+            mapInstance.on('dragstart', () => {
+                setShowControls(false);
+            });
+
+            mapInstance.on('dragend', () => {
+                setTimeout(() => setShowControls(true), 1500);
+            });
+
+            // Handle window resize
+            const handleResize = () => {
+                if (mapInstance) {
+                    mapInstance.resize();
+                }
+            };
+
+            window.addEventListener('resize', handleResize);
 
             return () => {
+                window.removeEventListener('resize', handleResize);
                 mapInstance.remove()
-                navigator.geolocation.clearWatch(watcherId)
                 setMarkers({})
             }
         }, 100)
 
         return () => clearTimeout(timer)
-    }, [opened, rideDriver])
+    }, [isOpen, rideDriver, ride, userLocation, toggleTheme])
 
-    //for changing drivers location in realtime
     useEffect(() => {
-        if (!map || !rideDriver || !opened) return;
+        if (!userLocation || !userMarker || !map) return
+
+        const smoothedPosition = smoothPosition(userLocation)
+        userMarker.setLngLat(smoothedPosition)
+        if (!hasCenteredRef.current) {
+            map.setCenter(smoothedPosition)
+            hasCenteredRef.current = true
+        }
+    }, [userLocation, userMarker, map])
+
+    useEffect(() => {
+        if (!map || !rideDriver || !isOpen) return;
 
         const { userId, location } = rideDriver;
         const marker = markers[userId];
@@ -151,7 +328,7 @@ const LocalMap = ({ ride }: { ride: any }) => {
         }
     }, [rideDriver?.location, markers, rideDriver?.userId])
 
-    // for checking socket is connected or not becuase without it , it will run too early and will not execute
+    // Check socket connection
     useEffect(() => {
         if (socket.connected) {
             socket.emit('request', "User wants drivers location.")
@@ -162,22 +339,102 @@ const LocalMap = ({ ride }: { ride: any }) => {
         }
     }, [])
 
+    // Hide controls when clicking on map
+    const handleMapClick = () => {
+        setShowControls(false);
+        setTimeout(() => setShowControls(true), 3000);
+    };
+
+    if (!isOpen) return null;
 
     return (
-        <Sheet open={opened} onOpenChange={setOpened}>
-            <SheetTrigger className={`p-2 cursor-pointer rounded-md font-medium ${toggleTheme ? 'text-[#fefefe] border hover:bg-[#202020cc] border-[#202020]' : 'text-[#202020] border hover:bg-[#f0f0f0cc]'}`}><Map size={20} />
-            </SheetTrigger>
-            <SheetContent className={`${toggleTheme ? 'text-[#fefefe] border border-[#202020]' : 'text-[#202020] border border-[#f0f0f0]'} w-screen p-0`}>
-                <SheetHeader className='p-0'>
-                    <SheetTitle className='p-0 absolute'></SheetTitle>
-                    <div className={`inter flex flex-col gap-6 w-full mx-auto ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
-                        <div className={`relative flex justify-center w-full overflow-hidden items-center`}>
-                            <div id="map" className={`w-full h-screen`} style={{ position: 'relative' }} />
+        <div className={`fixed inset-0 z-50 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} transition-opacity duration-300`}>
+            <div
+                className={`absolute inset-0 backdrop-blur-sm ${toggleTheme ? 'bg-black/70' : 'bg-black/30'}`}
+                onClick={onClose}
+            />
+
+            <div
+                className={`absolute transition-all duration-300 ease-in-out inset-4 sm:inset-8 md:inset-16 rounded-2xl
+                    overflow-hidden shadow-2xl ${toggleTheme ? 'bg-[#121212] border border-[#252525]' : 'bg-white'}`}
+            >
+                {/* Map Container - Place this first in the DOM so it doesn't get covered */}
+                <div className="h-full w-full">
+                    <div
+                        id="map"
+                        ref={mapContainerRef}
+                        className="w-full h-full"
+                        onClick={handleMapClick}
+                    />
+                </div>
+
+                {/* Map UI Overlay - Now using fixed positioning with transition */}
+                <div
+                    className={`absolute top-0 left-0 right-0 z-10 px-4 py-3 flex justify-between items-center
+                    ${toggleTheme ? 'bg-[#121212]/80' : 'bg-white/80'} backdrop-blur-md border-b
+                    ${toggleTheme ? 'border-[#252525]' : 'border-gray-200'}
+                    transition-transform duration-300 ease-in-out ${showControls ? 'translate-y-0' : '-translate-y-full'}`}
+                >
+                    <div className="flex items-center gap-2">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${toggleTheme ? 'bg-[#202020]/80' : 'bg-[#f5f5f5]/80'}`}>
+                            <Navigation size={16} className="text-[#00563c]" />
+                        </div>
+                        <span className={`font-medium text-sm ${toggleTheme ? 'text-white' : 'text-black'}`}>
+                            {ride?.rideDetails?.distance ? `${Math.round(ride.rideDetails.distance)} km` : 'Route'}
+                        </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={onClose}
+                            className={`h-8 w-8 cursor-pointer rounded-full flex items-center justify-center ${toggleTheme ? 'bg-[#202020]/80 text-white hover:bg-[#252525]' : 'bg-[#f5f5f5]/80 text-black hover:bg-gray-100'} transition-all`}
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Bottom UI - Using fixed positioning with transition */}
+                <div
+                    className={`absolute bottom-0 left-0 right-0 z-10 p-4
+                    ${toggleTheme ? 'bg-[#121212]/80' : 'bg-white/80'} backdrop-blur-md border-t
+                    ${toggleTheme ? 'border-[#252525]' : 'border-gray-200'}
+                    transition-transform duration-300 ease-in-out ${showControls ? 'translate-y-0' : 'translate-y-full'}`}
+                >
+                    <div className={`w-full rounded-xl p-3 ${toggleTheme ? 'bg-[#202020]/80' : 'bg-[#f5f5f5]/80'} backdrop-blur-md flex justify-between items-center`}>
+                        <div className="flex items-center gap-3">
+                            <div className={`h-10 w-10 rounded-full flex items-center justify-center bg-[#00563c]`}>
+                                <LocateFixed size={18} className="text-white" />
+                            </div>
+                            <div>
+                                <p className={`text-xs opacity-70 ${toggleTheme ? 'text-white' : 'text-black'}`}>Duration</p>
+                                <p className={`font-medium ${toggleTheme ? 'text-white' : 'text-black'}`}>
+                                    {ride?.rideDetails?.duration ? `${Math.round(ride.rideDetails.duration)} mins` : 'Calculating...'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <button
+                                className={`h-10 w-10 rounded-full flex items-center justify-center
+                                ${toggleTheme ? 'bg-[#252525] hover:bg-[#303030]' : 'bg-white hover:bg-[#e5e5e5]'}
+                                transition-all`}
+                                onClick={() => {
+                                    if (map) {
+                                        const bounds = new mapboxgl.LngLatBounds();
+                                        bounds.extend(ride.rideDetails.pickupLocation.coordinates);
+                                        bounds.extend(ride.rideDetails.dropoffLocation.coordinates);
+                                        map.fitBounds(bounds, { padding: { top: 100, bottom: 100, left: 50, right: 50 } });
+                                    }
+                                }}
+                            >
+                                <Info size={18} className={`${toggleTheme ? 'text-white' : 'text-black'}`} />
+                            </button>
                         </div>
                     </div>
-                </SheetHeader>
-            </SheetContent>
-        </Sheet>
+                </div>
+            </div>
+        </div>
     )
 }
 

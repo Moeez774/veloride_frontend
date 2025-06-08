@@ -1,24 +1,18 @@
 'use client'
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Preferences from '@/app/find-ride/(Find-Ride)/Steps/Preferences'
 import Budget from './Budget'
 import Additional from '@/app/find-ride/(Find-Ride)/Steps/Additional'
 import RideDetails from './RideDetails'
-import SuccessLoader from '@/components/SuccessLoader'
+import Loader from '@/components/Loader'
 import { getContacts } from '@/context/ContactsProvider'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 
 interface Details {
     formData: any,
     currStep: number,
+    isLoading: boolean,
+    setIsLoading: Dispatch<SetStateAction<boolean>>,
     setCurrStep: Dispatch<SetStateAction<number>>,
     setStep: Dispatch<SetStateAction<number>>,
     step: number,
@@ -31,16 +25,14 @@ interface Details {
     statusCode: number,
 }
 
-const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, step, offer, loader, setLoader, setShowMessage, message, showMessage, statusCode }) => {
+const Submit: React.FC<Details> = ({ formData, currStep, isLoading, setIsLoading, setCurrStep, setStep, step, offer, loader, setLoader, setShowMessage, message, showMessage, statusCode }) => {
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
 
     return (
         <>
             {/* // loader */}
-            {loader && <SuccessLoader message={message} statusCode={statusCode} setLoader={setLoader} setShowMessage={setShowMessage} showMessage={showMessage} />}
-
-
+            {loader && <Loader message={message} statusCode={statusCode} setLoader={setLoader} setShowMessage={setShowMessage} showMessage={showMessage} />}
 
             <div className='w-full flex justify-center sm:px-10 items-center'>
                 <ScrollArea
@@ -97,9 +89,12 @@ const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, s
                             Back
                         </button>
 
-                        <button
-                            className={`exo2 active:translate-y-0.5 active:duration-200 text-[#fefefe] rounded-xl ${toggleTheme ? 'bg-[#048C64] hover:bg-[#048C64d3]' : 'bg-[#00b37e] hover:bg-[#00b37dd3]'} shadow-lg font-bold px-8 py-2.5 transition-all duration-300 cursor-pointer`}
-                            onClick={async () => await offer()}
+                        <button disabled={isLoading}
+                            className={`exo2 active:bg-[#00563c] active:duration-200 text-[#fefefe] rounded-md bg-[#00563c] hover:bg-[#00563ccc] shadow-md font-bold px-8 py-2.5 transition-all duration-300 cursor-pointer`}
+                            onClick={async () => {
+                                setIsLoading(true)
+                                await offer()
+                            }}
                         >
                             Offer
                         </button>

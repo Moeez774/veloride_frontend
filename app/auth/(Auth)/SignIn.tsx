@@ -17,15 +17,26 @@ interface PasswordProps {
     showPass: boolean,
     toggleForm: boolean,
     toggleTheme: boolean | undefined,
-    setShowPass: Dispatch<SetStateAction<boolean>>
+    setShowPass: Dispatch<SetStateAction<boolean>>,
+    error?: string
 }
 
-const PasswordField = ({ value, setValue, showPass, toggleForm, toggleTheme, setShowPass }: PasswordProps) => {
+const PasswordField = ({ value, setValue, showPass, toggleForm, toggleTheme, setShowPass, error }: PasswordProps) => {
     return (
         <div className='w-full flex items-center gap-2'>
-            <input value={value} type={toggleForm || showPass ? 'text' : 'password'} onChange={(e) => setValue(e.target.value)} className={`border outline-none font-normal focus:shadow-lg transition-all w-full duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm pl-[0.90rem] pr-12 py-[0.90rem] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} />
-            {!showPass && !toggleForm && <Eye onClick={() => setShowPass(true)} size={20} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
-            {showPass && !toggleForm && <EyeOff size={20} onClick={() => setShowPass(false)} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
+            <input
+                value={value}
+                type={toggleForm ? 'text' : (showPass ? 'text' : 'password')}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder={toggleForm ? 'Enter your name' : 'Enter your password'}
+                className={`border outline-none font-normal transition-all w-full duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md pl-[0.90rem] pr-12 py-[0.90rem] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} ${error ? 'border-red-500 focus:border-red-500' : 'focus:border-[#00563c]'}`}
+            />
+            {!toggleForm && (
+                <>
+                    {!showPass && <Eye onClick={() => setShowPass(true)} size={20} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
+                    {showPass && <EyeOff size={20} onClick={() => setShowPass(false)} className='cursor-pointer absolute right-4' color={toggleTheme ? '#fefefe' : '#202020'} />}
+                </>
+            )}
         </div>
     )
 }
@@ -51,6 +62,7 @@ const SignIn = () => {
     const [number, setNumber] = useState('')
     const [city, setCity] = useState('')
     const [btnText, setBtnText] = useState('Reset password')
+    const [errors, setErrors] = useState<{ email?: string; value?: string }>({})
 
     useEffect(() => {
         setForType(queries.get("for") ? queries.get("for") : '')
@@ -99,8 +111,27 @@ const SignIn = () => {
 
     const delay = async (ms: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms))
 
-    // for proceeding next
-    const proceed = async () => handlingProceeding(setShowSteps, toggleForm, signIn, email, value, setStep, delay, setMessage, setShowMessage)
+    const validateFields = () => {
+        const newErrors: { email?: string; value?: string } = {}
+
+        if (!email) {
+            newErrors.email = 'Email is required'
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Please enter a valid email'
+        }
+
+        if (!value) {
+            newErrors.value = toggleForm ? 'Name is required' : 'Password is required'
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
+    const proceed = async () => {
+        if (!validateFields()) return
+        handlingProceeding(setShowSteps, toggleForm, signIn, email, value, setStep, delay, setMessage, setShowMessage)
+    }
 
     //for saving user's data if signing in with provider
     const saveUser = async (setLoader: Dispatch<SetStateAction<boolean>>) => saveUserData(setLoader, user, city, number, role, router, gender)
@@ -141,13 +172,21 @@ const SignIn = () => {
         }
     }
 
+    // Add error styles
+    const getInputStyles = (field: 'email' | 'value') => {
+        const baseStyles = `border outline-none font-normal transition-all duration-300 flex gap-3 items-center justify-center rounded-md p-[0.90rem] w-full ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`
+        return errors[field]
+            ? `${baseStyles} border-red-500 focus:border-red-500`
+            : `${baseStyles} border-[#c7c7c7] focus:border-[#00563c]`
+    }
+
     return (
         <>
             {showSteps && <Loader setLoader={setShowSteps} message={message} showMessage={showMessage} setShowMessage={setShowMessage} />}
 
-            <div className={`inter font-medium overflow-hidden min-h-screen delay-100 w-full transition-all duration-700 flex`}>
+            <div className={`inter font-medium min-h-screen delay-100 w-full transition-all duration-700 flex`}>
 
-                <div className={`relative hidden md:flex flex-col gap-4 transition-all duration-700 justify-between ${step != 0 ? 'px-0 w-16' : 'w-full px-6 lg:px-10'} py-14 overflow-hidden max-w-[20rem] lg:max-w-[23rem] xl:max-w-[26rem] bg-[#00563C]`}>
+                <div className={`fixed top-0 left-0 hidden md:flex flex-col gap-4 transition-all duration-700 justify-between ${step != 0 ? 'px-0 w-16' : 'w-full px-6 lg:px-10'} py-14 overflow-hidden max-w-[20rem] lg:max-w-[22rem] xl:max-w-[26rem] bg-[#00563C] h-screen z-10`}>
 
                     {step === 0 && <div className='relative flex flex-col gap-8'>
                         <div className='w-full flex justify-between'>
@@ -174,7 +213,7 @@ const SignIn = () => {
 
                 </div>
 
-                <div className='flex-1 flex text-[#202020] mx-5 sm:mx-8 w-full'>
+                <div className={`flex-1 flex text-[#202020] mx-5 sm:mx-8 transition-all duration-300 w-full ${step != 0 ? 'md:pl-16' : 'md:pl-[20rem] lg:pl-[26rem]'}`}>
 
                     {/* //all steps of sign up */}
                     {step >= 3 && forType != 'reset-password' && <div className={`transition-all md:max-w-6xl md:px-6 xl:px-0 pt-12 flex items-center mx-auto min-h-screen w-full duration-400 ease-out ${step >= 4 ? 'translate-x-0 opacity-[1]' : 'translate-x-12 opacity-0'}`}>
@@ -191,6 +230,8 @@ const SignIn = () => {
                             <h1 className={`flex items-center font-medium text-sm gap-1 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{toggleForm ? "Have an account?" : "Don't have an account?"} <p className={`font-semibold ${toggleTheme ? 'text-[#048C64] hover:text-[#048c64ccc]' : 'text-[#00563c] hover:text-[#00563ccc]'} transition-all duration-200 cursor-pointer`} onClick={() => {
                                 setToggle(!toggleForm)
                                 setEmail('')
+                                setErrors(prev => ({ ...prev, email: undefined }))
+                                setErrors(prev => ({ ...prev, value: undefined }))
                                 setValue('')
                             }}>{toggleForm ? 'Login' : 'Sign up'}</p></h1>
 
@@ -213,12 +254,44 @@ const SignIn = () => {
 
                             <div className='flex w-full flex-col gap-1.5'>
                                 <label className={`text-[13px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Email</label>
-                                <input value={email} type='email' onChange={(e) => setEmail(e.target.value)} className={`border outline-none font-normal focus:shadow-lg transition-all duration-300 flex gap-3 items-center justify-center border-[#c7c7c7] rounded-md shadow-sm p-[0.90rem] w-full ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`} />
+                                <input
+                                    value={email}
+                                    type='email'
+                                    placeholder='Enter your email'
+                                    onChange={(e) => {
+                                        setEmail(e.target.value)
+                                        if (errors.email) {
+                                            setErrors(prev => ({ ...prev, email: undefined }))
+                                        }
+                                    }}
+                                    className={getInputStyles('email')}
+                                />
+                                {errors.email && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                                )}
                             </div>
 
                             <div className='flex w-full flex-col gap-1.5'>
                                 <label className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} text-[13px]`}>{toggleForm ? 'Your name' : 'Password'}</label>
-                                <PasswordField value={value} setValue={setValue} showPass={showPass} setShowPass={setShowPass} toggleTheme={toggleTheme} toggleForm={toggleForm} />
+                                <div className="relative w-full">
+                                    <PasswordField
+                                        value={value}
+                                        setValue={(val) => {
+                                            setValue(val)
+                                            if (errors.value) {
+                                                setErrors(prev => ({ ...prev, value: undefined }))
+                                            }
+                                        }}
+                                        showPass={showPass}
+                                        setShowPass={setShowPass}
+                                        toggleTheme={toggleTheme}
+                                        toggleForm={toggleForm}
+                                        error={errors.value}
+                                    />
+                                    {errors.value && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.value}</p>
+                                    )}
+                                </div>
                             </div>
 
                             {!toggleForm && <h1 className={`${toggleTheme ? 'text-[#b1b1b1] hover:text-[#fefefe]' : 'text-[#5b5b5b] hover:text-[#202020]'} my-2 w-fit cursor-pointer transition-all duration-200 font-medium text-xs sm:text-[13px]`} onClick={() => {
@@ -259,7 +332,25 @@ const SignIn = () => {
 
                                 <div className='flex w-full flex-col gap-1.5'>
                                     <label className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} text-[13px]`}>New Password</label>
-                                    <PasswordField value={value} setValue={setValue} showPass={showPass} setShowPass={setShowPass} toggleTheme={toggleTheme} toggleForm={toggleForm} />
+                                    <div className="relative w-full">
+                                        <PasswordField
+                                            value={value}
+                                            setValue={(val) => {
+                                                setValue(val)
+                                                if (errors.value) {
+                                                    setErrors(prev => ({ ...prev, value: undefined }))
+                                                }
+                                            }}
+                                            showPass={showPass}
+                                            setShowPass={setShowPass}
+                                            toggleTheme={toggleTheme}
+                                            toggleForm={toggleForm}
+                                            error={errors.value}
+                                        />
+                                        {errors.value && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.value}</p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <button disabled={showSteps ? true : false} onClick={() => resetPassword()} className={`flex gap-3 items-center justify-center mt-2 md:mt-4 bg-[#00563c] text-[#fefefe] text-sm ${showSteps ? 'hover:bg-[#00563c]' : 'hover:bg-[#00563ccc] cursor-pointer'} active:bg-[#00563c] transition-all duration-200 rounded-md p-4 w-full`}>
@@ -282,7 +373,6 @@ const SignIn = () => {
                         </div>
                     }
                 </div>
-
             </div>
         </>
     )

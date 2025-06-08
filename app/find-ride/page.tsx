@@ -31,6 +31,7 @@ const page = () => {
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [loader, setLoader] = useState(false)
+    const [statusCode, setStatusCode] = useState<number>(0)
     const [seats, setSeats] = useState<boolean[]>()
 
     // fields for Ride Details
@@ -68,6 +69,45 @@ const page = () => {
 
     //search for ride
     const searchRide = async () => {
+        // Validate required fields
+        setLoader(true)
+        if (!pickup) {
+            setStatusCode(404)
+            setMessage('Pickup location is required')
+            setShowMessage(true)
+            return
+        }
+        if (!drop) {
+            setStatusCode(404)
+            setMessage('Drop location is required')
+            setShowMessage(true)
+            return
+        }
+        if (!date) {
+            setStatusCode(404)
+            setMessage('Date is required')
+            setShowMessage(true)
+            return
+        }
+        if (time === 'Time') {
+            setStatusCode(404)
+            setMessage('Time is required')
+            setShowMessage(true)
+            return
+        }
+        if (passengers < 1) {
+            setStatusCode(404)
+            setMessage('At least 1 passenger is required')
+            setShowMessage(true)
+            return
+        }
+        if (price <= 0) {
+            setStatusCode(404)
+            setMessage('Price must be greater than 0')
+            setShowMessage(true)
+            return
+        }
+
         await findRide(pickup, drop, date, passengers, time, price, vehicle, location, dropLocation, email, number, setMatchedRides || null, setHideForm, router, luggage, petFriendly, smoking, rating, setLoader, setShowMessage, setMessage, ride, gender, user)
         setRideState({
             userId: user?._id || '',
@@ -86,13 +126,11 @@ const page = () => {
 
             {hideform && <div className='flex justify-center h-screen w-screen items-center left-0 top-0 fixed z-50'>
                 <div className='loader -translate-y-5'></div>
-                <h1 className={`${toggleTheme? 'text-[#fefefe]': 'text-[#202020]'} inter md:text-lg font-medium text-center mt-4 translate-x-2.5 translate-y-7`}>Finding best rides for you...</h1>
+                <h1 className={`${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} inter md:text-lg font-medium text-center mt-4 translate-x-2.5 translate-y-7`}>Finding best rides for you...</h1>
             </div>}
 
-            {!hideform && loader && <Loader message={message} showMessage={showMessage} setShowMessage={setShowMessage} setLoader={setLoader} />}
-
             {!hideform && <div className={`fixed top-0 left-0 ${currStep === 5 ? 'z-[60] opacity-[1]' : 'opacity-0 -z-[60]'} w-screen h-screen flex justify-center items-center bg-[#2020203f]`}>
-                <Submit formData={formData} searchRide={searchRide} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} />
+                <Submit showMessage={showMessage} setShowMessage={setShowMessage} message={message} statusCode={statusCode} formData={formData} searchRide={searchRide} currStep={currStep} setCurrStep={setCurrStep} step={step} setStep={setStep} setLoader={setLoader} loader={loader} />
             </div>}
 
             {/* // decors */}
@@ -139,7 +177,7 @@ const page = () => {
                         {currStep === 4 && <Additional instruct={instruct} setEmail={setEmail} email={email} number={number} setNumber={setNumber} setInstruct={setInstruct} photo={photo} setPhoto={setPhoto} />}
 
 
-                        {currStep != 5 && <div className={`inter ${currStep === 4? 'mt-2': 'mt-6'} flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
+                        {currStep != 5 && <div className={`inter ${currStep === 4 ? 'mt-2' : 'mt-6'} flex ${currStep === 1 ? 'justify-end' : 'justify-between'} items-center`}>
 
                             {currStep != 1 && <button className={`shadow-md font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`} onClick={() => {
                                 setStep(step - 1)

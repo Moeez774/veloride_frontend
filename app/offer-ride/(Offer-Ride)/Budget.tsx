@@ -18,6 +18,7 @@ const Budget = ({ negotiate, setNegotiate, budget, setBudget, vehicle, location,
 
     //sending request to server for fetching ride price whenever user goes to 3rd step
     const fetchPrice = async () => {
+        if (currStep != 3) return
         let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rides/fetchPrice`, {
             method: "POST", headers: {
                 "Content-Type": "application/json"
@@ -63,7 +64,7 @@ const Budget = ({ negotiate, setNegotiate, budget, setBudget, vehicle, location,
                                 <TooltipTrigger onMouseLeave={() => setShowToolTip(false)} onMouseEnter={() => setShowToolTip(true)} onClick={() => setShowToolTip(true)} onBlur={() => setShowToolTip(false)}>
                                     <HelpCircle size={20} color={toggleTheme ? '#fefefe' : '#202020'} />
                                 </TooltipTrigger>
-                                <TooltipContent className={`inter relative z-[100] w-48 text-center ${toggleTheme ? 'bg-[#0d0d0d] border border-[#202020] text-[#fefefe]' : 'bg-white text-[#202020]'}`}>
+                                <TooltipContent className={`inter relative z-[100] w-48 text-center bg-[#00563c] text-[#fefefe]`}>
                                     <p>Adjust your total budget as needed. The final split may vary based on passenger count.</p>
                                 </TooltipContent>
                             </Tooltip>

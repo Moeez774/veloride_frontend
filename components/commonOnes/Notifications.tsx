@@ -83,7 +83,6 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
         setCurrentlyActive(id)
 
         try {
-
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/read?id=${id}`, {
                 method: 'PUT',
                 headers: {
@@ -126,7 +125,6 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
 
             const response = await res.json()
             setNotifications(notifications.map((e) => ({ ...e, is_read: true })))
-            alert(response.message)
 
         } catch (err) {
             console.log(err)
@@ -156,7 +154,6 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
 
             const response = await res.json()
             setNotifications(notifications.filter((e) => e._id !== id))
-            alert(response.message)
         }
 
         catch (err) {

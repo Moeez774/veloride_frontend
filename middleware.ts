@@ -6,41 +6,43 @@ export async function middleware(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
     const { pathname } = req.nextUrl;
 
-    if (pathname.startsWith('/_next') || pathname === '/favicon.ico' || pathname.startsWith('/Images')) {
-        return NextResponse.next(); // Allow Next.js static files
-    }
+    // if (pathname.startsWith('/_next') || pathname === '/favicon.ico' || pathname.startsWith('/Images')) {
+    //     return NextResponse.next()
+    // }
 
-    if (!token) {
-        // No token, allow requests to these paths
-        if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
-            return NextResponse.next();
-        }
-        // Redirect if trying to access protected pages without a token
-        url.pathname = '/hop-in';
-        return NextResponse.redirect(url);
-    }
+    return NextResponse.next()
 
-    try {
-        const secret = new TextEncoder().encode(process.env.SECRET_KEY); // Use your secret key
-        await jwtVerify(token, secret);
+    // if (!token) {
+    //     // No token, allow requests to these paths
+    //     if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
+    //         return NextResponse.next();
+    //     }
+    //     // Redirect if trying to access protected pages without a token
+    //     url.pathname = '/hop-in';
+    //     return NextResponse.redirect(url);
+    // }
 
-        // Token is valid, redirect away from public pages to home page
-        if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
-            url.pathname = '/';
-            return NextResponse.redirect(url);
-        }
+    // try {
+    //     const secret = new TextEncoder().encode(process.env.SECRET_KEY); // Use your secret key
+    //     await jwtVerify(token, secret);
 
-        return NextResponse.next();
-    } catch (error) {
-        console.error('JWT Verification Error:', error);
+    //     // Token is valid, redirect away from public pages to home page
+    //     if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
+    //         url.pathname = '/';
+    //         return NextResponse.redirect(url);
+    //     }
 
-        // Invalid token, redirect to /hop-in
-        if (!(pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password'))) {
-            url.pathname = '/hop-in';
-            return NextResponse.redirect(url);
-        }
-        return NextResponse.next();
-    }
+    //     return NextResponse.next();
+    // } catch (error) {
+    //     console.error('JWT Verification Error:', error);
+
+    //     // Invalid token, redirect to /hop-in
+    //     if (!(pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password'))) {
+    //         url.pathname = '/hop-in';
+    //         return NextResponse.redirect(url);
+    //     }
+    //     return NextResponse.next();
+    // }
 }
 
 export const config = {
