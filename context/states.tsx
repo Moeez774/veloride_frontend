@@ -76,7 +76,6 @@ export const RideProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fetchNotifications()
     }, [user?._id])
 
-    //for adding new month objects for monthlyStats and monthlyEarnings and monthlySpent
     useEffect(() => {
         if (!user) return
 

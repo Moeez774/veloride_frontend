@@ -5,6 +5,7 @@ import { getContacts } from '@/context/ContactsProvider'
 import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
 import '@/app/(HomePage)/Main.css'
 import Suggestions from './Suggestions'
+import { fetchSuggestions } from '@/functions/function'
 interface Details {
     placeholder: string,
     showSearch: boolean,
@@ -23,30 +24,9 @@ const Field: React.FC<Details> = ({ placeholder, showSearch, setShowSearch, setV
     const toggleTheme = context?.toggleTheme
 
     const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue = e.target.value;
-        setValue(inputValue);
-
-        if (inputValue.length > 1) {
-            setLoader(true)  // Use the new value directly
-            try {
-                const requestOptions = {
-                    method: 'GET',
-                }
-
-                const a = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${inputValue}&apiKey=7c961581499544e085f28a826bf9ebeb`, requestOptions)
-
-                const response = await a.json()
-                setLoader(false)
-                setSuggestions(response.features)
-
-            } catch (err) {
-                setLoader(false)
-                alert("Error fetching locations: " + err)
-            }
-        } else {
-            setLoader(false)
-            setSuggestions([])
-        }
+        const input = e.target.value;
+        setValue(input);
+        await fetchSuggestions(input, setLoader, setSuggestions)
     }
 
     return (

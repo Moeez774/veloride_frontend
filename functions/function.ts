@@ -1,17 +1,16 @@
-import { toggleTheme } from './../app/(HomePage)/MainMap';
 import { auth } from "@/firebase"
 import socket from "@/utils/socket"
 import { User } from "firebase/auth"
 import { Dispatch, SetStateAction } from "react"
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth'
+import wordsToNumbers from "words-to-numbers"
+
 
 const google = new GoogleAuthProvider()
 const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
-// for saving user's data
 export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any, gender: string) {
 
-    // calling server for saving user's data if not saved already
     let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/providers-sign-in`, {
         method: "POST", headers: {
             "Content-Type": "application/json"
@@ -40,7 +39,7 @@ function generateHSLColor() {
 }
 
 // for sign up
-export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, role: string | null, router: any, gender: string) {
+export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, email: string, fullname: string, pass: string, number: string, city: string, role: string | null, router: any, gender: string, country: string) {
 
     //generating random color for profile backgorund
     const color = generateHSLColor()
@@ -52,7 +51,7 @@ export async function signUserUp(setLoader: Dispatch<SetStateAction<boolean>>, e
                 "Content-Type": "application/json"
             },
             credentials: 'include',
-            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: number, city: city, remeber: false, photo: color, role: role, isProvider: false, rating: 0, gender: gender })
+            body: JSON.stringify({ _id: userId, fullname: fullname, email: email, pass: pass, number: `${country}${number}`, city: city, remeber: false, photo: color, role: role, isProvider: false, rating: 0, gender: gender })
         })
 
         let response = await a.json()
@@ -279,4 +278,157 @@ export async function drawRoute(from: any, to: any, map: any, toggleTheme: boole
             }
         });
     }
-};
+}
+
+export async function tts(text: string, setIsSpeaking: Dispatch<SetStateAction<boolean>>): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/voice/tts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Backend TTS error:', errorData);
+                throw new Error(errorData.error || 'TTS failed');
+            }
+
+            const blob = await response.blob();
+            const audioUrl = URL.createObjectURL(blob);
+
+            const audio = new Audio(audioUrl);
+            audio.play();
+
+            audio.onplay = () => setIsSpeaking(true);
+
+            audio.onended = () => {
+                setIsSpeaking(false);
+                resolve();
+            };
+        } catch (err) {
+            console.error('Failed to speak:', err);
+            setIsSpeaking(false);
+            reject(err);
+        }
+    });
+}
+
+
+export async function fetchSuggestions(input: string, setLoader: Dispatch<SetStateAction<boolean>> | undefined, setSuggestions: Dispatch<SetStateAction<any[]>>): Promise<any[]> {
+
+    return new Promise(async (resolve, reject) => {
+        if (input.length > 2) {
+            setLoader && setLoader(true)
+            try {
+                const requestOptions = {
+                    method: 'GET',
+                }
+
+                const a = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${input}&apiKey=${process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY}`, requestOptions)
+
+                const response = await a.json()
+                setLoader && setLoader(false)
+                setSuggestions(response.features)
+                resolve(response.features)
+            } catch (err) {
+                setLoader && setLoader(false)
+                reject(err)
+            }
+        } else {
+            setLoader && setLoader(false)
+            setSuggestions([])
+            resolve([])
+        }
+    })
+}
+export function isFutureTime(time: string, isToday: boolean): boolean {
+    const regex = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s?(a\.m\.|p\.m\.)$/i;
+    const match = time.trim().match(regex);
+
+    if (!match) return false;
+
+    if (!isToday) return true;
+
+    let hour = parseInt(match[1]);
+    const minute = parseInt(match[2]);
+    const meridian = match[3].toLowerCase();
+
+    if (meridian === 'p.m.' && hour !== 12) {
+        hour += 12;
+    } else if (meridian === 'a.m.' && hour === 12) {
+        hour = 0;
+    }
+
+    const now = new Date();
+    const inputTime = new Date();
+
+    inputTime.setHours(hour, minute, 0, 0);
+
+    return inputTime.getTime() > now.getTime();
+}
+
+export function isPassengerCount(count: any): boolean {
+    if (!count) return false;
+
+    const text = String(count).toLowerCase().trim();
+
+    const match = text.match(/(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+(passenger|passengers)/i);
+    if (!match) return false;
+
+    const numWord = match[1];
+
+    let number = parseInt(numWord);
+    if (isNaN(number)) {
+        const converted = wordsToNumbers(numWord);
+        number = typeof converted === 'number' ? converted : NaN;
+    }
+
+    return !isNaN(number);
+}
+
+export async function saveDetails(brand: string, model: string, color: string, seats: string, userId: string, setLoader: Dispatch<SetStateAction<boolean>>, setShowMessage: Dispatch<SetStateAction<boolean>>, setMessage: Dispatch<SetStateAction<string>>, setStatusCode: Dispatch<SetStateAction<number>>, setEditCarDetails: Dispatch<SetStateAction<boolean>>, setUser: Dispatch<SetStateAction<any>> | undefined) {
+
+    setLoader(true)
+    setShowMessage(false)
+    setMessage('')
+    setStatusCode(0)
+
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile/cars/save-details`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ brand, model, color, avg_available_seats: seats, userId })
+        })
+
+        const data = await res.json()
+        setShowMessage(true)
+        setMessage(data.message)
+        setStatusCode(data.statusCode)
+
+        if (data.statusCode === 200) {
+            setEditCarDetails(false)
+            setUser && setUser((prev: any) => ({
+                ...prev,
+                car_details: {
+                    brand: brand,
+                    model: model,
+                    color: color,
+                    avg_available_seats: seats
+                }
+            }))
+        }
+    } catch (err: any) {
+        setShowMessage(true)
+        setMessage(err.message || 'Something went wrong')
+        setStatusCode(err.statusCode || 500)
+    }
+}
+
+
+

@@ -94,7 +94,7 @@ const RecentlyActivities = ({ toggleTheme, data }: { toggleTheme?: boolean | und
                 <h1 className={`${toggleTheme ? 'text-[#b1b1b1b]' : 'text-[#5b5b5b]'} text-sm text-center font-medium mt-10`}>You haven't done any transactions recently.</h1>
             </div>}
 
-            {data.length != 0 && data.reverse().map((transaction, index) => (
+            {data.length != 0 && data.map((transaction, index) => (
                 <React.Fragment key={index}>
                     <div className={`grid grid-cols-3 mt-3 text-[15px] ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} font-medium gap-x-4`}>
                         <h1>#{transaction.rideId.slice(-5)}</h1>

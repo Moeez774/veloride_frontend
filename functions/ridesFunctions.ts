@@ -58,6 +58,7 @@ export async function offerRide(userId: string | null | undefined, driverName: s
 
         const notification = response.notification
         const otpNotification = response.otpNotification
+        socket.emit('join-room', ({ roomId: rideId }))
 
         setNotifications(prev => [otpNotification, notification, ...prev])
     } catch (error) {

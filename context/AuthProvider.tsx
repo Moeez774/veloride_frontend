@@ -16,7 +16,13 @@ export interface User {
   contacts: any[];
   rating: number;
   gender: string | null;
-  activeRides: string[]
+  activeRides: string[],
+  car_details: {
+    brand: string | null;
+    model: string | null;
+    color: string | null;
+    avg_available_seats: number | null;
+  }
 }
 
 interface AuthContextType {
@@ -50,7 +56,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  // for fetching user's data on render and also driver's movement
   useEffect(() => {
     fetchUser()
 
@@ -59,7 +64,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // First get the initial position
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { longitude, latitude } = position.coords;
@@ -71,21 +75,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Error getting initial position:", error);
         alert("Unable to retrieve your location.");
       }
-    );
+    )
 
     const watcherId = navigator.geolocation.watchPosition(
       (position) => {
         const { longitude, latitude } = position.coords;
         setUserLocation([longitude, latitude]);
-        localStorage.setItem('long', longitude.toString());
-        localStorage.setItem('lat', latitude.toString());
+        localStorage.setItem('long', longitude.toString())
+        localStorage.setItem('lat', latitude.toString())
 
-        const isDriver = drivers.some(driver => driver.userId === user?._id);
-        if (isDriver) {
-          socket.emit("driverMoved", { userId: user?._id, location: [longitude, latitude] });
-        }
+        socket.emit("driverMoved", { userId: user?._id, location: [longitude, latitude] });
 
-        //for tracking passengers movement
+        //for tracking passengers movement on driver movement
         socket.emit("passengerMoved", { userId: user?._id, location: [longitude, latitude] });
       },
       (error) => {
@@ -96,19 +97,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         timeout: Infinity,
         maximumAge: 0
       }
-    );
-
-    // detecting any driver's movement and changing its coordinates
-    socket.on("driverLocationChanged", (data) => {
-      const updatedData = drivers.map(driver => {
-        return driver.userId === data.userId ? { ...driver, location: data.location } : driver;
-      });
-      setDrivers(updatedData);
-    });
+    )
 
     return () => {
-      socket.off("driverLocationChanged");
       navigator.geolocation.clearWatch(watcherId);
+      socket.off("driverMoved")
+      socket.off("passengerMoved")
     }
   }, [user?._id, drivers]);
 
@@ -122,29 +116,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const data = await response.json()
       if (data.statusCode === 200) {
-        const long = localStorage.getItem("long")
-        const lat = localStorage.getItem("lat")
-        const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
-        const userInfo = {
-          userId: data.data.userId,
-          location: currLocation,
-        }
-        socket.emit("avl.driver", userInfo)
+        socket.emit("avl.driver", { userId: user?._id, location: userLocation })
       }
     } catch (error) {
       console.error("Error checking ride:", error)
     }
   }
 
-  // for checking user is driver and if it is then sending user's location to all
   useEffect(() => {
     const handleRequest = () => checkRide()
 
-    const handleAvailableDrivers = (data: any) => {
+    const handleAvailableDrivers = ({ userId, location }: { userId: string, location: [number, number] }) => {
       if (setDrivers) {
         setDrivers((prev) => {
-          const exists = prev.some(driver => driver.userId === data.userId);
-          if (!exists) return [...prev, data]
+          const exists = prev.some(driver => driver.userId === userId);
+          if (!exists) return [...prev, { userId, location }]
           return prev;
         })
       }
@@ -160,10 +146,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     socket.on("available_drivers", handleAvailableDrivers)
 
+    socket.on("driverLocationChanged", ({ userId, location }: { userId: string, location: [number, number] }) => {
+      if (drivers.length > 0) {
+        const updatedDrivers = drivers.map(driver => {
+          if (driver.userId === userId) {
+            return { ...driver, location }
+          }
+          return driver
+        })
+        setDrivers(updatedDrivers)
+      }
+    })
+
     return () => {
       socket.off('join-passengers')
       socket.off('userRequest', handleRequest)
       socket.off("available_drivers", handleAvailableDrivers);
+      socket.off("driverLocationChanged");
+
     }
   }, [userLocation])
 

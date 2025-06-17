@@ -44,7 +44,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
     const [rider, setRider] = useState(role === 'rider' ? true : false)
     const [driver, setDriver] = useState(role === 'driver' ? true : false)
     const [showPass, setShowPass] = useState(false)
-    const [country, setCountry] = useState<string>(countries[129].phone)
+    const [country, setCountry] = useState<string>(countries[0].phone)
     const [loader, setLoader] = useState(false)
     const [errors, setErrors] = useState<{ role?: string; city?: string; number?: string; pass?: string; gender?: string }>({})
 
@@ -80,7 +80,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
     }
 
     // sending signup request to backend
-    const signUp = async () => await signUserUp(setLoader, email, fullname, pass, `${country}${number}`, city, role, router, gender)
+    const signUp = async () => await signUserUp(setLoader, email, fullname, pass, number, city, role, router, gender, country)
 
     const delay = async (ms: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms))
 

@@ -19,7 +19,7 @@ export const toggleTheme = () => {
 
 const MainMap: React.FC<Details> = ({ setShowMap }) => {
     const [map, setMap] = useState<mapboxgl.Map | null>(null)
-    const [markers, setMarkers] = useState<Record<string, mapboxgl.Marker>>({})
+    const markersRef = useRef<Record<string, mapboxgl.Marker>>({})
     const [userMarker, setUserMarker] = useState<mapboxgl.Marker | null>(null)
     const authContext = useAuth()
     const context = getContacts()
@@ -116,69 +116,39 @@ const MainMap: React.FC<Details> = ({ setShowMap }) => {
 
     //for changing drivers location in realtime
     useEffect(() => {
-        if (!map || !drivers || drivers.length === 0 || !user) return
+        if (!map || !drivers || drivers.length === 0) return
 
-        const newMarkers: Record<string, mapboxgl.Marker> = {}
+        const existingUserIds = new Set(drivers ? Object.keys(drivers) : []);
 
-        drivers.forEach(driver => {
-            const { userId, location } = driver
+        if (drivers) {
+            Object.entries(drivers).forEach(([userId, location]) => {
+                if (!location || !Array.isArray(location) || location.length !== 2) return;
 
-            if (userId === user?._id) {
-                return
+                if (markersRef.current[userId]) {
+                    markersRef.current[userId].setLngLat(location as [number, number]);
+                } else {
+                    const el = document.createElement('div');
+                    el.className = 'driver-location-dot';
+                    const marker = new mapboxgl.Marker({ element: el })
+                        .setLngLat(location as [number, number])
+                        .addTo(map)
+
+                    markersRef.current[userId] = marker;
+                }
+            });
+        }
+
+        Object.keys(markersRef.current).forEach((userId) => {
+            if (!existingUserIds.has(userId)) {
+                markersRef.current[userId].remove();
+                delete markersRef.current[userId];
             }
+        });
+    }, [drivers, map])
 
-            if (markers[userId]) {
-                const existingMarker = markers[userId]
-                existingMarker.setLngLat(location)
-                newMarkers[userId] = existingMarker
-            } else {
-                const el = document.createElement('div')
-                el.className = 'driver-location-dot'
-
-                const marker = new mapboxgl.Marker({ element: el })
-                    .setLngLat(location)
-                    .addTo(map)
-
-                newMarkers[userId] = marker
-            }
-        })
-
-        Object.keys(markers).forEach(userId => {
-            if (!newMarkers[userId]) {
-                markers[userId].remove()
-            }
-        })
-
-        setMarkers(newMarkers)
-    }, [drivers, user])
-
-    // for updating drivers markers on theme change
     useEffect(() => {
-        if (!map || !drivers || drivers.length === 0 || !user) return
-
-        Object.values(markers).forEach(marker => marker.remove())
-
-        const newMarkers: Record<string, mapboxgl.Marker> = {}
-
-        drivers.forEach(driver => {
-            const { userId, location } = driver
-
-            if (userId === user?._id) {
-                return
-            }
-            const el = document.createElement('div')
-            el.className = 'driver-location-dot'
-
-            const marker = new mapboxgl.Marker({ element: el })
-                .setLngLat(location)
-                .addTo(map)
-
-
-            newMarkers[userId] = marker
-        })
-
-        setMarkers(newMarkers)
-    }, [map, user])
+        console.log("drivers", drivers)
+    }, [drivers])
 
     // for checking socket is connected or not becuase without it , it will run too early and will not execute
     useEffect(() => {

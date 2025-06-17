@@ -50,20 +50,6 @@ const MatchedRides: React.FC<Details> = ({ isFound, location, drop, pickup, drop
         }
     }, [matchedRides, currentState])
 
-    //for fetching distance of rides if they are near
-    const fetchDistance = async (e: any) => {
-        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${location.long},${location.lat};${e.rideDetails.pickupLocation.coordinates[0]},${e.rideDetails.pickupLocation.coordinates[1]}?access_token=${accessToken}`
-
-        const info = await fetch(url)
-        const jsonInfo = await info.json()
-
-        if (jsonInfo.code === 'Ok') {
-            const route = jsonInfo.routes[0];
-            const distance = (route.distance / 1000).toFixed(2)
-            return distance
-        }
-    }
-
     return (
         <div className={`w-full h-full font-medium inter ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>
             {/* Header */}

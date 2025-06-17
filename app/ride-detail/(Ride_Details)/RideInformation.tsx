@@ -128,7 +128,7 @@ const RideInformation: React.FC<RideInformationProps> = ({
 
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogTrigger></DialogTrigger>
-                <DialogContent className={`inter ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'bg-[#fefefe] text-[#202020]'} border-none`}>
+                <DialogContent className={`inter text-start ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'bg-[#fefefe] text-[#202020]'} border-none`}>
                     <DialogHeader>
                         <DialogTitle>Tell the issue behind cancelling the ride</DialogTitle>
 
@@ -149,14 +149,14 @@ const RideInformation: React.FC<RideInformationProps> = ({
 
                             {/* //Description of issue */}
                             <div className='mt-4'>
-                                <label htmlFor="description" className={`text-sm mb-2 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Description</label>
+                                <label htmlFor="description" className={`text-sm mb-2 text-start ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Description</label>
                                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Enter description' className={`resize-none h-[100px] ${toggleTheme ? 'bg-[#202020] text-[#fefefe] border border-[#353535]' : 'bg-[#fefefe] text-[#202020] border'}`} />
                             </div>
 
                         </div>
                     </DialogHeader>
                     <DialogFooter className='flex mt-6 justify-between'>
-                        <button className={`px-8 text-sm transition-all duration-200 py-2.5 ${toggleTheme ? 'bg-[#202020] hover:bg-[#353535] text-[#fefefe] border border-[#353535]' : 'bg-[#fefefe] hover:bg-[#f0f0f0] text-[#202020] border'} cursor-pointer rounded-md font-medium`}>Back</button>
+                        <button onClick={() => setOpenDialog(false)} className={`px-8 text-sm transition-all duration-200 py-2.5 ${toggleTheme ? 'bg-[#202020] hover:bg-[#353535] text-[#fefefe] border border-[#353535]' : 'bg-[#fefefe] hover:bg-[#f0f0f0] text-[#202020] border'} cursor-pointer rounded-md font-medium`}>Back</button>
                         <button className='px-8 text-sm transition-all duration-200 py-2.5 bg-[#00563c] text-[#fefefe] hover:bg-[#00563ccc] active:bg-[#00563c] cursor-pointer rounded-md font-medium' onClick={handleReportIssue} disabled={isLoading}>Cancel ride</button>
                     </DialogFooter>
                 </DialogContent>

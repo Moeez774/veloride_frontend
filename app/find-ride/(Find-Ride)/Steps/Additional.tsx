@@ -36,7 +36,7 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
                         const file = e.target.files?.[0] as File;
                         if (!file) return;
 
-                        setUploading(true);
+                        setUploading(true)
 
                         const data = new FormData();
                         data.append('file', file);

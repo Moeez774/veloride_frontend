@@ -6,11 +6,11 @@ export async function middleware(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
     const { pathname } = req.nextUrl;
 
-    // if (pathname.startsWith('/_next') || pathname === '/favicon.ico' || pathname.startsWith('/Images')) {
-    //     return NextResponse.next()
-    // }
+    if (pathname.startsWith('/_next') || pathname === '/favicon.ico' || pathname.startsWith('/Images')) {
+        return NextResponse.next()
+    }
 
-    return NextResponse.next()
+    return NextResponse.next();
 
     // if (!token) {
     //     // No token, allow requests to these paths
@@ -23,10 +23,9 @@ export async function middleware(req: NextRequest) {
     // }
 
     // try {
-    //     const secret = new TextEncoder().encode(process.env.SECRET_KEY); // Use your secret key
+    //     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     //     await jwtVerify(token, secret);
 
-    //     // Token is valid, redirect away from public pages to home page
     //     if (pathname.startsWith('/hop-in') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
     //         url.pathname = '/';
     //         return NextResponse.redirect(url);

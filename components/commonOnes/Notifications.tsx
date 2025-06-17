@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { User } from '@/context/AuthProvider'
-import { Bell, Dot, KeyRound, Route, EllipsisVertical, Bookmark, CheckCheck, Trash, UserRound, Car, Smile } from 'lucide-react'
+import { Bell, Dot, KeyRound, Route, EllipsisVertical, Bookmark, CheckCheck, Trash, UserRound, Car, Smile, CreditCard } from 'lucide-react'
 import { useRide } from '@/context/states'
 import Link from 'next/link'
 
@@ -31,8 +31,8 @@ const Notification = ({ isLoading, _id, isRead, type, date, message, toggleTheme
             </div>}
 
             <div className='flex gap-3'>
-                <div className={`p-2 rounded-md ${type === 'rideCreated' ? 'bg-green-200' : type === 'passengerDropped' ? 'bg-green-500' : type === 'passengerCancelled' ? 'bg-red-200' : type === 'welcome' ? 'bg-[#00563c]' : type === 'rideStarted' ? 'bg-green-200' : type === 'passengerDeclined' ? 'bg-yellow-200' : type === 'otpArrived' ? 'bg-blue-200' : type === 'rideCancelled' ? 'bg-red-200' : type === 'passengerJoined' ? 'bg-yellow-200' : 'bg-gray-200'} h-fit w-fit`}>
-                    {type === 'rideCreated' ? <Route color='green' size={20} /> : type === 'passengerDropped' ? <UserRound color='white' size={20} /> : type === 'passengerCancelled' ? <UserRound color='white' size={20} /> : type === 'welcome' ? <Smile color='white' size={20} /> : type === 'rideStarted' ? <Car color='green' size={20} /> : type === 'passengerDeclined' ? <UserRound color='white' size={20} /> : type === 'otpArrived' ? <KeyRound color='blue' size={20} /> : type === 'rideCancelled' ? <Trash color='red' size={20} /> : type === 'passengerJoined' ? <UserRound color='white' size={20} /> : <Bell color='gray' size={20} />}
+                <div className={`p-2 rounded-md ${type === 'rideCreated' ? 'bg-green-200' : type === 'Payment' ? 'bg-blue-200' : type === 'passengerDropped' ? 'bg-green-500' : type === 'passengerCancelled' ? 'bg-red-200' : type === 'welcome' ? 'bg-[#00563c]' : type === 'rideStarted' ? 'bg-green-200' : type === 'passengerDeclined' ? 'bg-yellow-200' : type === 'otpArrived' ? 'bg-blue-200' : type === 'rideCancelled' ? 'bg-red-200' : type === 'passengerJoined' ? 'bg-yellow-200' : 'bg-gray-200'} h-fit w-fit`}>
+                    {type === 'rideCreated' ? <Route color='green' size={20} /> : type === 'Payment' ? <CreditCard color='blue' size={20} /> : type === 'passengerDropped' ? <UserRound color='white' size={20} /> : type === 'passengerCancelled' ? <UserRound color='white' size={20} /> : type === 'welcome' ? <Smile color='white' size={20} /> : type === 'rideStarted' ? <Car color='green' size={20} /> : type === 'passengerDeclined' ? <UserRound color='white' size={20} /> : type === 'otpArrived' ? <KeyRound color='blue' size={20} /> : type === 'rideCancelled' ? <Trash color='red' size={20} /> : type === 'passengerJoined' ? <UserRound color='white' size={20} /> : <Bell color='gray' size={20} />}
                 </div>
 
                 <div>

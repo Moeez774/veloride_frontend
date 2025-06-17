@@ -30,7 +30,7 @@ const PhoneInput: React.FC<Details> = ({ number, setNumber, country, setCountry,
           <SelectTrigger className={`w-[130px] border py-6 ${error ? 'border-red-500' : ''}`}>
             <SelectValue placeholder="+1" />
           </SelectTrigger>
-          <SelectContent className={`${toggleTheme ? 'bg-[#202020] border border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] border text-[#202020]'}`}>
+          <SelectContent className={`${toggleTheme ? 'bg-[#202020] border border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] border text-[#202020]'} max-h-[300px] overflow-y-auto`}>
             {countries.map((country, index) => (
               <SelectItem key={index} className='flex items-center gap-1' value={country.phone}>
                 <img className='w-5' src={country.flag} alt="" />

@@ -75,8 +75,8 @@ const page = () => {
                           <Mic size={35} className={`${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1500`} color={toggleTheme ? '#048C64' : '#00563c'} />
 
                           <div className='flex flex-col gap-1.5'>
-                            <h1 className={`font-semibold text-lg ${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1700 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} `}>Speak to Book</h1>
-                            <h1 className={`${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1900 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-xs`}>Easily book your ride with simple voice commands for a hands-free, efficient experience.</h1>
+                            <h1 className={`font-semibold text-lg ${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1700 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'} `}>Speak to Find</h1>
+                            <h1 className={`${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1900 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-xs`}>Easily find your ride with simple voice commands for a hands-free, efficient experience.</h1>
                           </div>
                         </div>
                       </SwiperSlide>
@@ -115,8 +115,8 @@ const page = () => {
                   <Mic size={35} className={`${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1500`} color={toggleTheme ? '#048C64' : '#00563c'} />
 
                   <div className='flex flex-col gap-1.5'>
-                    <h1 className={`font-semibold text-lg ${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1700 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Speak to Book</h1>
-                    <h1 className={`${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1900 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-xs`}>Easily book your ride with simple voice commands for a hands-free, efficient experience.</h1>
+                    <h1 className={`font-semibold text-lg ${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1700 ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>Speak to Find</h1>
+                    <h1 className={`${inView2 ? 'translate-y-0 opacity-[1]' : 'translate-y-3 opacity-0'} ease-out transition-all duration-800 delay-1900 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-xs`}>Easily find your ride with simple voice commands for a hands-free, efficient experience.</h1>
                   </div>
                 </div>
 

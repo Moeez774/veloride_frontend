@@ -141,7 +141,6 @@ const Map = ({ selectedRide, passengers, setOpen, open }: MapProps) => {
         const currentRidePassengers = passengers[selectedRide._id];
         const existingUserIds = new Set(currentRidePassengers ? Object.keys(currentRidePassengers) : []);
 
-        // Add or update markers
         if (currentRidePassengers) {
             Object.entries(currentRidePassengers).forEach(([userId, location]) => {
                 if (!location || !Array.isArray(location) || location.length !== 2) return;
@@ -164,7 +163,6 @@ const Map = ({ selectedRide, passengers, setOpen, open }: MapProps) => {
             });
         }
 
-        // Remove markers that no longer exist
         Object.keys(markersRef.current).forEach((userId) => {
             if (!existingUserIds.has(userId)) {
                 markersRef.current[userId].remove();

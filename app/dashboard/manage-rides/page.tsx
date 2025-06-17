@@ -171,7 +171,6 @@ const ManageRides = () => {
             }
         })
 
-        //setting location in object by selected rides id
         socket.on('provide-location', ({ location, rideId, userId }) => {
             setPassengers((prev: any) => ({
                 ...prev,

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/accordion"
 import Loader from '@/components/Loader'
 import { useRouter } from 'next/navigation'
+import socket from '@/utils/socket'
 
 interface CheckoutProps {
     rideId: string | null
