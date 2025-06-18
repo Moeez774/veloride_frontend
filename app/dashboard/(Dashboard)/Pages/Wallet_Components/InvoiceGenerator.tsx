@@ -198,10 +198,11 @@ const InvoiceGenerator = ({ walletData, user, formattedDate }: InvoiceGeneratorP
 
     return (
         <button
+            title='Download Invoice'
             onClick={generateInvoice}
-            className='flex hover:bg-[#00563ccc] cursor-pointer transition-all duration-300 py-2.5 px-[0.90rem] bg-[#00563c] rounded-md text-[#fefefe] items-center gap-1 text-sm md:text-base'
+            className='flex hover:bg-[#00563ccc] cursor-pointer transition-all duration-300 p-2.5 bg-[#00563c] rounded-full text-[#fefefe] items-center gap-1 text-sm md:text-base'
         >
-            <DownloadCloud size={20} /> Export
+            <DownloadCloud size={20} />
         </button>
     )
 }

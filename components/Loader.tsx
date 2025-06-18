@@ -33,11 +33,11 @@ const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMes
                         <DialogTitle className='flex items-center gap-2'>
                             {isSuccess ? (
                                 <>
-                                    Congratulations! <Sparkles size={20} color={toggleTheme ? '#fefefe' : '#202020'} />
+                                    Congratulations! <Sparkles size={16} color={toggleTheme ? '#fefefe' : '#202020'} />
                                 </>
                             ) : (
                                 <>
-                                    Error <AlertCircle size={20} color='#fefefe' />
+                                    Error <AlertCircle size={16} color='#fefefe' />
                                 </>
                             )}
                         </DialogTitle>

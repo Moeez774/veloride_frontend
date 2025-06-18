@@ -348,7 +348,7 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
 
                     <div className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} my-4 flex gap-2.5 sm:gap-1 flex-col`}>
                         <h1 className='text-sm'>
-                            Preferred Language
+                            Select Theme
                         </h1>
 
                         <Select value={toggleTheme ? 'dark' : 'light'} onValueChange={(value) => setToggleTheme && setToggleTheme(value === 'dark')}>
