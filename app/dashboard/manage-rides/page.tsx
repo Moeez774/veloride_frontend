@@ -9,7 +9,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import VerifyPax from '../(Rides)/Owned_Rides/VerifyPax'
 import { TargetIcon } from '@radix-ui/react-icons'
 import {
@@ -65,6 +65,8 @@ const ManageRides = () => {
     const [openChat, setOpenChat] = useState(false)
     const [remainingDistances, setRemainingDistances] = useState<Record<string, string>>({})
     const [openMenu, setOpenMenu] = useState(false)
+    const searchParams = useSearchParams()
+    const rideId = searchParams.get('rideId')
 
     useEffect(() => {
         if (pathname === '/dashboard/manage-rides') {
@@ -101,14 +103,24 @@ const ManageRides = () => {
                     }
                 })
                 const data = await response.json()
+
+                if (data.data.length === 0) {
+                    router.push('/dashboard?page=rides')
+                    return
+                }
+
                 setActiveRides(data.data)
-                setSelectedRide(data.data[0])
+                if (rideId) {
+                    setSelectedRide(data.data.find((ride: any) => ride._id === rideId))
+                } else {
+                    setSelectedRide(data.data[0])
+                }
             } catch (err) {
                 console.log(err)
             }
         }
         fetchActiveRides()
-    }, [user])
+    }, [user, rideId])
 
     // Function to calculate remaining distance
     const calculateRemainingDistance = async (ride: any) => {
@@ -165,10 +177,6 @@ const ManageRides = () => {
 
         socket.on('ride-cancelled', ({ ride, notification }) => {
             setSelectedRide(ride)
-            setActiveRides((prevRides: any) => prevRides.map((r: any) => r._id === selectedRide._id ? ride : r))
-            if (ride.userId === user?._id) {
-                setNotifications(prev => [notification, ...prev])
-            }
         })
 
         socket.on('provide-location', ({ location, rideId, userId }) => {

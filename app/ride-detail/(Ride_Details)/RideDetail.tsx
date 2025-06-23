@@ -97,6 +97,7 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
   useEffect(() => {
     if (!ride || !user) return
     updateSystem()
+    socket.emit('join-ride', ({ rideId: ride._id }))
   }, [ride, user])
 
   const [image, setImage] = useState('')

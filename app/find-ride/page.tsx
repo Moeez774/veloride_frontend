@@ -5,13 +5,11 @@ import Preferences from './(Find-Ride)/Steps/Preferences'
 import ProgressBar from '@/app/find-ride/(Find-Ride)/ProgressBar'
 import RideDetails from './(Find-Ride)/Steps/RideDetails'
 import Submit from './(Find-Ride)/Steps/Submit'
-import Loader from '@/components/Loader'
 import { useAuth } from '@/context/AuthProvider'
 import { getContacts } from '@/context/ContactsProvider'
 import { findRide } from '@/functions/ridesFunctions'
-import { Users } from 'lucide-react'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRide } from '@/context/states'
 
 const page = () => {
@@ -137,14 +135,14 @@ const page = () => {
             {!hideform && <div className='min-h-screen flex justify-between fixed w-screen top-0 left-0 z-10'>
 
                 <div className='flex h-screen items-end'>
-                    <div className='h-[150px] w-[150px] xl:w-[220px] xl:h-[220px] bg-[#00563c]' style={{ borderTopRightRadius: '500px' }}></div>
+                    <div className={`h-[100px] w-[100px] xl:w-[220px] xl:h-[220px] ${toggleTheme ? 'bg-[#048C64]' : 'bg-[#00b37e]'}`} style={{ borderTopRightRadius: '500px' }}></div>
                 </div>
 
                 <div className='flex'>
-                    <div className='w-[150px] h-[150px] xl:w-[220px] xl:h-[220px] bg-[#00563c]' style={{ borderBottomLeftRadius: '500px' }}></div>
+                    <div className={`w-[100px] h-[100px] xl:w-[220px] xl:h-[220px] ${toggleTheme ? 'bg-[#048C64]' : 'bg-[#00b37e]'}`} style={{ borderBottomLeftRadius: '500px' }}></div>
                 </div>
 
-            </div >}
+            </div>}
 
             {/* // main part */}
 

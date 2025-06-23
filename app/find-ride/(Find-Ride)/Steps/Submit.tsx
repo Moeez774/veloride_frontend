@@ -86,7 +86,6 @@ const Submit: React.FC<Details> = ({ formData, currStep, setCurrStep, setStep, s
                         </button>
 
                         <button
-                            disabled={isLoading}
                             className={`active:bg-[#00563c] text-[#fefefe] rounded-md bg-[#00563c] shadow-md font-medium hover:bg-[#00563ccc] px-8 py-2.5 cursor-pointer`}
                             onClick={async () => {
                                 setIsLoading(true)

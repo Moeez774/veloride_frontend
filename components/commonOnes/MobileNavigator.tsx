@@ -41,7 +41,7 @@ const MobileNavigator = () => {
 
             <Notifications toggleTheme={toggleTheme} user={user} openNotifications={openNotifications} setOpenNotifications={setOpenNotifications} />
 
-           { !isOpen && notifications.length > 0 && notifications.find((notfi) => !notfi.is_read) && <div className={`absolute top-0 right-0 m-[30px] z-[200] w-3 h-3 bg-red-500 rounded-full`}></div> }
+           { !isOpen && notifications.length > 0 && notifications.find((notfi) => !notfi?.is_read) && <div className={`absolute top-0 right-0 m-[30px] z-[200] w-3 h-3 bg-red-500 rounded-full`}></div> }
 
             <div ref={optionsRef} className={`w-fit h-12 z-[150] relative flex flex-col overflow-hidden transition-all duration-200 rounded-full ${toggleTheme ? 'bg-[#fefefe]' : 'bg-[#202020]'} mb-8 mr-8`}>
                 <button onClick={() => {

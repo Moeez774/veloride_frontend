@@ -1,6 +1,6 @@
 'use client'
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
-import { Mail, Phone, Pencil, Info, ArrowRight } from 'lucide-react'
+import { Mail, Phone, Pencil, Info, ArrowRight, Star } from 'lucide-react'
 import {
     Select,
     SelectContent,
@@ -95,10 +95,10 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
                     setSearchBrands(data.brands)
                 }
                 else {
-                    alert(data.message)
+                    console.log(data.message)
                 }
             } catch (err: any) {
-                alert(err.message)
+                console.log(err.message)
             }
         }
         fetchBrands()
@@ -106,7 +106,7 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
 
     useEffect(() => {
         if (selectedBrand.length > 0) {
-            const filteredBrands = brands.filter((brand: any) => brand.make_display.toLowerCase().includes(selectedBrand.toLowerCase()))
+            const filteredBrands = brands.filter((brand: any) => brand.toLowerCase().includes(selectedBrand.toLowerCase()))
             setSearchBrands(filteredBrands)
         }
         else {
@@ -142,16 +142,16 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
                 setSearchModels(data.models)
             }
             else {
-                alert(data.message)
+                console.log(data.message)
             }
         } catch (err) {
-            alert(err)
+            console.log(err)
         }
     }
 
     useEffect(() => {
         if (selectedModel.length > 0) {
-            const filteredModels = models.filter((model: any) => model.model_name.toLowerCase().includes(selectedModel.toLowerCase()))
+            const filteredModels = models.filter((model: any) => model.title.toLowerCase().includes(selectedModel.toLowerCase()))
             setSearchModels(filteredModels)
         }
         else {
@@ -163,6 +163,14 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
     const saveCarDetails = async () => {
         await saveDetails(selectedBrand, selectedModel, selectedColor, selectedSeats, user._id, setLoader, setShowMessage, setMessage, setStatusCode, setEditCarDetails, setUser)
     }
+
+    const formatDate = (date?: Date): string => {
+        if (!date || isNaN(date.getTime())) return "Invalid Date";
+
+        const options = { day: '2-digit', month: 'long', year: 'numeric' } as const;
+        return date.toLocaleDateString('en-GB', options);
+    }
+
 
     return (
         <>
@@ -200,10 +208,10 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
 
                                             {searchBrands.map((item: any, index: number) => (
                                                 <button disabled={!openBrandDropdown} key={index} className={`flex ${openBrandDropdown ? 'cursor-pointer' : 'cursor-default'} items-center justify-between ${toggleTheme ? 'hover:bg-[#353535] text-[#fefefe]' : 'hover:bg-[#f0f0f0] text-[#202020]'} w-full p-2 rounded-md text-start text-sm`} onClick={() => {
-                                                    setSelectedBrand(item.make_display)
+                                                    setSelectedBrand(item)
                                                     setOpenBrandDropdown(false)
-                                                    fetchModels(item.make_display)
-                                                }}>{item.make_display} <ArrowRight size={14} /></button>
+                                                    fetchModels(item)
+                                                }}>{item} <ArrowRight size={14} /></button>
                                             ))}
                                         </ScrollArea>
                                     </div>
@@ -227,11 +235,11 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
                                                 </div>
                                             )}
 
-                                            {searchModels.map((item: any, index: number) => (
+                                            {searchModels.length > 0 && searchModels.map((item: any, index: number) => (
                                                 <button disabled={!openModelDropdown} key={index} className={`flex ${openModelDropdown ? 'cursor-pointer' : 'cursor-default'} items-center justify-between ${toggleTheme ? 'hover:bg-[#353535] text-[#fefefe]' : 'hover:bg-[#f0f0f0] text-[#202020]'} w-full p-2 rounded-md text-start text-sm`} onClick={() => {
-                                                    setSelectedModel(item.model_name)
+                                                    setSelectedModel(item.title.charAt(0).toUpperCase() + item.title.slice(1))
                                                     setOpenModelDropdown(false)
-                                                }}>{item.model_name} <ArrowRight size={14} /></button>
+                                                }}>{item.title.charAt(0).toUpperCase() + item.title.slice(1)} <ArrowRight size={14} /></button>
                                             ))}
                                         </ScrollArea>
                                     </div>
@@ -278,9 +286,12 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
                                 )}
                             </div>
 
-                            <h1 className='text-2xl mt-6 font-medium'>{user?.fullname}</h1>
+                            <div className='flex items-center gap-2 mt-6'>
+                                <h1 className='text-2xl font-medium'>{user?.fullname}</h1>
+                                <h1 className='text-sm flex items-center gap-1'>(<Star className='w-4 h-4' color='yellow' fill='yellow' /> {user?.rating.toFixed(1)} )</h1>
+                            </div>
 
-                            <div className={`flex mt-2 flex-col sm:flex-row sm:items-center text-[13px] gap-2.5 sm:gap-6 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
+                            <div className={`flex mt-3 flex-col sm:flex-row sm:items-center text-[13px] gap-2.5 sm:gap-6 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
                                 <h1 className='flex items-center gap-1.5'><Mail size={14} /> {user?.email}</h1>
                                 <h1 className='flex items-center gap-1.5'><Phone size={14} /> {user?.number}</h1>
                             </div>
@@ -337,7 +348,7 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
                     <div className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} my-4 flex flex-col gap-2.5 sm:gap-0 sm:flex-row sm:items-center justify-between pr-2`}>
                         <h1 className='text-sm'>
                             Account Creation Date
-                            <p className={`text-sm sm:text-[15px] mt-1 sm:mt-2 font-medium ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>March 03, 2025</p>
+                            <p className={`text-sm sm:text-[15px] mt-1 sm:mt-2 font-medium ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{formatDate(new Date(user?.createdAt))}</p>
                         </h1>
 
                         <Alert item={showAlert} setter={setShowAlert} statements={['Are you sure you want to delete your account?', "This action can't be undone. You'll lose all data of your account and you have to make another account for accessing app again."]} func2={() => setShowAlert(false)} func1={deleteAccount} />
@@ -356,8 +367,8 @@ const Profile = ({ user, toggleTheme }: ProfileProps) => {
                                 <SelectValue defaultValue='light' placeholder="Light" />
                             </SelectTrigger>
                             <SelectContent className={`inter border ${toggleTheme ? 'bg-[#202020] border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`}>
-                                <SelectItem value="light" className={`${toggleTheme? 'hover:bg-[#353535]': 'hover:bg-[#f0f0f0]'} cursor-pointer`}>Light</SelectItem>
-                                <SelectItem value="dark" className={`${toggleTheme? 'hover:bg-[#353535]': 'hover:bg-[#f0f0f0]'} cursor-pointer`}>Dark</SelectItem>
+                                <SelectItem value="light" className={`${toggleTheme ? 'hover:bg-[#353535]' : 'hover:bg-[#f0f0f0]'} cursor-pointer`}>Light</SelectItem>
+                                <SelectItem value="dark" className={`${toggleTheme ? 'hover:bg-[#353535]' : 'hover:bg-[#f0f0f0]'} cursor-pointer`}>Dark</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

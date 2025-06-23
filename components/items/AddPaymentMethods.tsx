@@ -95,7 +95,7 @@ const AddPaymentMethods = ({ toggleTheme, walletData, setWalletData }: AddPaymen
                         <Plus size={22} color={toggleTheme ? '#b1b1b1' : '#5b5b5b'} />
                     </div>
                 </DialogTrigger>
-                <DialogContent className={`w-full inter h-[33em] overflow-x-hidden border-none ${toggleTheme ? 'bg-[#0d0d0d] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`}>
+                <DialogContent className={`w-full inter h-[33em] overflow-x-hidden border-none ${toggleTheme ? 'bg-[#202020] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`}>
                     <DialogHeader>
                         <DialogTitle>{heading}</DialogTitle>
                         <div className={`flex h-full mt-3 ${isChoosed ? '-translate-x-[110%]' : 'translate-x-[0%]'} transition-all duration-300 flex-col`}>

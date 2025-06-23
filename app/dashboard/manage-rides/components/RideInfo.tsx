@@ -32,19 +32,22 @@ import {
 } from "@/components/ui/table"
 import { Clock, EllipsisVertical, MessageCircle, PhoneCall, XCircle } from 'lucide-react'
 import Map from '../../(Rides)/Map'
+import { Button } from '@/components/ui/button'
 
-const RideInfo = ({ selectedRide, timeLeft, startRide, open, setOpen, payingByYou, passengers, setPassengerForChat, setOpenChat, setOpenDeclineDialog, setOpenMenu, isCancelled, setIsCancelled, menuRef }: { selectedRide: any, timeLeft: {
-    hours: number;
-    minutes: number;
-    seconds: number;
-    status: string;
-}, startRide: (rideId: string, status: string) => Promise<void>, open: boolean, setOpen: Dispatch<SetStateAction<boolean>>, payingByYou: number, passengers: any, setPassengerForChat: (pax: any) => void, setOpenChat: Dispatch<SetStateAction<boolean>>, setOpenDeclineDialog: Dispatch<SetStateAction<boolean>>, setOpenMenu: Dispatch<SetStateAction<boolean>>, isCancelled: boolean, setIsCancelled: Dispatch<SetStateAction<boolean>>, menuRef: RefObject<SVGSVGElement> }) => {
+const RideInfo = ({ selectedRide, timeLeft, startRide, open, setOpen, payingByYou, passengers, setPassengerForChat, setOpenChat, setOpenDeclineDialog, setOpenMenu, isCancelled, setIsCancelled, menuRef }: {
+    selectedRide: any, timeLeft: {
+        hours: number;
+        minutes: number;
+        seconds: number;
+        status: string;
+    }, startRide: (rideId: string, status: string) => Promise<void>, open: boolean, setOpen: Dispatch<SetStateAction<boolean>>, payingByYou: number, passengers: any, setPassengerForChat: (pax: any) => void, setOpenChat: Dispatch<SetStateAction<boolean>>, setOpenDeclineDialog: Dispatch<SetStateAction<boolean>>, setOpenMenu: Dispatch<SetStateAction<boolean>>, isCancelled: boolean, setIsCancelled: Dispatch<SetStateAction<boolean>>, menuRef: RefObject<SVGSVGElement>
+}) => {
     const context = getContacts()
     const toggleTheme = context?.toggleTheme || null
     const [showToolTip, setShowToolTip] = useState(false)
 
     const completeRide = async () => {
-        if(selectedRide.passengers.some((passenger: any) => passenger.status != 'dropped')) {
+        if (selectedRide.passengers.some((passenger: any) => passenger.status != 'dropped')) {
             alert('Please drop all passengers before completing the ride')
             return
         }
@@ -101,17 +104,19 @@ const RideInfo = ({ selectedRide, timeLeft, startRide, open, setOpen, payingByYo
                         {(selectedRide.status !== 'completed' && selectedRide.status !== 'expired') &&
                             <Dialog open={isCancelled} onOpenChange={setIsCancelled}>
                                 <DialogTrigger className={`${toggleTheme ? 'border border-[#b1b1b1] bg-transparent hover:bg-[#202020cc]' : 'border bg-transparent hover:bg-[#f7f7f7cc]'} py-2.5 px-4 md:px-6 text-sm rounded-full cursor-pointer active:bg-transparent font-medium`} onClick={() => setIsCancelled(true)}>Cancel ride</DialogTrigger>
-                                <DialogContent className={`inter ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'bg-[#f0f0f0] text-[#202020]'} border-none`}>
+                                <DialogContent className={`inter ${toggleTheme ? 'text-[#fefefe] bg-[#202020]' : 'bg-[#fefefe] text-[#202020]'} border-none`}>
                                     <DialogHeader>
                                         <DialogTitle>Are you sure you want to cancel this ride?</DialogTitle>
                                         <p className={`${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} text-sm text-start`}>This action will cancel the ride and refund the passenger. You will not be able to start the ride again.</p>
                                     </DialogHeader>
-                                    <DialogFooter className='flex items-center gap-2 mt-4'>
-                                        <button onClick={() => setIsCancelled(false)} className={`transition-all duration-200 ${toggleTheme ? 'bg-[#202020] hover:bg-[#353535] border border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] hover:bg-[#f0f0f0] border text-[#202020]'} py-2.5 px-4 md:px-6 text-sm rounded-md cursor-pointer active:bg-transparent font-medium`}>No</button>
-                                        <button className='transition-all duration-200 bg-[#00563c] hover:bg-[#00563ccc] text-[#fefefe] py-2.5 px-4 md:px-6 text-sm rounded-md cursor-pointer active:bg-[#00563c] font-medium' onClick={async () => {
-                                            setIsCancelled(false)
-                                            await startRide(selectedRide._id, 'cancelled')
-                                        }}>Yes</button>
+                                    <DialogFooter className='mt-4'>
+                                        <div className='flex items-center gap-2 justify-end w-full'>
+                                            <Button onClick={() => setIsCancelled(false)} className={`transition-all duration-200 ${toggleTheme ? 'bg-[#202020] hover:bg-[#353535] border border-[#353535] text-[#fefefe]' : 'bg-[#fefefe] hover:bg-[#f0f0f0] border text-[#202020]'} py-2.5 px-4 md:px-6 text-sm rounded-md cursor-pointer active:bg-transparent font-medium`}>No</Button>
+                                            <Button onClick={async () => {
+                                                setIsCancelled(false)
+                                                await startRide(selectedRide._id, 'cancelled')
+                                            }} className='transition-all duration-200 bg-[#00563c] hover:bg-[#00563ccc] text-[#fefefe] py-2.5 px-4 md:px-6 text-sm rounded-md cursor-pointer active:bg-[#00563c] font-medium'>Yes</Button>
+                                        </div>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
@@ -250,7 +255,7 @@ const RideInfo = ({ selectedRide, timeLeft, startRide, open, setOpen, payingByYo
                                             </TableRow>
                                         )
                                     }) : <TableRow className='w-full'>
-                                        <TableCell colSpan={7} className={`w-full ${toggleTheme ? 'hover:bg-[#202020cc] bg-[#000000] text-[#fefefe]' : 'hover:bg-[#f7f7f7cc] bg-[#f7f7f7] text-[#202020]'} text-center my-2`}>No passengers yet</TableCell>
+                                        <TableCell colSpan={7} className={`px-6 py-4 w-full ${toggleTheme ? 'hover:bg-[#202020cc] bg-[#000000] text-[#fefefe]' : 'hover:bg-[#f7f7f7cc] bg-[#f7f7f7] text-[#202020]'} text-center my-2`}>No passengers yet</TableCell>
                                     </TableRow>}
                                 </TableBody>
                             </Table>

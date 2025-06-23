@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation'
 import React, { useState, Dispatch, SetStateAction } from 'react'
 import { Check, User2, Eye, EyeOff } from 'lucide-react'
 import { signUserUp } from '@/functions/function'
-import countries from '@/public/data/countries.json'
 import {
     Select,
     SelectContent,
@@ -34,26 +33,21 @@ interface Details {
     setShowSteps: Dispatch<SetStateAction<boolean>>,
     gender: string,
     setGender: Dispatch<SetStateAction<string>>,
-    setter: Dispatch<SetStateAction<boolean>>
+    setter: Dispatch<SetStateAction<boolean>>,
+    country: string,
+    setCountry: Dispatch<SetStateAction<string>>,
+    isProvider: boolean
 }
 
-const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname, user, role, setRole, number, city, setCity, setNumber, saveUser, setShowMessage, setMessage, setShowSteps, gender, setGender, setter }) => {
+const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname, user, role, setRole, number, city, setCity, setNumber, saveUser, setShowMessage, setMessage, setShowSteps, gender, setGender, setter, country, setCountry, isProvider }) => {
 
     const router = useRouter()
     const [pass, setPass] = useState('')
     const [rider, setRider] = useState(role === 'rider' ? true : false)
     const [driver, setDriver] = useState(role === 'driver' ? true : false)
     const [showPass, setShowPass] = useState(false)
-    const [country, setCountry] = useState<string>(countries[0].phone)
     const [loader, setLoader] = useState(false)
     const [errors, setErrors] = useState<{ role?: string; city?: string; number?: string; pass?: string; gender?: string }>({})
-
-    const handleChange = (value: string) => {
-        setNumber(value)
-        if (errors.number) {
-            setErrors(prev => ({ ...prev, number: undefined }))
-        }
-    }
 
     // Add validation function
     const validateFields = () => {
@@ -70,7 +64,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
             if (!number) {
                 newErrors.number = 'Phone number is required'
             }
-            if (!user && !pass) {
+            if (!user && !isProvider && !pass) {
                 newErrors.pass = 'Password is required'
             }
         }
@@ -238,7 +232,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                             </div>
                         </div>
 
-                        {!user && <div className='flex flex-col gap-1.5'>
+                        {!auth.currentUser && !isProvider && <div className='flex flex-col gap-1.5'>
                             <label className='text-[13px]'>Password</label>
                             <div className='w-full flex items-center gap-2'>
                                 <input
@@ -299,7 +293,7 @@ const SignUp: React.FC<Details> = ({ step, setStep, toggleTheme, email, fullname
                         <button className={`${toggleTheme ? 'text-[#048C64] hover:text-[#048C64ccc] active:text-[#048C64]' : 'text-[#00563c] hover:text-[#00563ccc] active:text-[#00563c]'} font-semibold cursor-pointer transition-all duration-200 text-sm`} onClick={() => back()}>Back</button>
                         <button className='text-[#fefefe] active:bg-[#00563c] bg-[#00563c] cursor-pointer hover:bg-[#00563ccc] transition-all duration-200 px-12 sm:px-14 py-[0.90rem] sm:py-4 rounded-md font-medium text-sm' onClick={() => {
                             setLoader(true)
-                            if (!user) signUp()
+                            if (!user && !isProvider) signUp()
                             else saveUser(setLoader)
                         }}>{!loader ? 'Hop in' :
                             <svg className='authLoader w-[1.42em]' viewBox="25 25 50 50">

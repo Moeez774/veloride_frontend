@@ -16,7 +16,7 @@ import {
 import { useAuth } from '@/context/AuthProvider'
 import FindByVoice from '@/app/(HomePage)/FindByVoice'
 
-const RideConnect = () => {
+const RideConnect = ({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) => {
 
     // states of all four inputs for showing search suggestion container
     const [takePick, setTakePick] = useState(false)
@@ -223,7 +223,7 @@ const RideConnect = () => {
                 </Dialog>
             </div>
 
-            <div>
+            <div ref={ref}>
 
                 {(showOfferMap || showFindMap) && <div className='flex z-50 fixed w-[100vw] h-screen justify-center items-center left-0 top-0 bg-[#0000003d]'>
 

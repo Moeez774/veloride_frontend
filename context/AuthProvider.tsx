@@ -22,7 +22,8 @@ export interface User {
     model: string | null;
     color: string | null;
     avg_available_seats: number | null;
-  }
+  },
+  createdAt: Date | null;
 }
 
 interface AuthContextType {

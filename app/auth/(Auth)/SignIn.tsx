@@ -10,6 +10,7 @@ import { Eye, EyeOff, Fingerprint, ArrowLeft } from 'lucide-react'
 import Loader from '@/components/Loader'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/firebase'
+import countries from '@/public/data/countries.json'
 
 interface PasswordProps {
     value: string,
@@ -55,6 +56,8 @@ const SignIn = () => {
     const [showMessage, setShowMessage] = useState(false)
     const [message, setMessage] = useState('')
     const [showSteps, setShowSteps] = useState(false)
+    const [country, setCountry] = useState<string>(countries[0].phone)
+    const [isProvider, setIsProvider] = useState(false)
     const context = getContacts()
     const toggleTheme = context?.toggleTheme
     const [loader, setLoader] = useState(false)
@@ -134,10 +137,10 @@ const SignIn = () => {
     }
 
     //for saving user's data if signing in with provider
-    const saveUser = async (setLoader: Dispatch<SetStateAction<boolean>>) => saveUserData(setLoader, user, city, number, role, router, gender)
+    const saveUser = async (setLoader: Dispatch<SetStateAction<boolean>>) => saveUserData(setLoader, user, city, number, role, router, gender, country)
 
     //for handling google signin
-    const googleAuth = async () => handleGoogleAuth(setLoader, router, setStep, delay, setShowSteps, (loader) => saveUser(loader))
+    const googleAuth = async () => handleGoogleAuth(setLoader, router, setStep, delay, setShowSteps, (loader) => saveUser(loader), setIsProvider)
 
     const resetPassword = async () => {
         setMessage('')
@@ -217,7 +220,7 @@ const SignIn = () => {
 
                     {/* //all steps of sign up */}
                     {step >= 3 && forType != 'reset-password' && <div className={`transition-all md:max-w-6xl md:px-6 xl:px-0 pt-12 flex items-center mx-auto min-h-screen w-full duration-400 ease-out ${step >= 4 ? 'translate-x-0 opacity-[1]' : 'translate-x-12 opacity-0'}`}>
-                        <SignUp setter={setLoader} gender={gender} setGender={setGender} saveUser={saveUser} city={city} setShowSteps={setShowSteps} setMessage={setMessage} setShowMessage={setShowMessage} number={number} setNumber={setNumber} setCity={setCity} role={role} setRole={setRole} user={user} email={email} fullname={value} step={step} toggleTheme={toggleTheme} setStep={setStep} />
+                        <SignUp setter={setLoader} gender={gender} setGender={setGender} saveUser={saveUser} city={city} setShowSteps={setShowSteps} setMessage={setMessage} setShowMessage={setShowMessage} number={number} setNumber={setNumber} setCity={setCity} role={role} setRole={setRole} user={user} email={email} fullname={value} step={step} toggleTheme={toggleTheme} setStep={setStep} country={country} setCountry={setCountry} isProvider={isProvider} />
                     </div>}
 
                     {/* Sign in form */}

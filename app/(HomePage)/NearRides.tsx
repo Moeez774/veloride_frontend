@@ -250,7 +250,10 @@ const NearRides = () => {
 
         const currLocation = [long ? parseFloat(long) : 0, lat ? parseFloat(lat) : 0]
 
+        if(drivers.length === 0) return
+
         const sources = drivers.map((driver) => [driver.location[0], driver.location[1]])
+
         const targets = [currLocation]
 
         const body = {

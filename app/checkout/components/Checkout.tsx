@@ -13,6 +13,8 @@ import {
 import Loader from '@/components/Loader'
 import { useRouter } from 'next/navigation'
 import socket from '@/utils/socket'
+import axios from 'axios'
+import { useAuth } from '@/context/AuthProvider'
 
 interface CheckoutProps {
     rideId: string | null
@@ -47,6 +49,8 @@ const TipInput = ({ value, onChange, placeholder, toggleTheme }: { value: number
 }
 
 const Summary = ({ toggleTheme, amount, tip, setTip, payableAmount, availableMethods, paymentMethod, setPaymentMethod, hovered, setHovered, rating, setRating, comment, setComment }: { toggleTheme: boolean | undefined, amount: string, tip: number, setTip: (value: number) => void, payableAmount: number, availableMethods: any, paymentMethod: string, setPaymentMethod: (value: string) => void, hovered: number, setHovered: (value: number) => void, rating: number, setRating: (value: number) => void, comment: string, setComment: (value: string) => void }) => {
+
+
     return (
         <div className='lg:max-w-lg xl:max-w-xl w-full'>
             <Link href="/dashboard?page=wallet">
@@ -143,12 +147,23 @@ const Summary = ({ toggleTheme, amount, tip, setTip, payableAmount, availableMet
     )
 }
 
+const PaymentMethod = ({ paymentMethod, src }: { paymentMethod: string, src: string }) => {
+    return (
+        <div className='flex items-center gap-1'>
+            <img className='w-4' src={src} alt="" />
+            <h1 className='text-sm font-semibold'>{paymentMethod}</h1>
+        </div>
+    )
+}
+
 const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
     const [tip, setTip] = useState(0)
     const [payableAmount, setPayableAmount] = useState<number>(0)
     const [rating, setRating] = useState(0)
     const [senderWallet, setSenderWallet] = useState<any>(null)
     const router = useRouter()
+    const authContext = useAuth()
+    const user = authContext?.user || null
     const [availableMethods, setAvailableMethods] = useState<any>(null)
     const [receiverInfo, setReceiverInfo] = useState<any>(null)
     const [hovered, setHovered] = useState(0)
@@ -194,13 +209,27 @@ const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
         fetchReceiverInfo()
     }, [rideId, by])
 
-    const PaymentMethod = ({ paymentMethod, src }: { paymentMethod: string, src: string }) => {
-        return (
-            <div className='flex items-center gap-1'>
-                <img className='w-4' src={src} alt="" />
-                <h1 className='text-sm font-semibold'>{paymentMethod}</h1>
-            </div>
-        )
+    const rateDriver = async (driverId: string) => {
+        try {
+
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/completed/rider/rate/driver`, {
+                driverId: driverId,
+                userId: user?._id,
+                rating: rating,
+                review: comment
+            }, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+
+            if (res.data.statusCode === 200) {
+                setRating(0)
+                setComment('')
+            }
+        } catch (err: any) {
+            console.log(err)
+        }
     }
 
     const payAmount = async () => {
@@ -212,6 +241,12 @@ const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
             setStatusCode(400)
             setShowMessage(true)
             return
+        }
+
+        if (to && rating > 0) {
+            await rateDriver(to)
+            setRating(0)
+            setComment('')
         }
 
         try {

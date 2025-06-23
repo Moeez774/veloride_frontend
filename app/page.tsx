@@ -2,7 +2,11 @@
 import NearRides from "@/app/(HomePage)/NearRides"
 import RideConnect from "@/components/hooks/RideConnect"
 import { toggleTheme } from "./(HomePage)/MainMap"
+import VoiceFeature from "./(HomePage)/VoiceFeature"
+import { useRef } from "react"
 export default function Home() {
+
+  const voiceFeatureRef = useRef<HTMLDivElement | null>(null)
   return (
     <>
       <div className="flex flex-col gap-12 md:gap-10">
@@ -27,8 +31,9 @@ export default function Home() {
 
         </div>
 
-        <RideConnect />
+        <RideConnect ref={voiceFeatureRef} />
         <NearRides />
+        <VoiceFeature ref={voiceFeatureRef} />
       </div>
     </>
   )

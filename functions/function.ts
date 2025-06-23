@@ -2,21 +2,21 @@ import { auth } from "@/firebase"
 import socket from "@/utils/socket"
 import { User } from "firebase/auth"
 import { Dispatch, SetStateAction } from "react"
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import wordsToNumbers from "words-to-numbers"
 
 
 const google = new GoogleAuthProvider()
 const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
-export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any, gender: string) {
+export async function saveUserData(setLoader: Dispatch<SetStateAction<boolean>>, user: User, city: string, number: string, role: string | null, router: any, gender: string, country: string) {
 
     let a = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/providers-sign-in`, {
         method: "POST", headers: {
             "Content-Type": "application/json"
         },
         credentials: 'include',
-        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: number, city: city, photo: user?.photoURL, role: role, isProvider: true, rating: 0, gender: gender })
+        body: JSON.stringify({ _id: auth.currentUser?.uid, fullname: user?.displayName, email: user?.email, pass: null, number: `${country}${number}`, city: city, photo: user?.photoURL, role: role, isProvider: true, rating: 0, gender: gender })
     })
 
     let response = await a.json()
@@ -136,7 +136,7 @@ export async function handlingProceeding(setShowSteps: Dispatch<SetStateAction<b
     }
 }
 
-export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolean>>, router: any, setStep: Dispatch<SetStateAction<number>>, delay: (number: number) => Promise<void>, setShowSteps: Dispatch<SetStateAction<boolean>>, saveUser: (setLoader: Dispatch<SetStateAction<boolean>>) => Promise<void>) {
+export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolean>>, router: any, setStep: Dispatch<SetStateAction<number>>, delay: (number: number) => Promise<void>, setShowSteps: Dispatch<SetStateAction<boolean>>, saveUser: (setLoader: Dispatch<SetStateAction<boolean>>) => Promise<void>, setIsProvider: Dispatch<SetStateAction<boolean>>) {
     setLoader(true)
     try {
 
@@ -158,6 +158,7 @@ export async function handleGoogleAuth(setLoader: Dispatch<SetStateAction<boolea
             setStep(prev => prev + 1)
             await delay(50)
             setStep(prev => prev + 1)
+            setIsProvider(true)
         }
         else {
             await saveUser(setLoader)

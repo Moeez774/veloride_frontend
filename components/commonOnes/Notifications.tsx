@@ -167,7 +167,7 @@ const Notifications = ({ toggleTheme, user, openNotifications, setOpenNotificati
     return (
         <Dialog open={openNotifications} onOpenChange={setOpenNotifications}>
             <DialogTrigger></DialogTrigger>
-            <DialogContent className={`p-0 h-[550px] overflow-y-auto inter border-none ${toggleTheme ? 'bg-[#202020] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`} style={{ scrollbarWidth: 'thin' }}>
+            <DialogContent className={`p-0 h-[90vh] overflow-y-auto inter border-none ${toggleTheme ? 'bg-[#202020] text-[#fefefe]' : 'bg-[#fefefe] text-[#202020]'}`} style={{ scrollbarWidth: 'thin' }}>
                 <DialogHeader>
                     <DialogTitle className='pt-5 px-4'>Notifications</DialogTitle>
                     <hr className={`${toggleTheme ? 'border-[#353535]' : 'border-[#f0f0f0]'} mt-2`} />

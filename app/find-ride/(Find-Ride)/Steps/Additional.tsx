@@ -86,9 +86,8 @@ const Additional: React.FC<Details> = ({ photo, email, setEmail, number, setNumb
                 {pathname.startsWith("/find-ride") && <p className={`text-[12px] inter ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>You'll get a secure OTP after booking. Show it to the driver before entering.
                     Only step in once your driver confirms it. Do not share this code with anyone else.</p>}
 
-                {pathname.startsWith('/offer-ride') && <p className={`text-[12px] inter ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Before starting the ride, ask the rider to show their Ride OTP.
-                    Only start the trip if the code matches exactly. Do not allow anyone to enter the vehicle if the OTP is incorrect or missing.
-                    This step helps prevent fraud and keeps everyone safe.</p>}
+                {pathname.startsWith('/offer-ride') && <p className={`text-[12px] inter ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>Ask the Rider to show their Ride OTP before starting.
+                    Only allow the rider in if the code matches exactly. No OTP, no entry. This prevents fraud and keeps everyone safe.</p>}
             </div>
         </div>
     )

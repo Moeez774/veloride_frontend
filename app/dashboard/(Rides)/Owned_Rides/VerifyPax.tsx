@@ -110,7 +110,7 @@ const VerifyPax = ({ passengers, ride, setSelectedRide, setActiveRides, activeRi
                               <img className='w-9 rounded-full md:w-10' src={e.photo === "" ? "/Images/user(1).png" : e.photo} alt="" />
                               <div className='flex flex-col gap-1'>
                                 <p className='text-sm'>{e.fullname}</p>
-                                <p className={`text-xs flex items-center gap-0 ${isDark ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>{e.phone} - <Star className='w-4 mx-1 h-4 border-none' /> {e.rating}</p>
+                                <p className={`text-xs flex items-center gap-0 ${isDark ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>{e.phone} - <Star className='w-4 mx-1 h-4 border-none' /> {e.rating.toFixed(1)}</p>
                               </div>
                             </div>
 

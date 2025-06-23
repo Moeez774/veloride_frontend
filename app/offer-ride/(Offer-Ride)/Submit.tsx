@@ -79,7 +79,7 @@ const Submit: React.FC<Details> = ({ formData, currStep, isLoading, setIsLoading
 
                     <div className={`mt-10 flex justify-between p-6 items-center`}>
                         <button
-                            className={`exo2 active:translate-y-0.5 active:duration-200 shadow-lg font-bold ${toggleTheme ? 'text-[#048C64] bg-[#202020] hover:bg-[#2d2d2d]' : 'text-[#00b37e] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-xl px-8 py-2.5 transition-all duration-300 cursor-pointer`}
+                            className={`shadow-md font-medium ${toggleTheme ? 'text-[#fefefe] bg-[#1f1f1f] hover:bg-[#2c2c2c]' : 'text-[#00563c] bg-[#fefefe] hover:bg-[#f8f7f7]'} rounded-md px-8 py-2.5  cursor-pointer ${toggleTheme ? 'border-none' : 'border'}`}
                             onClick={() => {
                                 setStep(step - 1)
                                 setCurrStep(currStep - 1)
@@ -89,8 +89,8 @@ const Submit: React.FC<Details> = ({ formData, currStep, isLoading, setIsLoading
                             Back
                         </button>
 
-                        <button disabled={isLoading}
-                            className={`exo2 active:bg-[#00563c] active:duration-200 text-[#fefefe] rounded-md bg-[#00563c] hover:bg-[#00563ccc] shadow-md font-bold px-8 py-2.5 transition-all duration-300 cursor-pointer`}
+                        <button
+                            className={`active:bg-[#00563c] text-[#fefefe] rounded-md bg-[#00563c] shadow-md font-medium hover:bg-[#00563ccc] px-8 py-2.5 cursor-pointer`}
                             onClick={async () => {
                                 setIsLoading(true)
                                 await offer()
