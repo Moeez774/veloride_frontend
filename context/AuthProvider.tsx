@@ -23,6 +23,7 @@ export interface User {
     color: string | null;
     avg_available_seats: number | null;
   },
+  reviews: any[],
   createdAt: Date | null;
 }
 

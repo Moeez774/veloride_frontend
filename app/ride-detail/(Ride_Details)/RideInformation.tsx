@@ -39,6 +39,7 @@ interface RideInformationProps {
     passengerStatus: string;
     user: any;
     setOpenChat: (value: boolean) => void;
+    driverReviews?: any[];
 }
 
 const RideInformation: React.FC<RideInformationProps> = ({
@@ -58,7 +59,8 @@ const RideInformation: React.FC<RideInformationProps> = ({
     passengerStatus,
     user,
     formattedDate,
-    setOpenChat
+    setOpenChat,
+    driverReviews = []
 }) => {
     const [openDialog, setOpenDialog] = useState(false)
     const [issue, setIssue] = useState('')
@@ -67,6 +69,9 @@ const RideInformation: React.FC<RideInformationProps> = ({
     const [message, setMessage] = useState('')
     const [statusCode, setStatusCode] = useState(0)
     const [description, setDescription] = useState('')
+    const [showAllReviews, setShowAllReviews] = useState(false)
+    const reviewsToShow = showAllReviews ? driverReviews : driverReviews.slice(0, 5)
+    const overallRating = ride.driver_rating !== undefined && ride.driver_rating !== null ? Number(ride.driver_rating).toFixed(1) : '—';
 
     const issues = [
         'Driver is taking too long',
@@ -178,7 +183,7 @@ const RideInformation: React.FC<RideInformationProps> = ({
                         <p className={`text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>
                             {formattedDate} · {ride.rideDetails.time}
                         </p>
-                    </div> }
+                    </div>}
 
                     <div className={`mt-4 flex items-center gap-2`}>
                         <div className={`p-1.5 rounded-lg ${toggleTheme ? 'bg-[#151515]' : 'bg-[#f0f0f0]'}`}>
@@ -188,28 +193,28 @@ const RideInformation: React.FC<RideInformationProps> = ({
                             {ride?.passengers?.length > 0 && ride?.passengers?.find((passenger: any) => passenger.userId === user?._id)?.status === 'dropped' ? (
                                 <p className="text-green-500 font-medium">Your total fare: Rs.{Math.round(paying)}</p>
                             ) :
-                            ride.status === 'expired' ? (
-                                <p className="text-red-500 font-medium">Ride expired</p>
-                            ) : ride.status === 'cancelled' ? (
-                                <p className="text-red-500 font-medium">Ride cancelled</p>
-                            ) : ride.status === 'completed' ? (
-                                <p className="text-green-500 font-medium">Ride completed</p>
-                            ) : hasBooked ? (
-                                <div>
-                                    <p className="font-medium">
-                                        Your fare: Rs.{Math.round(paying)} per seat
-                                    </p>
-                                    <p className="text-xs opacity-70 truncate">
-                                        ({bookedSeats} {bookedSeats === 1 ? 'seat' : 'seats'})
-                                        {ride.rideDetails.bookedSeats < ride.rideDetails.seats ?
-                                            ` · Current fare: Rs.${Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5))}` : ''}
-                                    </p>
-                                </div>
-                            ) : !hasBooked && ride.rideDetails.bookedSeats < ride.rideDetails.seats ? (
-                                <p className="font-medium">Current fare: Rs.{Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5))}</p>
-                            ) : (
-                                <p className="text-amber-500 font-medium">Ride full</p>
-                            )}
+                                ride.status === 'expired' ? (
+                                    <p className="text-red-500 font-medium">Ride expired</p>
+                                ) : ride.status === 'cancelled' ? (
+                                    <p className="text-red-500 font-medium">Ride cancelled</p>
+                                ) : ride.status === 'completed' ? (
+                                    <p className="text-green-500 font-medium">Ride completed</p>
+                                ) : hasBooked ? (
+                                    <div>
+                                        <p className="font-medium">
+                                            Your fare: Rs.{Math.round(paying)} per seat
+                                        </p>
+                                        <p className="text-xs opacity-70 truncate">
+                                            ({bookedSeats} {bookedSeats === 1 ? 'seat' : 'seats'})
+                                            {ride.rideDetails.bookedSeats < ride.rideDetails.seats ?
+                                                ` · Current fare: Rs.${Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5))}` : ''}
+                                        </p>
+                                    </div>
+                                ) : !hasBooked && ride.rideDetails.bookedSeats < ride.rideDetails.seats ? (
+                                    <p className="font-medium">Current fare: Rs.{Math.round(ride.budget.totalBudget / (ride.rideDetails.bookedSeats + 1.5))}</p>
+                                ) : (
+                                    <p className="text-amber-500 font-medium">Ride full</p>
+                                )}
                         </div>
                     </div>
                 </div>
@@ -360,7 +365,7 @@ const RideInformation: React.FC<RideInformationProps> = ({
                             <h3 className="font-bold text-lg truncate">{ride.driverName}</h3>
                             <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                 <Star fill={toggleTheme ? '#FFD700' : '#FFD700'} size={16} color={toggleTheme ? '#FFD700' : '#FFD700'} />
-                                <span className="font-medium">{ride.driver_rating}</span>
+                                <span className="font-medium">{ride.driver_rating.toFixed(1)}</span>
                             </div>
                         </div>
 
@@ -448,7 +453,6 @@ const RideInformation: React.FC<RideInformationProps> = ({
                 <div className={`p-5 ${toggleTheme ? 'border-b border-[#202020]' : 'border-b border-gray-100'}`}>
                     <h2 className="font-bold">Ride Preferences</h2>
                 </div>
-
                 <div className="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="flex items-center gap-3">
                         <div className="p-3 rounded-full bg-[#FFD700]">
@@ -491,6 +495,64 @@ const RideInformation: React.FC<RideInformationProps> = ({
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="w-full relative min-h-[600px] flex flex-col md:flex-row gap-8 mb-10 animate-fade-in">
+                <div className="md:w-1/3 w-full md:sticky md:top-28 flex-shrink-0 z-10 h-fit">
+                    <div className={`rounded-2xl p-6 flex flex-col items-center shadow-md ${toggleTheme ? 'bg-[#181818] border border-[#232323]' : 'bg-white border border-[#e0e0e0]'} transition-all duration-300`}>
+                        <span className="text-lg font-semibold mb-2" style={{ color: '#00563c' }}>Driver Rating</span>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-5xl font-bold text-[#00563c]">{overallRating}</span>
+                            <Star size={36} fill="#FFD700" color="#FFD700" className="drop-shadow" />
+                        </div>
+                        <span className={`text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>{driverReviews.length} review{driverReviews.length === 1 ? '' : 's'}</span>
+                    </div>
+                </div>
+                {/* Reviews List */}
+                <div className="md:w-2/3 w-full flex flex-col gap-4">
+                    <div className="flex flex-col gap-4">
+                        {reviewsToShow.length === 0 && (
+                            <div className={`text-center text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'}`}>No reviews yet for this driver.</div>
+                        )}
+                        {reviewsToShow.map((review, idx) => {
+                            let dateStr = '';
+                            if (review.createdAt) {
+                                const dateObj = new Date(review.createdAt);
+                                dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                            }
+                            return (
+                                <div key={idx} className={`flex items-start gap-3 p-5 min-h-[96px] rounded-xl transition-all duration-300 ${toggleTheme ? 'bg-[#181818]' : 'bg-[#f7f7f7]'} shadow-sm hover:shadow-md`}>
+                                    {review.userPhoto?.startsWith('hsl') ? (
+                                        <div className="rounded-full flex justify-center items-center text-white w-12 h-12 min-w-[48px] min-h-[48px]" style={{ background: review.userPhoto }}>
+                                            <span className='inter text-lg'>{review.userName?.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                    ) : (
+                                        <img className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full object-cover border-2 border-[#00563c]" src={review.userPhoto || '/Images/user(1).png'} alt={review.userName} />
+                                    )}
+                                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                            <span className={`font-semibold text-base truncate ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}>{review.userName}</span>
+                                            <span className="flex items-center gap-1 text-[#FFD700] font-medium text-sm">
+                                                <Star size={16} fill="#FFD700" color="#FFD700" />
+                                                {review.rating}
+                                            </span>
+                                        </div>
+                                        {dateStr && <span className={`text-xs mt-0.5 ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#888]'}`}>{dateStr}</span>}
+                                        <p className={`mt-2 text-sm ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} break-words`}>{review.review}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {driverReviews.length > 5 && (
+                        <button
+                            className={`mt-2 mx-auto px-6 py-2 rounded-full font-semibold text-sm transition-all duration-200 ${toggleTheme ? 'bg-[#181818] text-[#fefefe] hover:bg-[#232323]' : 'bg-[#00563c] text-white hover:bg-[#007a4d]'} shadow-sm`}
+                            onClick={() => setShowAllReviews((prev) => !prev)}
+                        >
+                            {showAllReviews ? 'Show Less' : 'Show More'}
+                        </button>
+                    )}
                 </div>
             </div>
         </>

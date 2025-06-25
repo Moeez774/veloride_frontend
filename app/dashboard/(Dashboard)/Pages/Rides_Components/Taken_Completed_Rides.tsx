@@ -22,8 +22,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import Rate from '@/components/commonOnes/Rate'
+import { rateUser } from '@/functions/function'
 
 const Taken_Completed_Rides = ({ toggleTheme, user, rides, setRides }: { toggleTheme: boolean | undefined, user: any, rides: any[], setRides: Dispatch<SetStateAction<any[]>> }) => {
     const { data, loading, error } = useFetch(() => fetchWalletDetails({ id: user?._id }))
@@ -69,37 +70,6 @@ const Taken_Completed_Rides = ({ toggleTheme, user, rides, setRides }: { toggleT
         }
     }
 
-    const rateDriver = async (driverId: string) => {
-        setLoader(true)
-        try {
-
-            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/completed/rider/rate/driver`, {
-                driverId: driverId,
-                userId: user._id,
-                rating: rating,
-                review: comment
-            }, {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-
-            setStatusCode(res.data.statusCode)
-            setMessage(res.data.message)
-            setShowMessage(true)
-
-            if (res.data.statusCode === 200) {
-                setOpen(false)
-                setRating(0)
-                setComment('')
-            }
-        } catch (err: any) {
-            setStatusCode(err.response.data.statusCode)
-            setMessage(err.response.data.message)
-            setShowMessage(true)
-        }
-    }
-
     return (
         <>
             {loader && <Loader setLoader={setLoader} message={message} showMessage={showMessage} setShowMessage={setShowMessage} statusCode={statusCode} />}
@@ -111,36 +81,26 @@ const Taken_Completed_Rides = ({ toggleTheme, user, rides, setRides }: { toggleT
                     <DialogHeader>
                         <DialogTitle>Rate driver</DialogTitle>
 
-                        <div className='mt-2 flex flex-col'>
-
-                            <p className={`w-full ${toggleTheme ? 'text-[#b1b1b1]' : 'text-[#5b5b5b]'} mt-1 text-[13px]`}>Your feedback is valuable in helping us improve our service. Please take a moment to rate your driver.</p>
-
-                            <div className='mt-6 w-full'>
-
-                                <div className="flex gap-1 mb-4">
-                                    {[1, 2, 3, 4, 5].map((star) => {
-                                        const isFilled = hovered >= star || (!hovered && rating >= star)
-                                        return (
-                                            <Star
-                                                key={star}
-                                                onMouseEnter={() => setHovered(star)}
-                                                onMouseLeave={() => setHovered(0)}
-                                                onClick={() => setRating(star)}
-                                                className={`w-6 h-6 cursor-pointer transition-colors ${toggleTheme ? 'text-[#fefefe]' : 'text-[#202020]'}`}
-                                                fill={isFilled ? '#00563c' : 'none'}
-                                            />
-                                        )
-                                    })}
-                                </div>
-
-                                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder='Write a review' className={`w-full mt-4 resize-none border h-[10em] ${toggleTheme ? 'border-[#353535]' : ''}`} />
-                            </div>
-
-                        </div>
+                        <Rate toggleTheme={toggleTheme} rating={rating} setRating={setRating} comment={comment} setComment={setComment} />
                     </DialogHeader>
                     <DialogFooter className='mt-6'>
                         <Button className={`border ${toggleTheme ? 'bg-[#202020] hover:bg-[#353535] border-[#353535] text-white' : 'bg-[#fefefe] hover:bg-[#f0f0f0]/90 border-[#f0f0f0] text-[#202020]'} transition-all cursor-pointer duration-200`} onClick={() => setOpen(false)}>Cancel</Button>
-                        <Button className='bg-[#00563c] hover:bg-[#00563c]/90 cursor-pointer text-white' onClick={() => rateDriver(selectedRide.userId)}>Rate</Button>
+                        <Button className='bg-[#00563c] hover:bg-[#00563c]/90 cursor-pointer text-white' onClick={() => rateUser({
+                            driverId: selectedRide.userId,
+                            userId: user._id,
+                            rating,
+                            review: comment,
+                            role: 'driver',
+                            setLoader,
+                            setMessage,
+                            setShowMessage,
+                            setStatusCode,
+                            onSuccess: () => {
+                                setOpen(false)
+                                setRating(0)
+                                setComment('')
+                            }
+                        })}>Rate</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

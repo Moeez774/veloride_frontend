@@ -201,7 +201,7 @@ const Rides = ({ toggleTheme, user }: RidesProps) => {
 
                         {/* Past rides */}
                         {currentTab === 'completed' &&
-                            <CompletedRides toggleTheme={toggleTheme} setRides={setCompletedRides} rides={completedRides} />
+                            <CompletedRides toggleTheme={toggleTheme} user={user} setRides={setCompletedRides} rides={completedRides} />
                         }
 
                         {/* Cancelled rides */}

@@ -11,7 +11,6 @@ import {
 import { Plus, Dot } from 'lucide-react'
 import InputField from '../hooks/InputField'
 import { url } from '../hooks/useHooks/useWallet'
-import Radios from '../Radios'
 import { WalletData } from '@/app/dashboard/(Dashboard)/Pages/Wallet'
 interface AddPaymentMethodsProps {
     toggleTheme: boolean | undefined,

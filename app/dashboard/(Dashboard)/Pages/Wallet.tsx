@@ -38,9 +38,9 @@ const DateFilter = ({ text, toggleTheme, data, setMonthlyStatistics, walletData 
     const [value, setValue] = useState<string>('')
 
     useEffect(() => {
-        if(!value) return
+        if (!value) return
         const getTime = value.split(" ")
-        if(text === "Monthly Spent") {
+        if (text === "Monthly Spent") {
             const getData = walletData.monthlySpent.find((stat: any) => {
                 return stat.month === getTime[0] && stat.year === Number(getTime[1])
             })
@@ -62,7 +62,7 @@ const DateFilter = ({ text, toggleTheme, data, setMonthlyStatistics, walletData 
     }, [value])
 
     useEffect(() => {
-        if(!data) return
+        if (!data) return
         const months = data.map((transaction) => {
             return transaction.month + " " + transaction.year
         })
@@ -228,6 +228,17 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
         hasFetched.current = true
     }, [data])
 
+    const createOrder = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/wallets/create-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 500, userId: user._id }),
+        });
+
+        const { redirectUrl } = await res.json();
+        window.location.href = redirectUrl;
+    }
+
     if (loading || !walletData) return <h1>Loading...</h1>
 
     return (
@@ -257,7 +268,7 @@ const Wallet = ({ toggleTheme, user, formattedDate }: WalletProps) => {
                         </h1>
 
                         <div className='w-full flex items-center gap-x-2 mt-5'>
-                            <button className={`w-full py-3 text-[#fefefe] text-[15px] flex items-center gap-1 justify-center rounded-lg bg-[#00563c]`}><ArrowUp size={20} className='rotate-45' />Transfer</button>
+                            <button onClick={() => createOrder()} className={`w-full py-3 text-[#fefefe] cursor-pointer text-[15px] flex items-center gap-1 justify-center rounded-lg bg-[#00563c] hover:bg-[#00563c]/80 transition-all duration-200`}><ArrowUp size={20} className='rotate-45' />Transfer</button>
                             <button className={`w-full py-3 text-[15px] flex items-center gap-1 justify-center rounded-lg ${toggleTheme ? 'bg-[#202020] text-[#b1b1b1]' : 'bg-[#f0f0f0] text-[#5b5b5b]'}`}><ArrowUp size={20} className='-rotate-135' />Receive</button>
                             <button className={`${toggleTheme ? 'bg-[#202020] text-[#b1b1b1]' : 'bg-[#f0f0f0] text-[#5b5b5b]'} py-[0.90rem] rounded-lg w-fit px-4`}><Plus size={20} /> </button>
                         </div>

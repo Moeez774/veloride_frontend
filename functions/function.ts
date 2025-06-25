@@ -431,5 +431,62 @@ export async function saveDetails(brand: string, model: string, color: string, s
     }
 }
 
+/**
+ * @param {Object} params
+ * @param {string} params.driverId
+ * @param {string} params.userId
+ * @param {number} params.rating
+ * @param {string} params.review
+ * @param {string} params.role
+ * @param {Function} params.setLoader
+ * @param {Function} params.setMessage
+ * @param {Function} params.setShowMessage
+ * @param {Function} params.setStatusCode
+ * @param {Function} [params.onSuccess]
+ */
+export async function rateUser({
+    driverId,
+    userId,
+    rating,
+    review,
+    role,
+    setLoader,
+    setMessage,
+    setShowMessage,
+    setStatusCode,
+    onSuccess
+}: {
+    driverId: string,
+    userId: string,
+    rating: number,
+    review: string,
+    role: 'driver' | 'passenger',
+    setLoader: Dispatch<SetStateAction<boolean>>,
+    setMessage: Dispatch<SetStateAction<string>>,
+    setShowMessage: Dispatch<SetStateAction<boolean>>,
+    setStatusCode: Dispatch<SetStateAction<number>>,
+    onSuccess?: () => void
+}) {
+    setLoader(true)
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/completed/rider/rate/driver`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ driverId, userId, rating, review, role })
+        })
+        const data = await res.json()
+        setStatusCode(data.statusCode)
+        setMessage(data.message)
+        setShowMessage(true)
+        if (data.statusCode === 200 && onSuccess) {
+            onSuccess()
+        }
+    } catch (err: any) {
+        setStatusCode(err.statusCode || 500)
+        setMessage(err.message || 'Something went wrong')
+        setShowMessage(true)
+    }
+}
+
 
 

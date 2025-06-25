@@ -481,6 +481,7 @@ const RideDetail: React.FC<Details> = ({ ride, setRide, queries, params, isCompl
               driversTime={driversTime}
               user={user}
               setOpenChat={setOpenChat}
+              driverReviews={driver && Array.isArray(driver.reviews) ? driver.reviews.filter((r: any) => r.received_as === 'driver') : []}
             />
           </div>
         </div>

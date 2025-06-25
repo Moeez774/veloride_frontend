@@ -216,7 +216,8 @@ const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
                 driverId: driverId,
                 userId: user?._id,
                 rating: rating,
-                review: comment
+                review: comment,
+                role: 'driver'
             }, {
                 headers: {
                     "Content-Type": "application/json"

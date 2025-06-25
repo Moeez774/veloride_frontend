@@ -25,11 +25,20 @@
                 "optional": true
             }
         ],
-        "usage": {
-            "For Payments": false,
-            "For Payouts": false,
-            "Use for both": true
-        }
+        "usage": [
+            {
+                "label": "For Payments",
+                "value": false
+            },
+            {
+                "label": "For Payouts",
+                "value": false
+            },
+            {
+                "label": "Use for both",
+                "value": true
+            }
+        ]
     },
     {
         "logo": "https://blogify-images-123.s3.eu-north-1.amazonaws.com/uploads/idPncNv7mC_1746162971646.png",

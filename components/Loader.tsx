@@ -17,7 +17,7 @@ const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMes
     const isSuccess = statusCode === 200
 
     return (
-        <div className='fixed left-0 flex justify-center items-center top-0 !z-9999 bg-[#0000001e] w-screen h-screen'>
+        <div className='fixed left-0 flex justify-center items-center top-0 !z-[999999] bg-[#0000001e] w-screen h-screen'>
             {message === '' && <div className="loader"></div>}
             <Dialog open={showMessage} onOpenChange={() => {
                 setShowMessage(false)
