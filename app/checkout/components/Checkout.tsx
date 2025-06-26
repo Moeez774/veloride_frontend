@@ -251,39 +251,21 @@ const Checkout = ({ rideId, amount, by, to, toggleTheme }: CheckoutProps) => {
         }
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/wallets/pay`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    notificationId: rideId + amount.toString() + by + to,
-                    amount: payableAmount,
-                    initialAmount: Number(amount),
-                    currency: 'PKR',
-                    method: paymentMethod,
-                    senderId: by,
-                    receiverId: to,
-                    id: rideId,
-                    type: 'Send',
-                    spendingCategory: 'rides'
-                })
-            })
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/wallets/create-order`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: payableAmount, userId: by, type: "Send", receiverId: to, spendingCategory: 'rides', initialAmount: Number(amount), method: paymentMethod, notificationId: rideId + amount.toString() + by + to }),
+            });
 
-            const data = await response.json()
-            setMessage(data.message)
-            setStatusCode(data.statusCode)
+            const { redirectUrl } = await res.json();
+            window.location.href = redirectUrl;
+        } catch (err: any) {
+            setMessage(err.message)
             setShowMessage(true)
-            if (data.statusCode === 200) {
-                setNotifications(notifications.filter((notification: any) => notification._id !== rideId + amount.toString() + by + to))
-                router.push('/dashboard?page=wallet')
-            }
-        } catch (err) {
-            setMessage(err as string)
             setStatusCode(500)
-            setShowMessage(true)
         }
     }
+
 
     if (!receiverInfo || !senderWallet) return null
 

@@ -30,6 +30,10 @@ interface RideContextType {
     setRideState: React.Dispatch<React.SetStateAction<RideState>>;
     notifications: Notification[];
     setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
+    allUsers: any[];
+    setAllUsers: React.Dispatch<React.SetStateAction<any[]>>;
+    searchedUser: any;
+    setSearchedUser: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const defaultRideState: RideState = {
@@ -47,6 +51,8 @@ const RideContext = createContext<RideContextType | undefined>(undefined);
 export const RideProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [rideState, setRideState] = useState<RideState>(defaultRideState);
     const [notifications, setNotifications] = useState<Notification[]>([])
+    const [allUsers, setAllUsers] = useState<any[]>([])
+    const [searchedUser, setSearchedUser] = useState<any>('')
     const authContext = useAuth()
     const user = authContext?.user as User | null
 
@@ -153,8 +159,29 @@ export const RideProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [user])
 
+    const fetchAllUsers = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/all-users?search=${searchedUser}`, {
+                method: "GET",
+                credentials: "include"
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                setAllUsers(data.users)
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchAllUsers()
+    }, [searchedUser])
+
     return (
-        <RideContext.Provider value={{ rideState, setRideState, notifications, setNotifications }}>
+        <RideContext.Provider value={{ rideState, setRideState, notifications, setNotifications, allUsers, setAllUsers, searchedUser, setSearchedUser }}>
             {children}
         </RideContext.Provider>
     );

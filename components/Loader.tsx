@@ -18,13 +18,13 @@ const Loader: React.FC<Details> = ({ message, setLoader, showMessage, setShowMes
 
     return (
         <div className='fixed left-0 flex justify-center items-center top-0 !z-[999999] bg-[#0000001e] w-screen h-screen'>
-            {message === '' && <div className="loader"></div>}
+            {message === '' && <div className="loader !z-[999999]"></div>}
             <Dialog open={showMessage} onOpenChange={() => {
                 setShowMessage(false)
                 setTimeout(() => setLoader(false), 200)
             }}>
                 <DialogTrigger></DialogTrigger>
-                <DialogContent className={`inter !z-999 ${isSuccess
+                <DialogContent className={`inter w-[400px] !z-[999999] ${isSuccess
                     ? toggleTheme
                         ? 'text-[#fefefe] border bg-[#202020] border-[#353535]'
                         : 'text-[#202020] border bg-[#fefefe]'

@@ -69,14 +69,13 @@ const Header = () => {
     // Checking pathname in useEffect to avoid SSR mismatch
     useEffect(() => {
         const hideHeaderPaths = [
-            '/auth', '/auth', '/dashboard', '/reset-password', '/find-ride', '/offer-ride', '/chats', '/matched-rides', '/dashboard/manage-rides']
+            '/auth', '/auth', '/dashboard', '/reset-password', '/find-ride', '/offer-ride', '/chats', '/matched-rides', '/dashboard/manage-rides', '/payment-status']
 
-        const isSmallScreen = window.matchMedia("(max-width: 1023px)").matches;
         const isMobileScreen = window.matchMedia("(max-width: 767px)").matches;
 
         if (
             hideHeaderPaths.some(path => pathname === path) ||
-            pathname.startsWith('/ride-detail') ||
+            pathname.startsWith('/ride-detail') || pathname.startsWith('/payment-status') ||
             (isMobileScreen && pathname.startsWith('/find-ride/saved-routes'))
         ) {
             setShowHeader(false)

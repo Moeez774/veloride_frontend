@@ -19,7 +19,7 @@ interface AddPaymentMethodsProps {
 }
 
 const AddPaymentMethods = ({ toggleTheme, walletData, setWalletData }: AddPaymentMethodsProps) => {
-    const [heading, setHeading] = useState('Add a new payment method')
+    const [heading, setHeading] = useState('Add a new Payout Method')
     const [isChoosed, setChoosed] = useState(false)
     const [fields, setFields] = useState<any>({})
     const [allMethods, setAllMethods] = useState<any>([])
@@ -40,6 +40,8 @@ const AddPaymentMethods = ({ toggleTheme, walletData, setWalletData }: AddPaymen
             holderName: fields[selectedMethod.requirements[0].label].value,
             name: selectedMethod.name,
             accountNumber: fields[selectedMethod.requirements[1].label].value,
+            branchCode: fields[selectedMethod.requirements[2].label].value,
+            cnic: fields[selectedMethod.requirements[3].label].value,
             logoUrl: selectedMethod.logo,
             addedAt: new Date(Date.now()),
             status: "Pending",
@@ -130,7 +132,7 @@ const AddPaymentMethods = ({ toggleTheme, walletData, setWalletData }: AddPaymen
                                                 }
                                             })
                                         })
-                                    }} key={i} className={`bg-transparent py-4 px-3 flex items-center justify-between rounded-md transition-all cursor-pointer duration-200 ${toggleTheme ? 'hover:bg-[#202020]' : 'hover:bg-[#f0f0f0]'}`}>
+                                    }} key={i} className={`bg-transparent py-4 px-3 flex items-center justify-between rounded-md transition-all cursor-pointer duration-200 ${toggleTheme ? 'hover:bg-[#353535]' : 'hover:bg-[#f0f0f0]'}`}>
 
                                         <div className='flex items-center gap-2'>
                                             <Dot size={20} />
@@ -200,7 +202,7 @@ const AddPaymentMethods = ({ toggleTheme, walletData, setWalletData }: AddPaymen
                                 </div>
 
                                 <div className='flex items-center justify-between'>
-                                    <button className={`text-sm border font-medium py-2 cursor-pointer px-4 rounded-md transition-all duration-200 ${toggleTheme ? 'text-[#fefefe] border-[#202020] hover:bg-[#202020]' : 'text-[#202020] hover:bg-[#f0f0f0]'}`} onClick={() => {
+                                    <button className={`text-sm border font-medium py-2 cursor-pointer px-4 rounded-md transition-all duration-200 ${toggleTheme ? 'text-[#fefefe] border-[#353535] hover:bg-[#353535]' : 'text-[#202020] hover:bg-[#f0f0f0]'}`} onClick={() => {
                                         setChoosed(false)
                                         setHeading('Add a new payment method')
                                     }}>Back</button>
